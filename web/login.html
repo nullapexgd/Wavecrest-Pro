@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--HEAD-->
+    <title>Sign in to Wavecrest</title>
+    <meta name="robots" content="noindex" />
+    <script type="module" src="/src/login.ts"></script>
+  </head>
+  <body>
+    <!--NAV-->
+    <main id="main" class="login">
+      <p class="eyebrow">Free beta</p>
+      <h1 class="display" style="font-size: clamp(2.25rem, 1rem + 4vw, 3.5rem)">Sign in to read a channel.</h1>
+      <p class="lead">One free analysis a month. No card, because there is nothing to buy yet.</p>
+      <a class="btn btn--primary" href="/api/auth/google" data-oauth><span>Continue with Google</span></a>
+      <a class="btn btn--ghost" href="/api/auth/github" data-oauth><span>Continue with GitHub</span></a>
+      <p class="fine">We only accept an email address your provider has verified. We store your email, name and avatar link, and nothing from your YouTube account. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+      <a class="btn btn--quiet" href="/sample"><span>Not ready? See the sample report</span></a>
+    </main>
+    <!--FOOT-->
+  </body>
+</html>

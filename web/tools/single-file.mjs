@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'dist-single');
-let html = readFileSync(join(out, 'index.html'), 'utf8');
+const page = process.env.ARTIFACT_PAGE ?? 'index';
+let html = readFileSync(join(out, `${page}.html`), 'utf8');
 const asset = f => readFileSync(join(out, f.replace(/^\//, '')), 'utf8');
 const font = readFileSync(join(root, 'static/fonts/bricolage-latin-wght.woff2')).toString('base64');
 
@@ -21,5 +22,6 @@ html = html.replace(/<link rel="preload"[^>]*fonts[^>]*>/g, '');
 html = html.replace(/<link rel="modulepreload"[^>]*>/g, '');
 
 if (/(src|href)="\/(assets|fonts)\//.test(html)) throw new Error('an external asset reference was left in the single file');
-writeFileSync(join(out, 'wavecrest.html'), html);
-console.log(`dist-single/wavecrest.html  ${(html.length / 1024).toFixed(0)} KB`);
+const name = page === 'index' ? 'wavecrest' : `wavecrest-${page}`;
+writeFileSync(join(out, `${name}.html`), html);
+console.log(`dist-single/${name}.html  ${(html.length / 1024).toFixed(0)} KB`);

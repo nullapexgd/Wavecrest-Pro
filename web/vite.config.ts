@@ -5,7 +5,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 // Vite bundles this file into a temp folder, so resolve siblings from its real location.
 const here = fileURLToPath(new URL('.', import.meta.url));
-const PAGES = ['pricing', 'privacy', 'terms', 'changelog'];
+const PAGES = ['pricing', 'privacy', 'terms', 'changelog', 'app', 'login', 'sample'];
 
 // Shared partials (head, nav, footer) for every page, and the first picture baked into the
 // home page: the HTML already holds one real creator's chart, so something complete shows
@@ -40,7 +40,8 @@ function site(): Plugin {
       let out = html
         .replace('<!--HEAD-->', partial('head'))
         .replace('<!--NAV-->', partial('nav').replace(new RegExp(`(href="/${page}")`), '$1 aria-current="page"'))
-        .replace('<!--FOOT-->', partial('foot'));
+        .replace('<!--FOOT-->', partial('foot'))
+        .replace('<!--SHELL-->', partial('shell'));
       if (!out.includes('<!--RIDGE-->')) return out;
 
       const [model, posters, copy] = await Promise.all([load('model.ts'), load('posters.ts'), load('copy.ts')]);
@@ -78,7 +79,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         // the single-file preview is the home page only
         input: inline
-          ? { main: join(here, 'index.html') }
+          ? { main: join(here, `${process.env.ARTIFACT_PAGE ?? 'index'}.html`) }
           : { main: join(here, 'index.html'), ...Object.fromEntries(PAGES.map(p => [p, join(here, `${p}.html`)])) },
         output: inline
           ? { inlineDynamicImports: true }

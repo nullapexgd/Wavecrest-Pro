@@ -14,6 +14,7 @@
     "check:contrast": "node tools/check-contrast.mjs",
     "fonts": "cp node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2 static/fonts/bricolage-latin-wght.woff2",
     "build:single": "vite build --mode artifact && node tools/single-file.mjs",
+    "build:single:app": "ARTIFACT_PAGE=app vite build --mode artifact && ARTIFACT_PAGE=app node tools/single-file.mjs",
     "creators": "node tools/fetch-creators.mjs"
   },
   "dependencies": {
