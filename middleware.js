@@ -1,7 +1,10 @@
 // Vercel Edge Middleware — runs in V8 isolate before the serverless fn.
 // Per-IP rate limiting backed by Upstash Redis (KV REST API).
 //
-// Limits: /api/analyze-stream 5/hr (expensive: YouTube + Groq quota),
+// Limits: /api/analyze-stream 20/hr per IP, a brake against floods. The real cost control
+//         is the per-ACCOUNT atomic quota in lib/quota.js; this only has to be loose
+//         enough not to lock out several real users behind one shared IP (office, carrier NAT).
+//         Both GET (API key) and POST (signed-in browser) are counted.
 //         /api/subscribe      3/hr (sends 2 Resend emails per call).
 //
 // KV env vars missing: fail OPEN in dev/preview so local work isn't blocked,
@@ -9,8 +12,8 @@
 // unmetered LLM spend). Transient KV errors always fail open.
 
 const LIMITS = {
-  '/api/analyze-stream': { max: 5, windowSecs: 3600, method: 'GET' },
-  '/api/subscribe':      { max: 3, windowSecs: 3600, method: 'POST' }
+  '/api/analyze-stream': { max: 20, windowSecs: 3600, methods: ['GET', 'POST'] },
+  '/api/subscribe':      { max: 3,  windowSecs: 3600, methods: ['POST'] }
 };
 
 export const config = {
@@ -20,7 +23,7 @@ export const config = {
 export default async function middleware(request) {
   const { pathname } = new URL(request.url);
   const limit = LIMITS[pathname];
-  if (!limit || request.method !== limit.method) return;
+  if (!limit || !limit.methods.includes(request.method)) return;
 
   const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
   if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {

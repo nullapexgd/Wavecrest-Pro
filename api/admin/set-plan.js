@@ -1,8 +1,8 @@
-// Manual plan switch — the "Stripe mock" until real billing lands.
+// Manual plan switch. There is no billing provider; this is the only way a plan changes.
 // POST { email, plan } with header x-admin-secret: $ADMIN_SECRET
 import crypto from 'node:crypto';
 import { getPool } from '../../lib/db.js';
-import { PLANS } from '../../lib/plans.js';
+import { PLANS, isPlanKey } from '../../lib/plans.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const plan = body?.plan;
 
   if (!email) return res.status(400).json({ error: 'email required', code: 'INVALID_INPUT' });
-  if (!PLANS[plan]) {
+  if (!isPlanKey(plan)) {
     return res.status(400).json({
       error: `plan must be one of: ${Object.keys(PLANS).join(', ')}`,
       code: 'INVALID_INPUT'
