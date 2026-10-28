@@ -150,7 +150,7 @@ button { font: inherit; color: inherit; }
   max-width: 78rem; margin-inline: auto; border-top: 1px solid var(--line);
 }
 .foot__name { font-weight: 650; letter-spacing: -0.02em; }
-.foot__links { display: flex; gap: var(--s-2); }
+.foot__links { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .foot__links a { display: inline-flex; align-items: center; min-height: var(--hit); padding: 0 var(--s-4); color: var(--ink-soft); text-decoration: none; border-radius: var(--r-pill); font-size: var(--fs-small); }
 .foot__links a:hover { color: var(--ink); background: var(--paper-2); }
 

@@ -166,7 +166,10 @@ stage.append(sentinel);
 
 function placeSentinel() {
   const range = stage.offsetHeight - innerHeight;
-  sentinel.style.top = `${Math.round(range / 2 + innerHeight * 0.5)}px`;
+  const top = Math.round(range / 2 + innerHeight * 0.5);
+  sentinel.style.top = `${top}px`;
+  // Cover the rest of the story so a large scroll step cannot skip the observed region.
+  sentinel.style.height = `${Math.max(1, stage.offsetHeight - top)}px`;
 }
 new ResizeObserver(placeSentinel).observe(stage);
 addEventListener('resize', placeSentinel, { passive: true });
@@ -178,7 +181,8 @@ let onState: (chart: boolean) => void = () => {};
 function setChart(chart: boolean) {
   if (stage.classList.contains('is-chart') === chart) return;
   stage.classList.toggle('is-chart', chart); // takes the faded hero out of the tab order
-  if (!chart) { inspector.hide(); scatter.querySelectorAll('.mk.is-on').forEach(el => el.classList.remove('is-on')); }
+  inspector.hide();
+  scatter.querySelectorAll('.mk.is-on').forEach(el => el.classList.remove('is-on'));
   if (!sceneOn || stage.classList.contains('is-static')) stage.style.setProperty('--p', chart ? '1' : '0');
   onState(chart);
 }
@@ -228,7 +232,7 @@ async function load3D(opts: { fromButton: boolean }) {
     });
     q<HTMLButtonElement>('[data-prev]', tools)!.addEventListener('click', () => step(-1));
     q<HTMLButtonElement>('[data-next]', tools)!.addEventListener('click', () => step(1));
-    if (caps.reduced) onState = chart => h.setState(chart ? 1 : 0);
+    onState = chart => h.setState(chart ? 1 : 0);
     if (caps.reduced) h.setState(stage.classList.contains('is-chart') ? 1 : 0);
   } catch (err) {
     console.warn('[wavecrest] 3D unavailable, keeping the static chart.', err);

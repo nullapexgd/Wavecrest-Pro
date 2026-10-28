@@ -19,3 +19,7 @@ node_modules
 dist/
 .DS_Store
 dist-single/
+
+# Local browser QA artifacts
+/web/test-results/
+/web/playwright-report/

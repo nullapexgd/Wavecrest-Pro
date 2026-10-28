@@ -24,7 +24,7 @@ export interface SceneHandle {
   dispose(): void;
   setPaused(paused: boolean): void;
   step(dir: 1 | -1): void;
-  /** static mode only: jump the story to the hero (0) or chart (1) state */
+  /** Wake on a story state change; static mode jumps to hero (0) or chart (1). */
   setState(p: number): void;
   /** swap in another creator: the relief rises again from flat */
   setModel(m: Model): void;
@@ -331,7 +331,7 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
     relief.uniforms.markMix.value = clamp((pStory - 0.35) / 0.5, 0, 1);
 
     // what the probe is on
-    const flat = pStory >= 0.5; // the flat chart owns hover from here on
+    const flat = stage.classList.contains('is-chart'); // the flat chart owns its inspector
     const subject = flat ? null : hoverVideo ?? pinned;
     const point = flat ? null : hoverPoint ?? (pinned ? peakPoint(pinned, curAmp) : null);
     if (flat) { /* no probe on the flat chart */ }
@@ -376,7 +376,7 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
       ui.show(subject, s.x, s.y, !!pinned && subject.id === pinned.id);
       relief.uniforms.hover.set((point.x / WORLD.w) + 0.5, (point.z / WORLD.d) + 0.5, 0.2, 0.85);
     } else {
-      ui.hide();
+      if (!flat) ui.hide();
       relief.uniforms.hover.w = 0;
     }
 
@@ -402,9 +402,14 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
   const io = new IntersectionObserver(([en]) => {
     visible = !!en?.isIntersecting;
     if (visible) { last = performance.now(); wake(); }
+    else { cancelAnimationFrame(raf); raf = 0; }
   });
   io.observe(stage);
-  const onVis = () => { hidden = document.hidden; if (!hidden) { last = performance.now(); wake(); } };
+  const onVis = () => {
+    hidden = document.hidden;
+    if (hidden) { cancelAnimationFrame(raf); raf = 0; }
+    else { last = performance.now(); wake(); }
+  };
   document.addEventListener('visibilitychange', onVis);
   const stopTheme = watchPalette(() => {
     palette = readPalette();
