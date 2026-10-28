@@ -66,10 +66,19 @@ const SECTIONS: { id: string; label: string; kinds: Provenance[] }[] = [
   { id: 'evidence', label: 'Evidence', kinds: ['observed'] }
 ];
 
+/** Marks markup this file built itself (already escaped) so fact() does not escape it twice. */
+class Html {
+  html: string;
+  constructor(html: string) { this.html = html; }
+}
+const raw = (html: string) => new Html(html);
+const list = (items: unknown[] | undefined, ev?: Evidence) =>
+  items?.length ? raw(`<ul class="bul">${items.map(i => `<li>${cite(i, ev)}</li>`).join('')}</ul>`) : '';
+
 const fact = (label: string, value: unknown, kind: Provenance, ev?: Evidence) => {
-  const empty = value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length);
+  const empty = value === undefined || value === null || value === '' || (value instanceof Html && !value.html);
   return `<div class="fact"><dt>${esc(label)} ${chip(empty ? 'unavailable' : kind)}</dt>` +
-    `<dd>${empty ? '<span class="muted">Not in this report.</span>' : cite(value, ev)}</dd></div>`;
+    `<dd>${empty ? '<span class="muted">Not in this report.</span>' : value instanceof Html ? value.html : cite(value, ev)}</dd></div>`;
 };
 
 function section(id: string, body: string, intro = ''): string {
@@ -143,7 +152,7 @@ function hooks(a: Analysis, ev: Evidence | undefined): string {
     ${fact('Main pattern', h.primaryPattern, 'inferred', ev)}
     <div class="fact"><dt>Examples ${chip(h.examples?.length ? 'observed' : 'unavailable')}</dt><dd>${examples ? `<ul class="quotes">${examples}</ul>` : '<span class="muted">Not in this report.</span>'}</dd></div>
     ${fact('How often', h.frequency, 'inferred', ev)}
-    ${fact('Other patterns', (h.secondaryPatterns ?? []).length ? `<ul class="bul">${(h.secondaryPatterns ?? []).map(p => `<li>${cite(p, ev)}</li>`).join('')}</ul>` : '', 'inferred')}
+    ${fact('Other patterns', list(h.secondaryPatterns, ev), 'inferred')}
   </dl>`);
 }
 
@@ -156,7 +165,7 @@ function thumbnails(a: Analysis, ev: Evidence | undefined): string {
         <span class="vchip__txt"><b>${(() => { const m = multiple(v, ev); return m ? `${formatMultiple(m)} median` : `${formatViews(v.views)} views`; })()}</b><span>${esc(v.title)}</span></span></button></li>`).join('')}</ul>`
     : '';
   const body = t
-    ? `<dl class="facts">${fact('Formula', t.formula, 'inferred')}${fact('Elements', (t.characteristics ?? []).length ? `<ul class="bul">${(t.characteristics ?? []).map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : '', 'inferred')}${fact('Text on the image', t.textOverlayStyle, 'inferred')}</dl>`
+    ? `<dl class="facts">${fact('Formula', t.formula, 'inferred')}${fact('Elements', list(t.characteristics), 'inferred')}${fact('Text on the image', t.textOverlayStyle, 'inferred')}</dl>`
     : `<div class="empty"><p>No thumbnail analysis in this report.</p></div>`;
   return section('thumbnails', `<p class="notice"><b>Read this one with care.</b> The model reads video titles and numbers. It never sees an image, so everything below is a hypothesis about thumbnails, not something observed. The real thumbnails of the most-viewed videos are shown so you can judge it yourself.</p>${body}${grid}`);
 }

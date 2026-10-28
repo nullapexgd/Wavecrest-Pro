@@ -85,4 +85,19 @@ export async function analyze(url: string, key: string, h: RunHandlers): Promise
   throw new ApiError(502, 'NO_RESULT', 'The connection closed before the report arrived.');
 }
 
-export const newAttemptKey = () => crypto.randomUUID();
+// One key per (channel, attempt). It is kept while an attempt might still be running on the
+// server (a dropped connection), so retrying replays that run instead of reserving another.
+const norm = (u: string) => u.trim().toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '');
+const slot = (u: string) => `wc-attempt:${norm(u)}`;
+export function attemptKey(url: string): string {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(slot(url)) ?? 'null');
+    if (saved && Date.now() - saved.at < 10 * 60_000) return saved.key;
+  } catch { /* storage unavailable: fall through to a fresh key */ }
+  const key = crypto.randomUUID();
+  try { sessionStorage.setItem(slot(url), JSON.stringify({ key, at: Date.now() })); } catch { /* ignore */ }
+  return key;
+}
+export function forgetAttempt(url: string): void {
+  try { sessionStorage.removeItem(slot(url)); } catch { /* ignore */ }
+}

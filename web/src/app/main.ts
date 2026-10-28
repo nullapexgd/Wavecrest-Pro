@@ -152,7 +152,7 @@ function signedOut(): void {
 /* ───────────── a live run ───────────── */
 
 async function run(url: string): Promise<void> {
-  const key = api.newAttemptKey();
+  const key = api.attemptKey(url);
   const started = Date.now();
   swap(`<div class="state state--run" role="status" aria-live="polite">
       <p class="eyebrow">Analysing</p><h1 class="title" data-run-title>Reading the channel</h1>
@@ -179,11 +179,15 @@ async function run(url: string): Promise<void> {
         if (h) h.textContent = DOING[step - 1] ?? 'Analysing';
       }
     });
+    api.forgetAttempt(url);
     if (me?.usage.used != null) me.usage.used += 1;
     current = report;
     if (report.reportId) setUrl(`/app?r=${encodeURIComponent(report.reportId)}`);
     show(report);
   } catch (e) {
+    // A refused or failed run was refunded, so the next try starts fresh. A dropped connection
+    // keeps the key: retrying the same channel replays the first run instead of charging twice.
+    if (!(e instanceof ApiError) || e.code !== 'NETWORK' && e.code !== 'NO_RESULT' && e.code !== 'NO_STREAM') api.forgetAttempt(url);
     failView(e, () => void home());
   } finally {
     clearInterval(tick);
@@ -202,7 +206,10 @@ function show(report: Report): void {
   spy = new IntersectionObserver(entries => {
     for (const en of entries) {
       if (!en.isIntersecting) continue;
-      rail.forEach(a => a.toggleAttribute('aria-current', a.dataset.spy === (en.target as HTMLElement).dataset.section));
+      rail.forEach(a => {
+        if (a.dataset.spy === (en.target as HTMLElement).dataset.section) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
     }
   }, { rootMargin: '-25% 0px -65% 0px' });
   secs.forEach(s => spy!.observe(s));

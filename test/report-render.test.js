@@ -84,3 +84,12 @@ test('recommendations carry their evidence, strength and the not-a-forecast cave
   assert.ok(html.includes('Not a forecast'));
   assert.ok(html.includes('data-video="aaa"'));
 });
+
+test('list-valued fields render as real lists, not escaped markup', () => {
+  const html = renderReport(report({
+    hooks: { primaryPattern: 'p', secondaryPatterns: ['one', 'two'] },
+    thumbnails: { formula: 'f', characteristics: ['a', 'b'] }
+  }));
+  assert.ok(!html.includes('&lt;ul'), 'no literal <ul> text');
+  assert.ok(html.includes('<li>one</li>') && html.includes('<li>b</li>'));
+});
