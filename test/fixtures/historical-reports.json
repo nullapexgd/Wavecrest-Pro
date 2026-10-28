@@ -1,0 +1,332 @@
+[
+  {
+    "version": "v0",
+    "source": {
+      "commit": "2b0f2d8c81d358dd771da5a5245e2c30731cb73c",
+      "path": "api/analyze.js"
+    },
+    "report": {
+      "reportId": "00000000-0000-4000-8000-000000000000",
+      "channel": {
+        "name": "Compatibility channel v0",
+        "handle": "@compatibility",
+        "subscriberCount": 1234
+      },
+      "videoCount": 30,
+      "analysis": {
+        "hooks": {
+          "primaryPattern": "I tested a familiar assumption",
+          "examples": [
+            "I tested a familiar assumption"
+          ],
+          "frequency": "3 of the top 20",
+          "secondaryPatterns": [
+            "A practical comparison"
+          ]
+        },
+        "thumbnails": {
+          "formula": "One subject",
+          "characteristics": [
+            "Simple layout"
+          ],
+          "textOverlayStyle": "Short label"
+        },
+        "cadence": {
+          "schedule": "Weekly",
+          "consistency": "Regular",
+          "durationStrategy": "Long form",
+          "peakPerformanceWindow": "See video #3",
+          "avgDaysBetweenVideos": 7,
+          "videosPerMonth": 4.3,
+          "peakDay": "Mon",
+          "avgDurationMinutes": 12
+        },
+        "audience": {
+          "primaryProfile": "Curious makers",
+          "estimatedAge": "Unknown",
+          "viewerIntent": "Learn a technique",
+          "loyaltySignal": "See video #3"
+        },
+        "pillars": [
+          {
+            "name": "Experiments",
+            "percentage": 100,
+            "description": "Hands-on tests"
+          }
+        ],
+        "monetization": {
+          "primaryApproach": "No clear signals",
+          "signals": [],
+          "brandAffinities": "Tools"
+        },
+        "gaps": [
+          {
+            "opportunity": "Repair guide",
+            "rationale": "Not covered by video #3"
+          }
+        ]
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "visibility": "link",
+      "isOwner": false
+    }
+  },
+  {
+    "version": "v1",
+    "source": {
+      "commit": "8f6fd97a1f1394be6b76260a5f0485180b1620d8",
+      "path": "api/analyze.js"
+    },
+    "report": {
+      "reportId": "00000000-0000-4000-8000-000000000001",
+      "channel": {
+        "name": "Compatibility channel v1",
+        "handle": "@compatibility",
+        "subscriberCount": 1234
+      },
+      "videoCount": 30,
+      "analysis": {
+        "hooks": {
+          "primaryPattern": "I tested a familiar assumption",
+          "examples": [
+            "I tested a familiar assumption"
+          ],
+          "frequency": "3 of the top 20",
+          "secondaryPatterns": [
+            "A practical comparison"
+          ]
+        },
+        "thumbnails": {
+          "formula": "One subject",
+          "characteristics": [
+            "Simple layout"
+          ],
+          "textOverlayStyle": "Short label"
+        },
+        "cadence": {
+          "schedule": "Weekly",
+          "consistency": "Regular",
+          "durationStrategy": "Long form",
+          "peakPerformanceWindow": "See video #3",
+          "avgDaysBetweenVideos": 7,
+          "videosPerMonth": 4.3,
+          "peakDay": "Mon",
+          "avgDurationMinutes": 12
+        },
+        "audience": {
+          "primaryProfile": "Curious makers",
+          "estimatedAge": "Unknown",
+          "viewerIntent": "Learn a technique",
+          "loyaltySignal": "See video #3"
+        },
+        "pillars": [
+          {
+            "name": "Experiments",
+            "percentage": 100,
+            "description": "Hands-on tests"
+          }
+        ],
+        "monetization": {
+          "primaryApproach": "No clear signals",
+          "signals": [],
+          "brandAffinities": "Tools"
+        },
+        "gaps": [
+          {
+            "opportunity": "Repair guide",
+            "rationale": "Not covered by video #3"
+          }
+        ],
+        "videoIdeas": [
+          {
+            "title": "I tested a repair method",
+            "rationale": "Based on video #3 and T1",
+            "estimatedPerformance": "Above the historical average"
+          }
+        ],
+        "earningsEstimate": {
+          "monthlyViewsEstimate": 100000,
+          "estimatedMonthlyAdRevenue": "100000 x 4/1000 = $400 to 100000 x 8/1000 = $800",
+          "otherRevenue": "Unclear from data",
+          "totalEstimate": "$400\u2013$800/month",
+          "cpmRange": "Education $4-8"
+        }
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "visibility": "link",
+      "isOwner": false
+    }
+  },
+  {
+    "version": "v2",
+    "source": {
+      "commit": "a3d624c3c84369225f84bca9e311c1025a0ec7e2",
+      "path": "api/analyze.js"
+    },
+    "report": {
+      "reportId": "00000000-0000-4000-8000-000000000002",
+      "channel": {
+        "name": "Compatibility channel v2",
+        "handle": "@compatibility",
+        "subscriberCount": 1234
+      },
+      "videoCount": 30,
+      "analysis": {
+        "hooks": {
+          "primaryPattern": "I tested a familiar assumption",
+          "examples": [
+            "I tested a familiar assumption"
+          ],
+          "frequency": "3 of the top 20",
+          "secondaryPatterns": [
+            "A practical comparison"
+          ]
+        },
+        "thumbnails": {
+          "formula": "One subject",
+          "characteristics": [
+            "Simple layout"
+          ],
+          "textOverlayStyle": "Short label"
+        },
+        "cadence": {
+          "schedule": "Weekly",
+          "consistency": "Regular",
+          "durationStrategy": "Long form",
+          "peakPerformanceWindow": "See video #3",
+          "avgDaysBetweenVideos": 7,
+          "videosPerMonth": 4.3,
+          "peakDay": "Mon",
+          "avgDurationMinutes": 12
+        },
+        "audience": {
+          "primaryProfile": "Curious makers",
+          "estimatedAge": "Unknown",
+          "viewerIntent": "Learn a technique",
+          "loyaltySignal": "See video #3"
+        },
+        "pillars": [
+          {
+            "name": "Experiments",
+            "percentage": 100,
+            "description": "Hands-on tests"
+          }
+        ],
+        "monetization": {
+          "primaryApproach": "No clear signals",
+          "signals": [],
+          "brandAffinities": "Tools"
+        },
+        "gaps": [
+          {
+            "opportunity": "Repair guide",
+            "rationale": "Not covered by video #3"
+          }
+        ],
+        "videoIdeas": [
+          {
+            "title": "I tested a repair method",
+            "rationale": "Based on video #3 and T1",
+            "estimatedPerformance": "Above the historical average"
+          }
+        ],
+        "earningsEstimate": {
+          "monthlyViewsEstimate": 100000,
+          "estimatedMonthlyAdRevenue": "100000 x 4/1000 = $400 to 100000 x 8/1000 = $800",
+          "otherRevenue": "Unclear from data",
+          "totalEstimate": "$400\u2013$800/month",
+          "cpmRPM": "Education $4-8"
+        }
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "visibility": "link",
+      "isOwner": false
+    }
+  },
+  {
+    "version": "v3",
+    "source": {
+      "commit": "e4b7943af0690ccfd7d088151050547f54ff4156",
+      "path": "lib/analysis.js"
+    },
+    "report": {
+      "reportId": "00000000-0000-4000-8000-000000000003",
+      "channel": {
+        "name": "Compatibility channel v3",
+        "handle": "@compatibility",
+        "subscriberCount": 1234
+      },
+      "videoCount": 30,
+      "analysis": {
+        "hooks": {
+          "primaryPattern": "I tested a familiar assumption",
+          "examples": [
+            "I tested a familiar assumption"
+          ],
+          "frequency": "3 of the top 20",
+          "secondaryPatterns": [
+            "A practical comparison"
+          ]
+        },
+        "thumbnails": {
+          "formula": "One subject",
+          "characteristics": [
+            "Simple layout"
+          ],
+          "textOverlayStyle": "Short label"
+        },
+        "cadence": {
+          "schedule": "Weekly",
+          "consistency": "Regular",
+          "durationStrategy": "Long form",
+          "peakPerformanceWindow": "See video #3",
+          "avgDaysBetweenVideos": 7,
+          "videosPerMonth": 4.3,
+          "peakDay": "Mon",
+          "avgDurationMinutes": 12
+        },
+        "audience": {
+          "primaryProfile": "Curious makers",
+          "estimatedAge": "Unknown",
+          "viewerIntent": "Learn a technique",
+          "loyaltySignal": "See video #3"
+        },
+        "pillars": [
+          {
+            "name": "Experiments",
+            "percentage": 100,
+            "description": "Hands-on tests"
+          }
+        ],
+        "monetization": {
+          "primaryApproach": "No clear signals",
+          "signals": [],
+          "brandAffinities": "Tools"
+        },
+        "gaps": [
+          {
+            "opportunity": "Repair guide",
+            "rationale": "Not covered by video #3"
+          }
+        ],
+        "videoIdeas": [
+          {
+            "title": "I tested a repair method",
+            "rationale": "Based on video #3 and T1",
+            "estimatedPerformance": "Above the historical average"
+          }
+        ],
+        "earningsEstimate": {
+          "monthlyViewsEstimate": 100000,
+          "estimatedMonthlyAdRevenue": "$400\u2013$800",
+          "otherRevenue": "Unclear from data",
+          "totalEstimate": "$400\u2013$800/month",
+          "cpmRPM": "Education $4-8"
+        }
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "visibility": "link",
+      "isOwner": false
+    }
+  }
+]
