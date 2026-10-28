@@ -13,11 +13,14 @@
 
 const LIMITS = {
   '/api/analyze-stream': { max: 20, windowSecs: 3600, methods: ['GET', 'POST'] },
-  '/api/subscribe':      { max: 3,  windowSecs: 3600, methods: ['POST'] }
+  '/api/subscribe':      { max: 3,  windowSecs: 3600, methods: ['POST'] },
+  // Public and cacheable, so this is only a brake. The key is protected by the allowlist,
+  // cache, lock and daily unit budget inside the handler (lib/handlers/sample-creator.js).
+  '/api/sample-creator': { max: 60, windowSecs: 3600, methods: ['GET'] }
 };
 
 export const config = {
-  matcher: ['/api/analyze-stream', '/api/subscribe']
+  matcher: ['/api/analyze-stream', '/api/subscribe', '/api/sample-creator']
 };
 
 export default async function middleware(request) {
