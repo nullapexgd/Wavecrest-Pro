@@ -7,6 +7,7 @@
 //   POST /api/auth/logout            → clear session cookie
 //   POST /api/auth/login             → 501 (email/password not offered; OAuth only)
 import crypto from 'node:crypto';
+import { googleVerifiedEmail, githubVerifiedEmail } from '../../lib/oauth.js';
 import {
   getUser, upsertUser, sessionCookie, clearSessionCookie,
   stateCookie, parseCookies
@@ -22,10 +23,10 @@ export default async function handler(req, res) {
   try {
     switch (route) {
       case 'google':          return startGoogle(req, res);
-      case 'google/callback': return googleCallback(req, res);
+      case 'google/callback': return await googleCallback(req, res);
       case 'github':          return startGithub(req, res);
-      case 'github/callback': return githubCallback(req, res);
-      case 'me':              return me(req, res);
+      case 'github/callback': return await githubCallback(req, res);
+      case 'me':              return await me(req, res);
       case 'logout':          return logout(req, res);
       case 'login':
         return res.status(501).json({
@@ -100,10 +101,12 @@ async function googleCallback(req, res) {
   });
   if (!infoRes.ok) throw new Error(`Google userinfo failed (${infoRes.status})`);
   const info = await infoRes.json();
-  if (!info.email) throw new Error('Google account has no email');
+  // Accounts link by email, so only an address Google says is verified may log in.
+  const email = googleVerifiedEmail(info);
+  if (!email) throw new Error('Google account has no verified email');
 
   const user = await upsertUser({
-    email: info.email,
+    email,
     name: info.name || '',
     avatarUrl: info.picture || '',
     provider: 'google',
@@ -151,15 +154,11 @@ async function githubCallback(req, res) {
   if (!userRes.ok) throw new Error(`GitHub user fetch failed (${userRes.status})`);
   const info = await userRes.json();
 
-  let email = info.email;
-  if (!email) {
-    const emailsRes = await gh('/user/emails');
-    if (emailsRes.ok) {
-      const emails = await emailsRes.json();
-      email = emails.find(e => e.primary && e.verified)?.email || emails[0]?.email;
-    }
-  }
-  if (!email) throw new Error('GitHub account has no accessible email');
+  // The profile's public email and unverified list entries are attacker-controlled: use
+  // only an address GitHub marks verified.
+  const emailsRes = await gh('/user/emails');
+  const email = emailsRes.ok ? githubVerifiedEmail(await emailsRes.json()) : null;
+  if (!email) throw new Error('GitHub account has no verified email');
 
   const user = await upsertUser({
     email,
