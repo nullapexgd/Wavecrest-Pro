@@ -1,0 +1,21 @@
+# Keeps `vercel --prod` (CLI deploys upload the working directory, not git) from
+# shipping the legacy Express app, its cron workflows, local logs, or tooling dirs.
+/server
+/public
+/api/index.js
+/.github
+/update-trends.py
+/requirements.txt
+/cron.log
+/.claude
+/.agents
+/.superpowers
+/docs
+/AGENTS.md
+/CLAUDE.md
+
+# Re-stated here because a .vercelignore can replace .gitignore for CLI uploads
+.env*
+node_modules
+.DS_Store
+dist

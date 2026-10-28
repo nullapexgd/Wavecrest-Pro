@@ -2,3 +2,19 @@
 .vercel
 node_modules
 .env*
+
+# Legacy trends app (Express + Python cron). NOT part of the shipped product:
+# production is the root static pages + api/ functions. See docs/wavecrest-3/ASSESSMENT.md.
+# api/index.js re-exports the legacy Express server; the two workflows are its crons.
+/server/
+/public/
+/api/index.js
+/update-trends.py
+/requirements.txt
+/cron.log
+/.github/workflows/update-trends.yml
+/.github/workflows/digest-cron.yml
+
+# Build output and OS junk
+dist/
+.DS_Store
