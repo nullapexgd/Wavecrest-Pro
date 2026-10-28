@@ -9,8 +9,8 @@ const HANDLES = [
   ['mkbhd', 'known'], ['MrBeast', 'known'], ['veritasium', 'known'], ['kurzgesagt', 'known'],
   ['LinusTechTips', 'known'], ['MarkRober', 'known'], ['Vsauce', 'known'],
   // smaller or specialist
-  ['clickspring', 'niche'], ['Posy', 'niche'], ['TechnologyConnections', 'niche'],
-  ['PracticalEngineering', 'niche'], ['Wintergatan', 'niche'], ['LockPickingLawyer', 'niche'],
+  ['clickspring', 'niche'], ['AlecSteele', 'niche'], ['StuffMadeHere', 'niche'], ['TechnologyConnections', 'niche'],
+  ['PracticalEngineeringChannel', 'niche'], ['Wintergatan', 'niche'], ['LockPickingLawyer', 'niche'],
   ['SummoningSalt', 'niche'], ['AdamNeely', 'niche'], ['NileRed', 'niche']
 ];
 
@@ -23,7 +23,8 @@ async function one([handle, tier]) {
   const id = attr(page, /<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/);
   if (!id) throw new Error(`no channel id for @${handle}`);
   const xml = await (await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${id}`, { headers: UA })).text();
-  const name = unesc(attr(xml, /<\/author>[\s\S]*?<title>([^<]*)<\/title>|<title>([^<]*)<\/title>/) || handle);
+  // the channel's own <title> comes before the first <entry>
+  const name = unesc(attr(xml.split('<entry>')[0], /<title>([^<]+)<\/title>/) || handle);
   const videos = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(m => {
     const e = m[1];
     return {

@@ -3,7 +3,7 @@ import {
   Mesh, PlaneGeometry, ShaderMaterial, Sphere, SRGBColorSpace, Vector2, Vector3, Vector4,
   type IUniform
 } from 'three';
-import { VIDEOS, WORLD, type Field } from '../data/sample';
+import { WORLD, type Field, type Video } from '../data/model';
 import type { Palette } from './theme';
 import {
   reliefFrag, reliefVert, shadowFrag, shadowVert, skirtFrag, skirtVert
@@ -47,12 +47,12 @@ export class Marks {
     this.texture.anisotropy = Math.min(4, maxAniso);
   }
 
-  draw(p: Palette): void {
+  draw(p: Palette, videos: readonly Video[]): void {
     const ctx = this.canvas.getContext('2d')!;
     const { width: W, height: H } = this.canvas;
     ctx.clearRect(0, 0, W, H);
     const css = (c: Color) => `#${c.getHexString()}`;
-    for (const v of VIDEOS) {
+    for (const v of videos) {
       const x = v.u * W;
       const y = (1 - v.v) * H; // texture rows run bottom to top
       if (v.crest) {

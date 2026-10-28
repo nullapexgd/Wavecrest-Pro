@@ -1,46 +1,25 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#e5ecea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0c1a22" media="(prefers-color-scheme: dark)" />
+    <!--HEAD-->
     <title>Wavecrest: read any channel like a chart</title>
     <meta
       name="description"
       content="Paste a YouTube channel and Wavecrest maps its hooks, cadence and gaps from public data, with the evidence shown. One free analysis a month."
     />
-    <link rel="preload" href="/fonts/bricolage-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M3 34c7 0 11-6 18-6s10 6 16 6M3 26c7 0 11-8 18-8s10 8 16 8' fill='none' stroke='%230c2431' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M3 18C9 18 13 8 21 8c6 0 10 4 10 9 0 3-2.500 4-4 2.500' fill='none' stroke='%23ee4b26' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script>document.documentElement.classList.add('js');</script>
     <script type="module" src="/src/main.ts"></script>
     <noscript>
       <style>
         .stage { height: auto; }
         .stage__pin { position: static; height: auto; min-height: 100dvh; }
         .stage__chartcopy { position: static; opacity: 1; margin: 2rem var(--gutter); }
-        .stage__tools, .stage__inspector { display: none; }
+        .stage__tools, .inspector { display: none; }
       </style>
     </noscript>
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
-
-    <header class="nav" data-nav>
-      <a class="brand" href="/" aria-label="Wavecrest, home">
-        <svg class="brand__mark" viewBox="0 0 40 40" width="30" height="30" aria-hidden="true" focusable="false">
-          <path d="M3 34c7 0 11-6 18-6s10 6 16 6" />
-          <path d="M3 26c7 0 11-8 18-8s10 8 16 8" />
-          <path class="brand__crest" d="M3 18C9 18 13 8 21 8c6 0 10 4 10 9 0 3-2.5 4-4 2.5" />
-        </svg>
-        <span class="brand__word">Wavecrest</span>
-      </a>
-      <nav class="nav__links" aria-label="Primary">
-        <a href="#evidence">Evidence labels</a>
-        <a href="#beta">Free beta</a>
-      </nav>
-      <a class="btn btn--quiet" href="/login">Sign in</a>
-    </header>
+    <!--NAV-->
 
     <main id="main">
       <section class="stage" data-stage aria-labelledby="hero-title">
@@ -64,7 +43,7 @@
                   <svg viewBox="0 0 16 16" width="14" height="14" focusable="false"><path d="M3 8h9M8.500 4l4 4-4 4" /></svg>
                 </span>
               </a>
-              <a class="btn btn--ghost" href="/sample">Open sample report</a>
+              <a class="btn btn--ghost" href="#evidence">See the evidence labels</a>
             </div>
           </div>
 
@@ -74,24 +53,34 @@
               Height becomes position. Each mark is one upload, set against the channel median, and the crests are the videos worth studying.
             </p>
             <ul class="legend" aria-label="Chart key">
-              <li><span class="key key--crest" aria-hidden="true"></span>Crest: 3x the median or more</li>
-              <li><span class="key key--video" aria-hidden="true"></span>Other uploads</li>
+              <li><span class="key key--crest" aria-hidden="true"></span><span data-legend-crest><!--LEGEND-CREST--></span></li>
+              <li><span class="key key--video" aria-hidden="true"></span>Video</li>
+              <li data-legend-short><span class="key key--short" aria-hidden="true"></span>Short (3 minutes or less)</li>
             </ul>
+            <p class="facts" data-facts><!--FACTS--></p>
+            <ol class="sr-only" data-crest-list aria-label="Crest uploads"><!--CRESTS--></ol>
           </div>
 
-          <div class="stage__notes" data-notes></div>
-
           <aside class="inspector" data-inspector hidden>
-            <p class="inspector__tag">Illustrative sample</p>
+            <p class="inspector__tag" data-i-tag></p>
             <p class="inspector__title" data-i-title></p>
             <p class="inspector__meta" data-i-meta></p>
             <p class="inspector__rel"><span data-i-rel></span> <small>the channel median</small></p>
             <p class="inspector__views" data-i-views></p>
           </aside>
 
-          <p class="stage__caption" data-caption>
-            Illustrative sample: 64 uploads of a fictional channel. Not real creator data.
-          </p>
+          <div class="stage__foot">
+            <div class="picker" data-picker hidden>
+              <label class="sr-only" for="pick">Channel shown in the chart</label>
+              <span class="picker__select">
+                <select id="pick" data-pick-select></select>
+              </span>
+              <button class="tool tool--text" type="button" data-pick-another>
+                <span>Another channel</span>
+              </button>
+            </div>
+            <p class="stage__caption" data-caption><!--CAPTION--></p>
+          </div>
 
           <div class="stage__tools" data-tools role="group" aria-label="Sample chart controls" hidden>
             <button class="tool" type="button" data-prev aria-label="Previous crest">
@@ -151,7 +140,7 @@
             Sign in with Google or GitHub and run one analysis a month, free. No card, because there is nothing to buy yet.
           </p>
           <p class="beta__note">
-            Paid plans are planned. They are not available and cannot be purchased today.
+            Paid plans are planned. They are not available and cannot be purchased today. <a href="/pricing">Read the details</a>.
           </p>
           <a class="btn btn--primary" href="/login">
             <span>Start free analysis</span>
@@ -163,13 +152,6 @@
       </section>
     </main>
 
-    <footer class="foot">
-      <p class="foot__name">Wavecrest</p>
-      <nav class="foot__links" aria-label="Footer">
-        <a href="/privacy">Privacy</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/login">Sign in</a>
-      </nav>
-    </footer>
+    <!--FOOT-->
   </body>
 </html>

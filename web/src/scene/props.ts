@@ -1,7 +1,7 @@
 import {
   BufferGeometry, InstancedBufferAttribute, InstancedMesh, Matrix4, Quaternion, ShaderMaterial, DoubleSide, Vector3
 } from 'three';
-import { CRESTS, WORLD, heightAt, type Field } from '../data/sample';
+import { WORLD, heightAt, type Field, type Video } from '../data/model';
 import { loadGlb, type GlbMesh } from './glb';
 import { modelUrls } from './modelUrls';
 import { pennantFrag, pennantVert, leadFrag, leadVert } from './shaders';
@@ -34,8 +34,8 @@ export interface Pennants {
 }
 
 /** One pennant planted on every crest, standing on the surface wherever the surface is. */
-export function buildPennants(g: PropGeometry, field: Field, shared: Shared): Pennants {
-  const n = CRESTS.length;
+export function buildPennants(g: PropGeometry, field: Field, shared: Shared, crests: readonly Video[]): Pennants {
+  const n = crests.length;
   const plant = { value: 0 };
   const own = { uFlutter: { value: 1 }, uScale: { value: 0.46 }, uPlant: plant };
   const mk = (geo: BufferGeometry, isPole: number) => {
@@ -56,7 +56,7 @@ export function buildPennants(g: PropGeometry, field: Field, shared: Shared): Pe
   const m4 = new Matrix4();
   const q = new Quaternion();
   const up = new Vector3(0, 1, 0);
-  CRESTS.forEach((c, i) => {
+  crests.forEach((c, i) => {
     const x = (c.u - 0.5) * WORLD.w;
     const z = (c.v - 0.5) * WORLD.d;
     peak[i] = heightAt(field, c.u, c.v);

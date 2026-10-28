@@ -1,0 +1,76 @@
+/* Reading pages: pricing, privacy, terms, changelog. Same tokens, same bands, no new colours. */
+
+.page {
+  max-width: 78rem; margin-inline: auto;
+  padding: calc(var(--s-9) + var(--s-6)) var(--gutter) var(--s-8);
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s-7) var(--s-8);
+  align-items: start;
+}
+.page__head { display: grid; gap: var(--s-5); align-content: start; position: sticky; top: calc(var(--s-9) - var(--s-2)); }
+.page__head .lead { max-width: 28rem; }
+.meta { font-family: var(--font-data); font-size: var(--fs-data); color: var(--ink-soft); }
+
+.doc { display: grid; gap: var(--s-7); max-width: 42rem; }
+.doc > section { display: grid; gap: var(--s-3); }
+.doc h2 { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; text-wrap: balance; }
+.doc h3 { font-family: var(--font-display); font-size: 1.125rem; letter-spacing: -0.015em; font-weight: 600; padding-top: var(--s-3); }
+.doc p, .doc li { color: var(--ink-soft); text-wrap: pretty; }
+.doc strong { color: var(--ink); font-weight: 600; }
+.doc ul { list-style: disc; padding-left: 1.25rem; display: grid; gap: var(--s-2); }
+.doc li::marker { color: var(--ink-soft); }
+.doc a { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.doc a:hover { text-decoration-thickness: 2px; }
+.doc code { font-family: var(--font-data); font-size: 0.9em; color: var(--ink); }
+
+/* One honest callout: a signal rule, not a card */
+.notice {
+  border-left: 3px solid var(--signal); padding: var(--s-3) var(--s-5);
+  background: var(--paper-2); border-radius: 0 var(--r-surface) var(--r-surface) 0;
+  color: var(--ink); text-wrap: pretty;
+}
+.doc .notice { color: var(--ink); }
+
+/* Who sees what: a definition list, same rhythm as the evidence labels */
+.rows { display: grid; }
+.rows > div { display: grid; grid-template-columns: minmax(7.5rem, 10rem) 1fr; gap: var(--s-2) var(--s-5); padding: var(--s-4) 0; border-top: 1px solid var(--line); }
+.rows > div:last-child { border-bottom: 1px solid var(--line); }
+.rows dt { font-family: var(--font-display); font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.rows dd { color: var(--ink-soft); }
+
+/* FAQ: native disclosure, so it works without script and by keyboard */
+.faq { display: grid; }
+.faq details { border-top: 1px solid var(--line); }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  min-height: var(--hit); padding: var(--s-3) 0; cursor: pointer; list-style: none;
+  font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem; color: var(--ink); letter-spacing: -0.01em;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: ''; flex: none; width: 0.55rem; height: 0.55rem; margin-right: var(--s-2);
+  border-right: 1.6px solid var(--ink-soft); border-bottom: 1.6px solid var(--ink-soft); transform: rotate(45deg);
+  transition: transform var(--t-ui) var(--ease-out);
+}
+.faq details[open] summary::after { transform: rotate(-135deg); }
+.faq details > p { padding-bottom: var(--s-4); max-width: 36rem; }
+
+/* Changelog */
+.entries { display: grid; gap: var(--s-7); }
+.entry { display: grid; grid-template-columns: minmax(7rem, 9rem) 1fr; gap: var(--s-3) var(--s-6); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+.entry__when { display: grid; gap: var(--s-1); align-content: start; }
+.entry__tag {
+  justify-self: start; padding: 0 var(--s-3); border-radius: var(--r-pill); border: 1px solid var(--ink-soft);
+  font-family: var(--font-data); font-size: var(--fs-data); color: var(--ink); line-height: 1.7;
+}
+.entry__tag--now { border-color: var(--signal); }
+.entry h2 { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: -0.015em; font-weight: 600; }
+.entry ul { list-style: disc; padding-left: 1.25rem; display: grid; gap: var(--s-2); margin-top: var(--s-3); }
+.entry li { color: var(--ink-soft); text-wrap: pretty; }
+.entry li::marker { color: var(--ink-soft); }
+
+@media (max-width: 860px) {
+  .page { grid-template-columns: 1fr; gap: var(--s-6); padding-top: calc(var(--s-9) + var(--s-4)); }
+  .page__head { position: static; }
+  .rows > div, .entry { grid-template-columns: 1fr; }
+}

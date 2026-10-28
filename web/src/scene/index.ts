@@ -2,7 +2,8 @@ import {
   BufferGeometry, Group, Line, LineBasicMaterial, Mesh, PerspectiveCamera, Scene, Vector2, Vector3,
   Float32BufferAttribute, WebGLRenderer
 } from 'three';
-import { CRESTS, GRID, WORLD, buildField, formatViews, heightAt, nearestVideo, type Video } from '../data/sample';
+import { WORLD, formatMultiple, formatViews, heightAt, nearestVideo, type Model, type Video } from '../data/model';
+import type { Inspector } from '../inspector';
 import { applyPalette, buildRelief, createShared, Marks, type Shared } from './relief';
 import { buildPennants, leadMaterial, loadProps } from './props';
 import { readPalette, watchPalette } from './theme';
@@ -15,6 +16,8 @@ export interface SceneOptions {
   /** reduced motion, or the visitor opted in from a constrained context: no auto motion */
   staticMode: boolean;
   base: string;
+  model: Model;
+  inspector: Inspector;
 }
 
 export interface SceneHandle {
@@ -23,6 +26,8 @@ export interface SceneHandle {
   step(dir: 1 | -1): void;
   /** static mode only: jump the story to the hero (0) or chart (1) state */
   setState(p: number): void;
+  /** swap in another creator: the relief rises again from flat */
+  setModel(m: Model): void;
 }
 
 const ease = (t: number) => t * t * t * (t * (t * 6 - 15) + 10); // smootherstep
@@ -49,7 +54,7 @@ function poses(w: number, h: number): { hero: Pose; chart: Pose } {
 
 export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
   const { canvas, stage, pin, staticMode } = o;
-  const ui = createUI(stage, pin);
+  const ui = createUI(stage, pin, o.inspector);
 
   let renderer: WebGLRenderer;
   try {
@@ -59,14 +64,15 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
   }
   renderer.setClearColor(0x000000, 0);
 
-  const field = buildField(GRID.nx, GRID.nz);
+  let model = o.model;
+  let field = model.field;
   let palette = readPalette();
   const shared: Shared = createShared(palette);
   const marks = new Marks(renderer.capabilities.getMaxAnisotropy());
-  marks.draw(palette);
-  const relief = buildRelief(field, shared, marks);
+  marks.draw(palette, model.videos);
+  let relief = buildRelief(field, shared, marks);
   const props = await loadProps(o.base);
-  const pennants = buildPennants(props, field, shared);
+  let pennants = buildPennants(props, field, shared, model.crests);
 
   // The sounding lead hangs from a pivot, so tilting the pivot swings the weight like a pendulum.
   const LEAD_H = 0.5;
@@ -222,11 +228,11 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
       }
       lastX = e.clientX; lastY = e.clientY;
     }
-    if (!dragging) {
+    if (!dragging && pStory < 0.5) {
       const hit = pick(e.clientX, e.clientY, curAmp);
       if (hit) {
         hoverPoint = hit.p;
-        hoverVideo = nearestVideo(hit.u, hit.v);
+        hoverVideo = nearestVideo(model, hit.u, hit.v);
       } else { hoverPoint = null; hoverVideo = null; }
     }
     dirty = true; wake();
@@ -255,7 +261,7 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
   const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && pinned) { pinned = null; dirty = true; wake(); } };
 
   function describe(v: Video): string {
-    return `${v.title}. ${v.rel.toFixed(1)} times the channel median, ${formatViews(v.views)} views. Sample data.`;
+    return `${v.title}. ${formatMultiple(v.rel)} the channel median, ${formatViews(v.views)} views. Public data.`;
   }
 
   canvas.addEventListener('pointermove', onMove);
@@ -325,9 +331,11 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
     relief.uniforms.markMix.value = clamp((pStory - 0.35) / 0.5, 0, 1);
 
     // what the probe is on
-    const subject = hoverVideo ?? pinned;
-    const point = hoverPoint ?? (pinned ? peakPoint(pinned, curAmp) : null);
-    if (hoverVideo && hoverPoint) leadTarget.copy(hoverPoint);
+    const flat = pStory >= 0.5; // the flat chart owns hover from here on
+    const subject = flat ? null : hoverVideo ?? pinned;
+    const point = flat ? null : hoverPoint ?? (pinned ? peakPoint(pinned, curAmp) : null);
+    if (flat) { /* no probe on the flat chart */ }
+    else if (hoverVideo && hoverPoint) leadTarget.copy(hoverPoint);
     else if (pinned) leadTarget.copy(peakPoint(pinned, curAmp));
     else if (hoverPoint) leadTarget.copy(hoverPoint);
     const want = point && !dragging ? 1 : 0;
@@ -372,14 +380,6 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
       relief.uniforms.hover.w = 0;
     }
 
-    // projected annotations for the crests, shown as the relief flattens
-    if (pStory > 0.55) {
-      ui.place(CRESTS.map((c, i) => {
-        const s = toScreen(peakPoint(c, curAmp));
-        return { index: i, x: s.x, y: s.y };
-      }));
-    }
-
     renderer.render(scene, camera);
     if (!stage.classList.contains('is-3d')) ui.ready();
     dirty = false;
@@ -410,7 +410,7 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
     palette = readPalette();
     applyPalette(shared, palette);
     cordMat.color.copy(palette.inkSoft);
-    marks.draw(palette);
+    marks.draw(palette, model.videos);
     dirty = true; wake();
   });
   const onLost = (e: Event) => { e.preventDefault(); ui.lost(); };
@@ -441,10 +441,24 @@ export async function mountScene(o: SceneOptions): Promise<SceneHandle> {
     },
     setPaused(p) { paused = p; dirty = true; wake(); },
     setState(p) { pTarget = p; dirty = true; wake(); },
+    setModel(next) {
+      model = next; field = next.field;
+      scene.remove(relief.tile, relief.skirt, relief.shadow, pennants.cloth, pennants.pole);
+      relief.dispose(); pennants.dispose();
+      marks.draw(palette, model.videos);
+      relief = buildRelief(field, shared, marks);
+      pennants = buildPennants(props, field, shared, model.crests);
+      scene.add(relief.shadow, relief.skirt, relief.tile, pennants.cloth, pennants.pole);
+      hoverVideo = null; pinned = null; hoverPoint = null; crestIdx = -1;
+      intro = staticMode ? 1 : 0; introStart = 0; plant = staticMode ? 1 : 0;
+      dirty = true; wake();
+    },
     step(dir) {
       lastInteraction = performance.now();
-      crestIdx = (crestIdx + dir + CRESTS.length) % CRESTS.length;
-      const v = CRESTS[crestIdx]!;
+      const crests = model.crests;
+      if (!crests.length) return;
+      crestIdx = (crestIdx + dir + crests.length) % crests.length;
+      const v = crests[crestIdx]!;
       pinned = v; hoverVideo = null; hoverPoint = null;
       ui.announce(describe(v));
       dirty = true; wake();

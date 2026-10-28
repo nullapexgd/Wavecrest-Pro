@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--HEAD-->
+    <title>Wavecrest privacy policy</title>
+    <meta name="description" content="What Wavecrest collects, who processes it, how long it is kept, and how to have it deleted." />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <!--NAV-->
+    <main id="main" class="page">
+      <div class="page__head">
+        <h1 class="display">Privacy.</h1>
+        <p class="lead">Short version: we keep your account, your reports and the counts needed to enforce the monthly limit. We run no ad trackers and sell nothing.</p>
+        <p class="meta">Last updated 28 October 2026</p>
+      </div>
+
+      <div class="doc">
+        <!-- Needs a legal review before launch. Facts were checked against the code on the wavecrest-3 branch. -->
+        <section aria-labelledby="collect">
+          <h2 id="collect">What we collect</h2>
+          <dl class="rows">
+            <div><dt>Account</dt><dd>When you sign in with Google or GitHub we store your email address (verified by the provider), name, profile picture link, which provider you used, and your plan. We never see your Google or GitHub password.</dd></div>
+            <div><dt>Session cookie</dt><dd>One cookie, <code>wc_session</code>, keeps you signed in for up to 30 days. It is HttpOnly and SameSite=Lax. It is not used for tracking.</dd></div>
+            <div><dt>Channels you analyze</dt><dd>The channel you submit, and the public channel and video data YouTube returns for it (titles, descriptions, dates, view, like and comment counts, durations). No private data and no YouTube account access.</dd></div>
+            <div><dt>Reports</dt><dd>The result of each analysis, linked to your account. Reports are private by default. A report can be opened by others only if you turn on its share link.</dd></div>
+            <div><dt>Usage records</dt><dd>For each run we keep a timestamp, status and the channel key, so we can enforce one analysis a month and avoid charging failed runs.</dd></div>
+            <div><dt>API keys</dt><dd>If you create one, we store a hash and a short prefix. The full key is shown once and cannot be recovered.</dd></div>
+            <div><dt>IP address</dt><dd>Used only for per-hour rate limits. It lives in Upstash for the length of the window and is not tied to your account or reports.</dd></div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="home">
+          <h2 id="home">The home page chart</h2>
+          <p>The chart shows public upload data for a well-known or smaller YouTube channel, picked at random or by you. It comes from YouTube's public feeds and the YouTube Data API, is cached on our servers, and is the same for every visitor. Choosing a channel sends nothing about you to YouTube. These creators have no connection to Wavecrest.</p>
+        </section>
+
+        <section aria-labelledby="not">
+          <h2 id="not">What we do not do</h2>
+          <ul>
+            <li>No advertising cookies, no analytics trackers and no third-party scripts on this site.</li>
+            <li>No selling or renting your data.</li>
+            <li>No access to your YouTube account, Studio data, comments or private videos.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="who">
+          <h2 id="who">Who processes data for us</h2>
+          <dl class="rows">
+            <div><dt>Vercel</dt><dd>Hosts the site and the API.</dd></div>
+            <div><dt>Neon</dt><dd>Stores accounts, reports and usage records (PostgreSQL).</dd></div>
+            <div><dt>Upstash</dt><dd>Short-lived rate-limit counters and cached sample data.</dd></div>
+            <div><dt>Google (YouTube)</dt><dd>The channel you analyze is looked up through the YouTube Data API, so YouTube receives that request. Wavecrest uses YouTube API Services; by using it you also agree to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>, and Google's handling of data is described in the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</dd></div>
+            <div><dt>Groq</dt><dd>Runs the language model. The public video titles, descriptions and statistics of the channel being analyzed are sent to it to write the report. Your email and name are not.</dd></div>
+            <div><dt>Resend</dt><dd>Sends the confirmation email if you use the early-access form. The address is not stored by us.</dd></div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="keep">
+          <h2 id="keep">How long we keep it</h2>
+          <p>Reports and account details stay until you delete them or ask us to. We do not yet run an automatic deletion job, so we would rather say that than promise a period we do not enforce. Rate-limit counters expire within an hour. Cached sample data expires within a week.</p>
+        </section>
+
+        <section aria-labelledby="rights">
+          <h2 id="rights">Your choices</h2>
+          <ul>
+            <li>Have a report deleted, or its share link switched off. Email us if you cannot find the control.</li>
+            <li>Revoke an API key at any time.</li>
+            <li>To delete your account and everything linked to it, or to get a copy of it, email <a href="mailto:efeali.bel@gmail.com">efeali.bel@gmail.com</a>. We reply within 7 days.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="changes">
+          <h2 id="changes">Changes and contact</h2>
+          <p>If our practices change in a way that matters, we will update this page and its date. Questions: <a href="mailto:efeali.bel@gmail.com">efeali.bel@gmail.com</a>.</p>
+        </section>
+      </div>
+    </main>
+    <!--FOOT-->
+  </body>
+</html>

@@ -19,9 +19,22 @@
 }
 .poster--scatter {
   opacity: clamp(0, calc((var(--p) - 0.5) * 3.4), 1);
-  padding: calc(var(--s-9) + var(--s-2)) var(--gutter) var(--s-9);
+  /* the chart sits beside the copy on wide screens, below it on narrow ones */
+  inset: var(--s-9) var(--gutter) calc(var(--s-9) + var(--s-3)) calc(var(--gutter) + 25rem);
+  pointer-events: none;
 }
-.stage.is-3d .poster { opacity: 0; }
+.poster--scatter .scat { position: absolute; inset: 0; }
+.poster--scatter .scat--tall { display: none; }
+.stage.is-chart .poster--scatter { pointer-events: auto; }
+.stage.is-3d .poster--ridge { opacity: 0; }
+.stage.is-3d .poster { transition: none; }
+.poster .mk { cursor: pointer; }
+.poster text { font-family: var(--font-text); }
+.poster .halo { paint-order: stroke; stroke: var(--paper-2); stroke-width: 5px; stroke-opacity: 0.92; stroke-linejoin: round; }
+.poster .mk.is-on path, .poster .mk.is-on circle:not([fill='transparent']) { stroke: var(--ink); stroke-width: 3; }
+.stage.is-chart .poster .mk { animation: mk-in 560ms var(--ease-out) both; animation-delay: calc(var(--i) * 16ms); transform-box: fill-box; transform-origin: center; }
+.stage.is-chart .poster .lb { animation: mk-in 560ms var(--ease-out) both; animation-delay: calc(240ms + var(--i) * 16ms); }
+@keyframes mk-in { from { opacity: 0; transform: translateY(14px); } }
 
 .stage__canvas {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -29,11 +42,17 @@
   touch-action: pan-y; /* vertical swipes scroll the page; horizontal drags orbit */
   cursor: grab;
 }
-.stage.is-3d .stage__canvas { opacity: 1; }
+.stage.is-3d .stage__canvas {
+  opacity: clamp(0, calc(1 - (var(--p) - 0.4) * 3.2), 1);
+  transition: none;
+  animation: canvas-in 520ms var(--ease-out);
+}
+@keyframes canvas-in { from { opacity: 0; } }
+.stage.is-chart .stage__canvas { pointer-events: none; }
 .stage__canvas:active { cursor: grabbing; }
 
 /* Copy sits above the canvas and lets pointer events fall through to it */
-.stage__copy, .stage__chartcopy, .stage__notes, .stage__caption, .stage__tools, .explore, .inspector { z-index: var(--z-overlay); }
+.stage__copy, .stage__chartcopy, .stage__foot, .stage__tools, .explore, .inspector { z-index: var(--z-overlay); }
 .stage__copy, .stage__chartcopy { position: absolute; pointer-events: none; }
 .stage__copy > *, .stage__chartcopy > * { pointer-events: auto; }
 
@@ -61,26 +80,32 @@
 .legend { display: grid; gap: var(--s-2); font-size: var(--fs-small); color: var(--ink-soft); }
 .legend li { display: flex; align-items: center; gap: var(--s-3); }
 .key { flex: none; width: 0.875rem; height: 0.875rem; }
-.key--crest { background: var(--signal); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.key--crest { background: var(--signal); border-radius: 50%; }
 .key--video { background: var(--tide); border-radius: 50%; }
+.key--short { background: var(--tide); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.facts { font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.45; color: var(--ink-soft); }
 
-/* Annotations projected from the 3D scene */
-.stage__notes { position: absolute; inset: 0; pointer-events: none; }
-.note {
-  position: absolute; left: 0; top: 0; will-change: transform;
-  font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.3; color: var(--ink);
-  padding: var(--s-1) var(--s-3); border-radius: var(--r-pill);
-  background: color-mix(in oklab, var(--paper-2) 88%, transparent);
-  border: 1px solid var(--line);
-  white-space: nowrap;
-  opacity: clamp(0, calc((var(--p) - 0.72) * 5), 1);
-}
-
-.stage__caption {
+.stage__foot {
   position: absolute; left: var(--gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom));
-  max-width: min(26rem, 52vw);
-  font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.4; color: var(--ink-soft);
+  max-width: min(27rem, 52vw);
+  display: grid; gap: var(--s-3);
 }
+.stage__caption { font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.4; color: var(--ink-soft); }
+.picker { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.picker__select { position: relative; display: inline-flex; }
+.picker__select::after {
+  content: ''; position: absolute; right: 1.125rem; top: 50%; width: 0.5rem; height: 0.5rem;
+  border-right: 1.6px solid var(--ink-soft); border-bottom: 1.6px solid var(--ink-soft);
+  transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+.picker select {
+  appearance: none; -webkit-appearance: none; min-height: var(--hit); max-width: 100%;
+  padding: 0 2.5rem 0 var(--s-5); border-radius: var(--r-pill); border: 1px solid var(--ink-soft);
+  background: color-mix(in oklab, var(--paper-2) 86%, transparent); color: var(--ink);
+  font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+}
+.picker select:hover { border-color: var(--ink); }
+.picker [aria-busy='true'] { opacity: 0.6; }
 
 /* Controls for the sample (accessible equivalent of hover and drag) */
 .stage__tools {
@@ -135,18 +160,29 @@
   }
   .stage__copy .lead { font-size: 1.0625rem; }
   .stage__chartcopy { top: calc(var(--s-9) + var(--s-2)); right: var(--gutter); max-width: none; }
-  .stage__caption { max-width: calc(100% - 2 * var(--gutter)); bottom: calc(var(--hit) + var(--s-6)); }
+  .stage__foot { max-width: calc(100% - 2 * var(--gutter)); bottom: calc(var(--hit) + var(--s-6)); }
+  .poster--scatter { inset: 15.25rem var(--s-2) 13.5rem var(--s-2); }
+  /* the flat chart owns the screen: title and key above it, picker below, nothing else */
+  .stage__chartcopy > p { display: none; }
+  .stage__chartcopy .legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); }
+  .stage.is-chart .explore, .stage.is-chart .stage__tools { display: none; }
+  .poster--scatter .scat--wide { display: none; }
+  .poster--scatter .scat--tall { display: block; }
   /* the picture lives below the copy, never behind it */
   .poster--ridge { inset: 52% 0 0 0; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 34%); mask-image: linear-gradient(180deg, transparent 0%, #000 34%); }
-  .poster--scatter { padding-top: calc(var(--s-9) * 2.2); }
 }
 
 /* Modes set by the script. Static mode (reduced motion, or 3D opted into) swaps the two
    states with a short fade instead of scrubbing, so no depth is ever animated. */
 .stage.is-static .stage__copy,
 .stage.is-static .stage__chartcopy,
-.stage.is-static .note,
 .stage.is-static .poster { transition: opacity 240ms var(--ease-out); }
 .stage.is-static .stage__copy,
 .stage.is-static .stage__chartcopy { transform: none; }
 .stage.is-static { height: 220dvh; }
+
+/* With script, the baked picture waits for the random creator (a moment) so it never visibly
+   swaps. If the script never arrives the failsafe animation reveals it anyway. */
+.js .stage__posters { opacity: 0; animation: posters-failsafe 1ms 2.6s forwards; }
+.js .stage__posters.is-ready { opacity: 1; animation: none; transition: opacity 300ms var(--ease-out); }
+@keyframes posters-failsafe { to { opacity: 1; } }

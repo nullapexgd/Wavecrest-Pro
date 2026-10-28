@@ -176,3 +176,5 @@ button { font: inherit; color: inherit; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+.beta__note a { color: var(--ink); text-underline-offset: 0.2em; }

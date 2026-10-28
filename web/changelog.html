@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--HEAD-->
+    <title>Wavecrest changelog</title>
+    <meta name="description" content="What changed in Wavecrest, newest first." />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <!--NAV-->
+    <main id="main" class="page">
+      <div class="page__head">
+        <h1 class="display">Changelog.</h1>
+        <p class="lead">What changed, newest first. Entries marked in development are not live yet.</p>
+      </div>
+
+      <div class="entries">
+        <article class="entry">
+          <div class="entry__when"><span class="entry__tag entry__tag--now">In development</span><span class="meta">Wavecrest 3.0</span></div>
+          <div>
+            <h2>A rebuilt site and a stricter service</h2>
+            <ul>
+              <li>New design, with a real-data chart of a channel you can explore in 3D and flatten into a plot.</li>
+              <li>Free beta stated plainly: one analysis a month with an account. Pricing, privacy and terms pages rewritten to match what the product does.</li>
+              <li>Reports are private to your account by default, with an optional share link.</li>
+              <li>The monthly allowance is counted on the server, one run at a time, and a run that fails on our side is not counted.</li>
+              <li>Sign-in only accepts email addresses that Google or GitHub has verified.</li>
+              <li>Errors from YouTube and the language model are no longer passed through to the page.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry__when"><span class="entry__tag">Live</span><span class="meta">7 Aug 2026</span></div>
+          <div>
+            <h2>Accounts, plans and API keys</h2>
+            <ul>
+              <li>Sign in with Google or GitHub, with plans and API keys per account.</li>
+              <li>A five-stage progress display with live counts while an analysis runs.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry__when"><span class="entry__tag">Live</span><span class="meta">30 Jun 2026</span></div>
+          <div>
+            <h2>Fixes</h2>
+            <ul>
+              <li>Reports cover nine dimensions, up from seven.</li>
+              <li>Print export escapes report text, and made-up social proof was removed.</li>
+              <li>Input checks on every endpoint.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry__when"><span class="entry__tag">Live</span><span class="meta">18 Jun 2026</span></div>
+          <div>
+            <h2>Creator intelligence</h2>
+            <ul>
+              <li>Analysis rewritten around creators: earnings estimates, video ideas and live progress as the report builds.</li>
+              <li>Per-IP rate limiting at the edge.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </main>
+    <!--FOOT-->
+  </body>
+</html>

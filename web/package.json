@@ -13,7 +13,8 @@
     "assets": "/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup --python tools/blender/make_assets.py -- static/models",
     "check:contrast": "node tools/check-contrast.mjs",
     "fonts": "cp node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2 static/fonts/bricolage-latin-wght.woff2",
-    "build:single": "vite build --mode artifact && node tools/single-file.mjs"
+    "build:single": "vite build --mode artifact && node tools/single-file.mjs",
+    "creators": "node tools/fetch-creators.mjs"
   },
   "dependencies": {
     "three": "^0.186.1"
