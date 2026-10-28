@@ -1,0 +1,27 @@
+{
+  "name": "wavecrest-web",
+  "private": true,
+  "version": "3.0.0-prototype",
+  "type": "module",
+  "description": "Wavecrest 3.0 front end (prototype). Separate workspace so it cannot affect the production dependencies.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "poster": "node tools/make-poster.mjs",
+    "assets": "/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup --python tools/blender/make_assets.py -- static/models",
+    "check:contrast": "node tools/check-contrast.mjs",
+    "fonts": "cp node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2 static/fonts/bricolage-latin-wght.woff2",
+    "build:single": "vite build --mode artifact && node tools/single-file.mjs"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

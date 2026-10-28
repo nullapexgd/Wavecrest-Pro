@@ -18,3 +18,4 @@ node_modules
 # Build output and OS junk
 dist/
 .DS_Store
+dist-single/

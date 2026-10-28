@@ -1,0 +1,97 @@
+/*
+  Wavecrest design tokens. Every colour, size, space and curve lives here; components
+  never contain a raw value. `npm run check:contrast` reads this file and fails if any
+  pair below drops under its WCAG threshold, in either theme.
+
+  The idea: a DAYLIGHT CHART. Sea-glass chart paper, deep marine ink, and one signal
+  colour that appears only where momentum breaks (the crest). Signal is a fill or a line,
+  never body text; text on signal uses --on-signal.
+*/
+
+@font-face {
+  font-family: 'Bricolage Grotesque Variable';
+  src: url('/fonts/bricolage-latin-wght.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* Light: daylight chart */
+  --paper: #e5ecea;
+  --paper-2: #f2f6f5;
+  --ink: #0c2431;
+  --ink-soft: #3c5760;
+  --line: #a9bdbf;
+  --tide: #2c6b7a;
+  --signal: #ee4b26;
+  --on-signal: #06141c;
+
+  /* Type */
+  /* One custom family, for display only (HIG branding: custom font for headlines, system
+     fonts for body, which are designed for small-size legibility). No weights under 400. */
+  --font-display: 'Bricolage Grotesque Variable', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --font-text: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-data: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-display: clamp(2.5rem, 1rem + 4.4vw, 5.5rem);
+  --fs-title: clamp(1.75rem, 1.2rem + 2vw, 3rem);
+  --fs-lead: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.875rem;
+  --fs-data: 0.8125rem;
+
+  --lh-display: 0.98;
+  --lh-body: 1.55;
+  --tracking-display: -0.035em;
+
+  /* Space: 4px base */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem;
+  --s-6: 2rem; --s-7: 3rem; --s-8: 4.5rem; --s-9: 7rem;
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+
+  /* Shape: one rule. Controls are pills, surfaces are 18px, data marks are square. */
+  --r-pill: 999px;
+  --r-surface: 1.125rem;
+
+  /* Touch: HIG default control size is 44pt, 28pt minimum */
+  --hit: 2.75rem;
+
+  /* Motion: UI 150 to 250ms, hero sequences 600 to 900ms, ease-out only */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --t-ui: 200ms;
+  --t-hero: 760ms;
+
+  /* Layers: a defined scale, not arbitrary numbers */
+  --z-stage: 0;
+  --z-overlay: 10;
+  --z-nav: 30;
+  --z-skip: 40;
+}
+
+/* Dark: night chart. Applied by system preference, or forced with data-theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0c1a22;
+    --paper-2: #132630;
+    --ink: #e2edec;
+    --ink-soft: #9db5b8;
+    --line: #2b4651;
+    --tide: #78b7c4;
+    --signal: #ff5c3a;
+    --on-signal: #0c1a22;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0c1a22;
+  --paper-2: #132630;
+  --ink: #e2edec;
+  --ink-soft: #9db5b8;
+  --line: #2b4651;
+  --tide: #78b7c4;
+  --signal: #ff5c3a;
+  --on-signal: #0c1a22;
+}
