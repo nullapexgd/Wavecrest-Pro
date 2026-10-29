@@ -6,6 +6,12 @@ Everything else is read-only or local. Production deploys from **`master`** (ver
 
 Files: this runbook, `HOTFIX-report-access.md` (design, decisions), `INCIDENT-report-access.md` (facts about the exposure).
 
+## 0. Immediate containment (GATE 0, can happen before everything else)
+
+Vercel Firewall custom rule: path equals `/api/featured` → deny. No code, data or schema change; the homepage ignores the non-OK response and keeps its static hero card. Stops the known public exposure while the release process continues. It does **not** stop access by report id (that is the optional Rule 2: `GET /api/report/*`, which also blocks legitimate report reads; use it only if previously exposed ids are a concern).
+**The rule stays in place until the fixed backend is deployed and verified (section 7).** It is not a rollback lever: removing it while the vulnerable build is live reopens the exposure. After verification it is harmless to keep (the hotfix deletes the endpoint), and removal is optional.
+Verify (anonymous): `curl -s -o /dev/null -w "%{http_code}\n" https://wavecrest.pro/api/featured` returns 403 or 404, from two networks.
+
 ## 1. Pre-deployment requirements (all must be true)
 
 - [ ] Owner has read the redacted A1-A4 results (section 2) and decided on any follow-up for suspect accounts.
@@ -164,7 +170,7 @@ Vercel Hobby keeps **1 hour** of runtime logs, so watch live for the first hour,
 
 Every older production deployment contains the vulnerability: do **not** use Vercel Instant Rollback or promote `e4b7943`.
 1. **Fix forward (default).** Small commit on `hotfix-report-access`, same gates (`git push origin hotfix-report-access:master`). Typical: 500s on report routes = migration not applied (apply it, no code change).
-2. **Contain without a deploy (GATE 5).** Vercel Firewall custom rule blocking `GET /api/report/*` and `/api/featured`. Instant, reversible, fails closed (reports unavailable). Remove the rule when fixed. May also be applied *before* this release to stop the ongoing exposure.
+2. **Contain without a deploy (GATE 5).** Keep the Gate 0 rule on `/api/featured`; if report reads themselves misbehave, add `GET /api/report/*`. Instant, fails closed (reports unavailable). **Do not remove a containment rule while the vulnerable build is the live one;** remove report-read blocking only after the fixed build is deployed and section 7 passes.
 3. **Last resort:** the old build only while rung 2 is active.
 4. **Schema:** never dropped; the `visibility` column stays under every rung. Migration 004 is not reversed.
 
