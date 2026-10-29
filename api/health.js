@@ -1,9 +1,18 @@
-// Health check — verifies DB connectivity and reports which env vars are
-// present (names only, never values). Used to sanity-check deploys.
+// Health check. Anyone gets only whether the app and database are up. Which secrets are
+// configured, the deployed commit and database error text help an attacker choose targets and
+// help no one else, so they are shown only to a caller presenting x-admin-secret.
+import crypto from 'node:crypto';
 import { getPool } from '../lib/db.js';
 
 const REQUIRED_ENV = ['YOUTUBE_API_KEY', 'GROQ_API_KEY', 'RESEND_API_KEY', 'SESSION_SECRET'];
 const DB_ENV = ['DB_URL', 'DATABASE_URL'];
+
+function isAdmin(req) {
+  const secret = process.env.ADMIN_SECRET;
+  const given = String(req.headers['x-admin-secret'] || '');
+  return Boolean(secret) && given.length === secret.length
+    && crypto.timingSafeEqual(Buffer.from(given), Buffer.from(secret));
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -23,15 +32,14 @@ export default async function handler(req, res) {
     db = r.rows[0]?.ok === 1;
   } catch (err) {
     dbError = err.message;
-    console.error('[health] DB check failed:', err);
+    console.error('[health] DB check failed:', err.message);
   }
 
   const ok = db && Object.values(env).every(Boolean);
-  return res.status(ok ? 200 : 503).json({
-    ok,
-    db,
-    ...(dbError ? { dbError } : {}),
-    env,
+  const status = ok ? 200 : 503;
+  if (!isAdmin(req)) return res.status(status).json({ ok, db });
+  return res.status(status).json({
+    ok, db, ...(dbError ? { dbError } : {}), env,
     deployment: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local'
   });
 }

@@ -17,8 +17,16 @@ const baseUrl = () => process.env.BASE_URL || `https://${process.env.VERCEL_URL}
 const googleRedirect = () => process.env.GOOGLE_CALLBACK_URL || `${baseUrl()}/api/auth/google/callback`;
 const githubRedirect = () => `${baseUrl()}/api/auth/github/callback`;
 
+// Vercel does not reliably fill req.query.path for this catch-all file (every /api/auth/* answered
+// 404 in production), so the request URL is the source of truth. The query value is only a
+// fallback when there is no URL, which also stops a stray ?path= from choosing the route.
+export function routeOf(req) {
+  const m = /^\/api\/auth\/(.+?)\/?$/.exec(String(req.url || '').split('?')[0]);
+  return m ? m[1] : [].concat(req.query?.path || []).join('/');
+}
+
 export default async function handler(req, res) {
-  const route = [].concat(req.query.path || []).join('/');
+  const route = routeOf(req);
 
   try {
     switch (route) {
