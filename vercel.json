@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm --prefix web ci && npm --prefix web run build",
+  "buildCommand": "npm --prefix web ci --include=dev && npm --prefix web run build",
   "outputDirectory": "web/dist",
   "cleanUrls": true,
   "trailingSlash": false,
