@@ -198,3 +198,18 @@ button { font: inherit; color: inherit; }
 }
 
 .beta__note a { color: var(--ink); text-underline-offset: 0.2em; }
+
+/* Scroll entrances (see reveal.ts). Only under html.js; visible from the start, never display:none. */
+.js .band__head, .js .labels .label, .js .beta, .js .doc > section, .js .entry, .js .rows {
+  opacity: 0.85; transform: translateY(18px);
+  transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.js .is-in { opacity: 1 !important; transform: none !important; }
+/* Failsafe: if the script never runs (rv-ready absent) everything settles after 2.5s */
+.js:not(.rv-ready) .band__head, .js:not(.rv-ready) .labels .label, .js:not(.rv-ready) .beta,
+.js:not(.rv-ready) .doc > section, .js:not(.rv-ready) .entry, .js:not(.rv-ready) .rows { animation: rv-settle 1ms 2.5s forwards; }
+@keyframes rv-settle { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .js .band__head, .js .labels .label, .js .beta, .js .doc > section, .js .entry, .js .rows { opacity: 1; transform: none; transition: none; }
+}

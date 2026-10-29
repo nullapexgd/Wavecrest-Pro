@@ -264,3 +264,5 @@ void (async () => {
 })();
 
 authNav();
+import { reveal } from './reveal';
+reveal();
