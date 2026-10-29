@@ -61,3 +61,16 @@ Written without production access, logs or database results. Dates come from git
 - Notification for any account confirmed or suspected to have been taken over.
 - Whether the privacy policy needs updating (the new text will have to describe private-by-default reports and the share toggle).
 - Record-keeping: keep this record and the review results regardless of the decision.
+
+## 10. Production review results (read-only, 2026-10-29, redacted)
+
+Run through the Neon connection on the production branch; nothing was written. Account identities were confirmed by the owner (both users are the owner's own accounts).
+
+- **Reports:** 12 total, **all anonymous (no owner), 0 signed-in**; first 2026-07-02, last 2026-08-15; nothing since.
+- **Users:** 2 (both Google sign-ins, both the owner's), 0 reports each, **0 API keys, 0 GitHub accounts**.
+- **Migrations applied:** 001-003 only; `visibility` column absent (004 not applied).
+- **Featured upper bounds** (each report was the newest, hence public via `/api/featured`, for at most): about 20 days, 16 days, 5.3 days, 14.8 hours, 1.4 hours (in total 5 reports), and under an hour for the remaining 5 of the first 11; the newest (2026-08-15) stayed featured until the containment rule on 2026-10-29. Real view counts remain unknowable.
+- **Implication (facts, not a severity):** no signed-in user's report has ever existed in this database, so none could have been featured. The exposed content is 12 anonymous analyses of public channels, which the published privacy page already described as link-readable; the hotfix does not change any of them. Rows deleted before this review cannot be ruled out, but no delete endpoint existed.
+- **OAuth:** no GitHub rows, no API keys, no reports owned by either user, so a takeover would have gained only profile/plan access. Takeover of an existing account would leave no trace, so absence of evidence remains the limit.
+- **Containment:** Firewall rule denying `/api/featured` is live (HTTP 403 verified 2026-10-29).
+- **Recovery point:** Neon snapshot `pre-hotfix-004-20261029` (`snap-nameless-butterfly-anvixz8c`, 33,349,632 bytes, created 16:48:13 UTC). Verified by restoring it into a temporary branch (12 reports, 2 users, 0 API keys, 3 migrations, last report 2026-08-15, no `visibility`), then deleting only that temporary branch; production was untouched throughout. Point-in-time history retention is only 6 hours, so the snapshot is the real recovery point.
