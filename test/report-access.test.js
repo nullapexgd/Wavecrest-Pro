@@ -148,3 +148,38 @@ test('saveReport: signed-in => private, anonymous => link (ownerless)', { skip }
   assert.equal(rows.find(r => r.id === anon).visibility, 'link');
   assert.equal((await get(mine, B.id)).statusCode, 404);
 });
+
+// ── regression coverage for the owner / other account / anonymous flow ───────────────────
+
+test('unauthorized PATCH/DELETE leave the whole stored row unchanged', { skip }, async () => {
+  const row = async () => (await pgx.pool.query('SELECT * FROM reports WHERE id=$1', [repB])).rows[0];
+  const before = await row();
+  for (const who of [A.id, null]) {
+    await call({ method: 'PATCH', query: { id: repB }, userId: who, body: { visibility: 'link' } });
+    await call({ method: 'DELETE', query: { id: repB }, userId: who });
+  }
+  assert.deepEqual(await row(), before);
+});
+
+test('other accounts cannot change or delete an ownerless report either', { skip }, async () => {
+  assert.equal((await call({ method: 'PATCH', query: { id: repAnon }, userId: A.id, body: { visibility: 'private' } })).statusCode, 404);
+  assert.equal((await call({ method: 'DELETE', query: { id: repAnon }, userId: A.id })).statusCode, 404);
+  assert.equal((await pgx.pool.query('SELECT visibility FROM reports WHERE id=$1', [repAnon])).rows[0].visibility, 'link');
+});
+
+test('share then unshare: B and anonymous follow the owner, and no owner identity is ever sent', { skip }, async () => {
+  const id = await makeReport(pgx.pool, { userId: A.id });
+  const seeIt = async () => [(await get(id, B.id)).statusCode, (await get(id, null)).statusCode];
+  assert.deepEqual(await seeIt(), [404, 404]);
+  assert.equal((await call({ method: 'PATCH', query: { id }, userId: A.id, body: { visibility: 'link' } })).statusCode, 200);
+  assert.deepEqual(await seeIt(), [200, 200]);
+  for (const who of [B.id, null]) {
+    const res = await get(id, who);
+    assert.equal(res.body.isOwner, false);
+    assert.ok(!('user_id' in res.body));
+    const sent = JSON.stringify(res.body);
+    assert.ok(!sent.includes(A.id) && !sent.includes(A.email ?? '\u0000'), 'no owner id or email in a shared response');
+  }
+  assert.equal((await call({ method: 'PATCH', query: { id }, userId: A.id, body: { visibility: 'private' } })).statusCode, 200);
+  assert.deepEqual(await seeIt(), [404, 404]);
+});
