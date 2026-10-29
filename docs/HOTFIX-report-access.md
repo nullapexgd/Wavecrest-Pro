@@ -163,3 +163,10 @@ How many links Option A affects = the number of signed-in reports (production co
 - **Poisoned existing users.** A row in `users` created through the old GitHub fallback may hold an unverified email an attacker chose, and a later verified login with that email links to it. The DB cannot tell. Suggested follow-up (needs approval): read-only review of `users` where `provider='github'` and the email domain looks unrelated to the profile; reset affected rows.
 - Sign-in required for analysis, sample-creator endpoint, share toggle UI, `GET /api/reports` history, CSRF Origin check (SameSite=Lax already blocks cross-site PATCH/DELETE), `ensureTable` request-time DDL, `api/health` exposure: all left as is.
 - Edge cache of the old `/api/featured` response: not verified from here; check post-deploy as listed.
+
+## Verified against the real handlers (isolated)
+
+The real `api/report/[id].js` and `api/auth/[...path].js` with `lib/*`, the real `app.html` in a browser, and a throwaway local Postgres with all migrations applied (no production DB, test-only session secret). Owner A, other account B, anonymous:
+- API matrix 22/22: A reads own private report; B and anonymous get 404 (identical body to a nonexistent id); B cannot PATCH or DELETE A's report (404, row unchanged); anonymous PATCH is 401; invalid visibility is 400; A shares, B and anonymous can then read it (no owner id in the response), B still cannot change it; A unshares and B is locked out again; ownerless reports stay readable and nobody can privatise them; `Cache-Control: private, no-store`.
+- Browser: A's report view shows "Private: only you"; clicking it writes `link` to the DB and shows "Shared"; B opens the same link and sees the report with no toggle; B's PATCH and DELETE from the page both 404 and the row stays `link`; A unshares (DB `private`); B then gets "Report not found".
+Not covered: real OAuth, production data, Safari/Firefox, a load test.

@@ -1,7 +1,7 @@
 # Hotfix runbook: production review, exact commands, re-share support
 
 Nothing here has been run against production. Every query is read-only unless marked WRITE.
-Results contain emails (personal data): keep them out of shared channels and tickets.
+Queries below are REDACTED by default: emails are masked and replaced by an 8-character `ref` (first 8 hex of md5 of the address); channel names are omitted. Review the masked output first. To identify one person afterwards, look them up by ref only: `SELECT email FROM users WHERE substr(md5(email),1,8) = '<ref>'` and keep the result out of shared channels and tickets.
 Run SQL in the Neon SQL editor for the PRODUCTION branch, not from this repo.
 
 ## A. Read-only review (before approving the deploy)
@@ -23,7 +23,7 @@ SELECT name, applied_at FROM _migrations ORDER BY name;  -- 004 must be absent
 Each report was "the featured report" from its creation until the next report was created
 (the response was CDN-cached ~5 min). `was_featured_for` is the maximum time it could have been public.
 ```sql
-SELECT id, (user_id IS NOT NULL) AS signed_in, channel_name, created_at,
+SELECT id, (user_id IS NOT NULL) AS signed_in, created_at,
        lead(created_at) OVER (ORDER BY created_at) - created_at AS was_featured_for
 FROM reports
 WHERE created_at >= '2026-06-18'          -- /api/featured was added this day
@@ -33,7 +33,7 @@ Prioritise `signed_in = true` rows with long `was_featured_for`.
 
 ### A3. Owners (who needs a re-share option or a notice)
 ```sql
-SELECT u.email, u.provider, u.plan, count(r.id) AS reports, max(r.created_at) AS last_report
+SELECT substr(md5(u.email),1,8) AS ref, u.provider, u.plan, count(r.id) AS reports, max(r.created_at) AS last_report
 FROM users u JOIN reports r ON r.user_id = u.id
 GROUP BY 1,2,3 ORDER BY reports DESC;
 ```
@@ -44,9 +44,10 @@ account leaves no trace in `users` (the attacker's provider id was never stored)
 address leaves a GitHub row. Review:
 ```sql
 SELECT provider, count(*) FROM users GROUP BY 1;
-SELECT id, email, name, created_at FROM users WHERE provider = 'github' ORDER BY created_at;
+SELECT substr(md5(email),1,8) AS ref, left(email,2) || '***@' || split_part(email,'@',2) AS masked, created_at
+FROM users WHERE provider = 'github' ORDER BY created_at;
   -- confirm each is a person you recognise or can verify; an address you cannot tie to its owner is suspect
-SELECT u.email, k.name, k.created_at, k.last_used_at, k.revoked_at
+SELECT substr(md5(u.email),1,8) AS ref, k.created_at, k.last_used_at, k.revoked_at
 FROM api_keys k JOIN users u ON u.id = k.user_id ORDER BY k.created_at;
   -- keys created or used at odd times or by unknown clients
 ```
