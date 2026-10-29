@@ -96,10 +96,14 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
   padding: var(--s-2) var(--s-2) var(--s-2) var(--s-5);
   border-radius: var(--r-pill);
-  background: color-mix(in oklab, var(--paper-2) 74%, transparent);
-  border: 1px solid var(--line);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  backdrop-filter: blur(16px) saturate(1.15);
+  /* Glass, kept to the navigation layer: a lit top edge, a little more vibrancy, a soft lift off the content. */
+  background:
+    linear-gradient(180deg, var(--glass-hi), transparent 58%),
+    color-mix(in oklab, var(--paper-2) 62%, transparent);
+  border: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 10px 28px -14px var(--glass-sh);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
 }
 .brand { display: inline-flex; align-items: center; gap: var(--s-3); text-decoration: none; min-height: var(--hit); }
 .brand__mark { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
@@ -163,7 +167,7 @@ button { font: inherit; color: inherit; }
 
 /* Reduce Transparency: the nav falls back to a solid surface that holds its own contrast */
 @media (prefers-reduced-transparency: reduce) {
-  .nav { background: var(--paper-2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .nav { background: var(--paper-2); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* Increase Contrast: harder lines and secondary text */
