@@ -13,6 +13,22 @@ body {
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
+/* Ground: two soft glows plus a faint wave-contour motif (the brand's own mark, repeated), so the page is
+   never a flat sheet. The motif is a CSS mask over a token colour, so it follows the theme. Static: no
+   animation, no fixed attachment, no scroll cost. The hero keeps a clean paper ground. */
+body {
+  position: relative;
+  background-image:
+    radial-gradient(70rem 36rem at 88% -6rem, color-mix(in oklab, var(--tide) 14%, transparent), transparent 72%),
+    radial-gradient(54rem 30rem at -8% 42rem, color-mix(in oklab, var(--signal) 6%, transparent), transparent 70%);
+  background-repeat: no-repeat;
+}
+body::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: color-mix(in oklab, var(--line) 42%, transparent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='200' viewBox='0 0 520 200' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M0 40C130 0 130 0 260 40S390 80 520 40'/%3E%3Cpath d='M0 100C130 60 130 60 260 100S390 140 520 100'/%3E%3Cpath d='M0 160C130 120 130 120 260 160S390 200 520 160'/%3E%3C/svg%3E") 0 0 / 520px 200px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='200' viewBox='0 0 520 200' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M0 40C130 0 130 0 260 40S390 80 520 40'/%3E%3Cpath d='M0 100C130 60 130 60 260 100S390 140 520 100'/%3E%3Cpath d='M0 160C130 120 130 120 260 160S390 200 520 160'/%3E%3C/svg%3E") 0 0 / 520px 200px repeat;
+}
 h1, h2, h3, p, dl, dd, ul { margin: 0; }
 ul { padding: 0; list-style: none; }
 a { color: inherit; }

@@ -280,3 +280,8 @@ ol { list-style: none; padding: 0; margin: 0; }
 
 /* Headings take focus after a view change so screen readers announce them; no ring is drawn for that. */
 [tabindex='-1']:focus, [tabindex='-1']:focus-visible { outline: none; box-shadow: none; }
+
+/* Provider sign-in buttons: neutral surface with the provider's own mark */
+.btn--signin { background: var(--paper-2); border-color: var(--line); color: var(--ink); gap: var(--s-3); }
+.btn--signin:hover { border-color: var(--ink); background: color-mix(in oklab, var(--paper-2) 80%, var(--paper)); }
+.btn__ico { width: 1.25rem; height: 1.25rem; flex: none; }

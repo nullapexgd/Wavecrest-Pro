@@ -4,6 +4,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/page.css';
 import '../styles/app.css';
+import { authNav } from '../authNav.ts';
 import { formatDate } from '../data/model.ts';
 import * as api from './api.ts';
 import { ApiError } from './api.ts';
@@ -365,4 +366,5 @@ async function boot(): Promise<void> {
   return void home();
 }
 
+authNav();
 void boot();

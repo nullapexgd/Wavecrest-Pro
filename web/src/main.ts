@@ -1,6 +1,7 @@
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/stage.css';
+import { authNav } from './authNav';
 import { CREATORS, byHandle, fromLive, fromSnapshot, randomCreator } from './data/creators';
 import { captionText, crestLegend, crestListHtml, factsText, scatterPair } from './data/copy';
 import type { Creator, Model } from './data/model';
@@ -261,3 +262,5 @@ void (async () => {
     exploreBtn.addEventListener('click', () => load3D({ fromButton: true }));
   }
 })();
+
+authNav();

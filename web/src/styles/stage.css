@@ -5,7 +5,7 @@
   opacity and transform.
 */
 
-.stage { --p: 0; position: relative; height: 320dvh; }
+.stage { --p: 0; position: relative; height: 320dvh; background: var(--paper); } /* the hero keeps a clean ground: the ruled texture would compete with the relief */
 .stage__pin { position: sticky; top: 0; height: 100dvh; overflow: clip; }
 
 /* Posters: a complete picture before any script runs. They fade out when the 3D takes over. */
