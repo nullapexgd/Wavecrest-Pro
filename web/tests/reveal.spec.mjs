@@ -33,3 +33,14 @@ test('without JavaScript nothing is offset or dimmed', async ({ browser }) => {
   for (const s of await secs(page).all()) expect(await op(s)).toBe(1);
   await ctx.close();
 });
+
+test('switching to Reduced while a section is still dimmed shows it at once (no scroll needed)', async ({ page }) => {
+  await page.goto('/pricing');
+  const last = secs(page).last();
+  test.skip(await last.evaluate(el => el.classList.contains('is-in')), 'the whole page is already in view at this height');
+  expect(await op(last)).toBeLessThan(1); // still waiting to be revealed
+  await page.locator('[data-settings-open]').click();
+  await page.locator('input[name="motion"][value="reduced"]').check({ force: true });
+  await expect.poll(() => op(last)).toBe(1);
+  expect(await last.evaluate(el => getComputedStyle(el).transform)).toBe('none');
+});

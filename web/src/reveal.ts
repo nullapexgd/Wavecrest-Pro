@@ -2,12 +2,14 @@
 // visible from the start (85% opacity, 18px low) and settles once as it enters view. Opacity and
 // transform only, so nothing moves the layout. Reduced motion, no IntersectionObserver, or a failed
 // script all end with everything simply shown (see the failsafe in base.css).
+import { effectiveReduced } from './prefs';
+
 const TARGETS = ['.band__head', '.labels .label', '.beta', '.doc > section', '.entry', '.rows'];
 
 export function reveal(): void {
   const els = [...document.querySelectorAll<HTMLElement>(TARGETS.join(','))];
   document.documentElement.classList.add('rv-ready'); // cancels the CSS failsafe
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window);
+  const still = effectiveReduced() || !('IntersectionObserver' in window);
   if (still) { els.forEach(e => e.classList.add('is-in')); return; }
 
   const seen = new Map<Element, number>();

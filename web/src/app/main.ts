@@ -5,6 +5,7 @@ import '../styles/base.css';
 import '../styles/page.css';
 import '../styles/app.css';
 import { authNav } from '../authNav.ts';
+import '../settings.ts';
 import { formatDate } from '../data/model.ts';
 import * as api from './api.ts';
 import { ApiError } from './api.ts';

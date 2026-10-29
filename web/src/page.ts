@@ -5,3 +5,4 @@ import { authNav } from './authNav';
 authNav();
 import { reveal } from './reveal';
 reveal();
+import './settings';
