@@ -82,3 +82,41 @@ test('a verified Google callback signs in through the URL route', { skip }, asyn
   assert.equal(res.headers.location, '/app');
   assert.match(String(res.headers['set-cookie']), /wc_session=/);
 });
+
+// ── the two OAuth callbacks are TWO path segments, which Vercel never routes to this file ──────
+import { readFileSync } from 'node:fs';
+const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+
+test('callbacks are rewritten to single-segment paths, and both spellings route the same', () => {
+  const rw = Object.fromEntries(vercel.rewrites.map(r => [r.source, r.destination]));
+  assert.deepEqual(rw, {
+    '/api/auth/google/callback': '/api/auth/google-callback',
+    '/api/auth/github/callback': '/api/auth/github-callback'
+  });
+  for (const [from, to] of Object.entries(rw)) {
+    assert.ok(!/^\/api\/auth\/[^/]+\/[^/]+/.test(to), 'destination must be ONE segment under /api/auth');
+    assert.equal(routeOf({ url: from + '?code=c', query: {} }), routeOf({ url: to + '?code=c', query: {} }));
+  }
+  assert.equal(routeOf({ url: '/api/auth/google-callback', query: {} }), 'google/callback');
+  assert.equal(routeOf({ url: '/api/auth/github-callback', query: {} }), 'github/callback');
+});
+
+test('every other auth route is a single segment (so it needs no rewrite)', () => {
+  const src = readFileSync(new URL('../api/auth/[...path].js', import.meta.url), 'utf8');
+  const cases = [...src.matchAll(/case '([^']+)':/g)].map(m => m[1]);
+  assert.deepEqual(cases.filter(c => c.includes('/')).sort(), ['github/callback', 'google/callback']);
+});
+
+test('a verified Google callback signs in through the REWRITTEN single-segment URL', { skip }, async () => {
+  const json = (b) => ({ ok: true, status: 200, json: async () => b });
+  globalThis.fetch = async (u) => {
+    u = String(u);
+    if (u.includes('oauth2.googleapis.com/token')) return json({ access_token: 't' });
+    if (u.includes('oauth2/v3/userinfo')) return json({ sub: 'g-1', email: user.email, email_verified: true, name: 'N' });
+    throw new Error('unexpected fetch ' + u);
+  };
+  const res = await call('GET', '/api/auth/google-callback?code=c&state=s', { query: { code: 'c', state: 's' }, headers: { cookie: 'wc_oauth_state=s' } });
+  assert.equal(res.statusCode, 302);
+  assert.equal(res.headers.location, '/app');
+  assert.match(String(res.headers['set-cookie']), /wc_session=/);
+});

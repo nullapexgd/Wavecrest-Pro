@@ -17,12 +17,16 @@ const baseUrl = () => process.env.BASE_URL || `https://${process.env.VERCEL_URL}
 const googleRedirect = () => process.env.GOOGLE_CALLBACK_URL || `${baseUrl()}/api/auth/google/callback`;
 const githubRedirect = () => `${baseUrl()}/api/auth/github/callback`;
 
-// Vercel does not reliably fill req.query.path for this catch-all file (every /api/auth/* answered
-// 404 in production), so the request URL is the source of truth. The query value is only a
-// fallback when there is no URL, which also stops a stray ?path= from choosing the route.
+// Vercel treats this file as ONE dynamic segment, not a catch-all: /api/auth/me reaches it (with
+// no req.query.path), but /api/auth/google/callback never does (platform 404). So the route comes
+// from the request URL, and vercel.json rewrites the two registered callback URLs to the
+// single-segment forms below. The URL a function sees after a rewrite is not guaranteed, so both
+// spellings are accepted. A ?path= query value never picks the route.
+const CALLBACKS = { 'google-callback': 'google/callback', 'github-callback': 'github/callback' };
 export function routeOf(req) {
   const m = /^\/api\/auth\/(.+?)\/?$/.exec(String(req.url || '').split('?')[0]);
-  return m ? m[1] : [].concat(req.query?.path || []).join('/');
+  const route = m ? m[1] : [].concat(req.query?.path || []).join('/');
+  return CALLBACKS[route] ?? route;
 }
 
 export default async function handler(req, res) {
