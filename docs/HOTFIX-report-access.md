@@ -63,7 +63,7 @@ Vercel project `wavecrest-pro` deploys **`master`**. Evidence (read-only, Vercel
 
 ## What the release contains
 
-`git diff origin/master...hotfix-report-access` is 13 files (+ this doc): `api/featured.js` (deleted), `api/report/[id].js`, `api/auth/[...path].js`, `lib/db.js`, `lib/oauth.js` (new), `lib/reports.js` (new), `migrations/004_report_access.sql` (new), and test files. It contains nothing from `wavecrest-3`: no `web/`, no `middleware.js`, no `app.html`/`index.html`, no quota ledger, no sample-creator endpoint, no analyzer/evidence changes. Verify before deploying with `git diff --stat origin/master...hotfix-report-access` and confirm no path starts with `web/` or `docs/wavecrest-3/`.
+`git diff origin/master...hotfix-report-access` is 13 files (+ this doc): `api/featured.js` (deleted), `api/report/[id].js`, `api/auth/[...path].js`, `lib/db.js`, `lib/oauth.js` (new), `lib/reports.js` (new), `migrations/004_report_access.sql` (new), and test files. It contains nothing from `wavecrest-3`: no `web/`, no `middleware.js`, no `index.html`, and `app.html` only for two small, separately committed changes (deep-link init fix, owner Share toggle), no quota ledger, no sample-creator endpoint, no analyzer/evidence changes. Verify before deploying with `git diff --stat origin/master...hotfix-report-access` and confirm no path starts with `web/` or `docs/wavecrest-3/`; `app.html` is the only page touched.
 
 ## Deploy order
 
@@ -133,28 +133,29 @@ Post-deploy (use two real accounts A, B and a logged-out browser)
 
 ## What breaks for existing users
 
-- Signed-in users' previously shared report links stop working for other people (404) until re-shared. **The old UI has no share toggle**: "Copy link" copies a URL that only the owner can open. Re-sharing is possible only via `PATCH /api/report/:id` until a UI exists (or tell users which ones to flip; or run the "keep old links" variant above).
+- Signed-in users' previously shared report links stop working for other people (404) until the owner re-shares. The old UI had no share toggle; the hotfix adds one (owner-only).
 - Homepage hero "featured" card no longer shows live data (static content only; no error shown).
 - Users whose GitHub account has no verified email, or whose Google email is unverified, can no longer sign in (a generic 500 "Authentication failed"). Unlikely for real accounts.
 - Anyone who copied `GET /api/featured` data in the past already has it; nothing here can recall it.
 
-## Existing shared links (decision needed)
+## Existing shared links (DECIDED: Option A)
 
-Before the fix there was no access control: any report was readable by anyone holding its UUID, which the old privacy page states ("Anyone with the link can view the report"). `/api/featured` also published the newest report, including its `reportId`, to every visitor.
+Owner decision: **Option A**. Existing signed-in users' reports become `private`; anonymous (ownerless) reports stay `link`. Rationale: `/api/featured` published report IDs, and Option C would keep every harvested ID openable.
 
-| Option | Effect on old links | Residual exposure |
-|---|---|---|
-| **A (as built, recommended)**: signed-in users' existing reports become `private` | Links to signed-in users' reports stop working for everyone except the owner (404). The old UI has no share toggle, so owners cannot re-share without help (`PATCH /api/report/:id`, or an admin SQL flip on request). Anonymous reports keep working. | Closes access for any UUID that was harvested from `/api/featured` while it was live. |
-| **C**: existing reports all `link`, only NEW signed-in reports private | Nothing breaks. | Any UUID someone already saved from `/api/featured` stays openable. Change the migration's UPDATE to `UPDATE reports SET visibility = 'link'` (all rows) before applying. |
+**Finding: report links already do not open in the browser.** Production's `app.html` (since `4ee017d`, 2026-08-07) throws `ReferenceError: Cannot access 'TOTAL_STEPS' before initialization` on every `/app?r=<id>` load, so the report view never renders for anyone; only the JSON API works. Reproduced by serving production's unmodified `app.html`. So the practical effect of Option A on people clicking old links is smaller than it looks (they were already dead in the UI), but the API still served them by UUID, which is what Option A closes. The hotfix includes the fix (run `init` after the script is evaluated), otherwise nobody, owner included, could open a report in the browser.
 
-How many links are affected is unknown until the read-only count in step 2 (signed-in report count = links that stop working under A). Not read.
+**Owner re-share path (built):** the report view shows an owner-only toggle, "Private: only you" / "Shared: anyone with the link" (PATCH `/api/report/:id`; verified against a mock API). "Copy link" warns when the report is private. For a report whose owner asks for help, `docs/HOTFIX-runbook.md` has the one-row SQL.
+
+How many links Option A affects = the number of signed-in reports (production count query in the runbook; not read).
 
 ## Was there an incident? (assessment, needs your decision)
 
 - **What `/api/featured` exposed:** for each request window (CDN cached 300 s), the single newest report of any user: `reportId`, channel name, handle, thumbnail, subscriber count, video count, and the full analysis. **Not exposed:** user id, email, name, avatar, plan, or any other report. Data is analysis of public YouTube channels.
 - **Who could have seen it:** anyone loading the homepage. Which reports were shown cannot be reconstructed exactly: each report was the newest from its creation until the next one. Upper bound = every report created while `/api/featured` was live. Vercel runtime-log retention is short, so request history is probably not recoverable.
 - **Policy context:** the published privacy page already said anyone with a report link can view it and that there is no access control. The homepage publication of signed-in users' reports was not disclosed.
-- **Assessment:** low severity (no account identifiers, public-channel analytics), but signed-in users did not consent to homepage publication. Recommended: record an internal incident note (this section is the draft), decide with legal advice whether any notification is required (a GDPR personal-data-breach notification is unlikely to be triggered by data without identifiers, but that is a legal call, not made here), and consider a courtesy notice to signed-in users once the fix is live. The OAuth issue is separate: whether any account was actually taken over is unknown; see the `users` review under Deferred.
+- **Assessment: NOT concluded.** An earlier draft called this low severity; that is withdrawn until the exposure review below is done. Facts that make it bounded but real: no account identifiers or other users' reports were exposed; but signed-in users' analyses (their chosen channels and the full analysis text) were published on the homepage without being told, for as long as `/api/featured` served them. Runtime logs cannot show who saw what: Vercel Hobby keeps only 1 hour, so exposure can only be bounded, not measured.
+- **Exposure window:** `/api/featured` was added 2026-06-18. Signed-in reports exist only since accounts launched (production deploy 2026-08-07). Every report created in the window was "the featured report" from its creation until the next one was created.
+- **Exposure review (runbook, owner runs or approves):** per-report "was featured for" durations, signed-in report and owner counts, the owner list (for re-share and courtesy notices), and the OAuth account review. Decide notification only after those numbers are in; legal advice on whether any notification is mandatory is still needed.
 
 ## Deferred (not in this hotfix)
 
