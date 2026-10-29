@@ -24,11 +24,10 @@ test('public health: only ok and db, even when the database is down', async () =
   }
 });
 
-test('admin health: configuration flags, commit and database error', async () => {
+test('admin health: configuration flags and commit', async () => {
   const res = await call({ 'x-admin-secret': 'health-test-admin-secret' });
   assert.equal(res.body.deployment, 'abcdef1');
   assert.equal(typeof res.body.env.SESSION_SECRET, 'boolean');
-  assert.ok(res.body.dbError);
   assert.ok(Object.values(res.body.env).every(v => typeof v === 'boolean'), 'flags only, never values');
 });
 

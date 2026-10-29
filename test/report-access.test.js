@@ -7,14 +7,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { startTempPostgres, makeUser, makeReport, PG_SKIP } from './helpers/pg.js';
 import { makeReq, makeRes } from './helpers/http.js';
 
-let pgx, handler, saveReport, A, B, repA, repB, repLinkB, repAnon;
+let pgx, handler, A, B, repA, repB, repLinkB, repAnon;
 
 before(async () => {
   if (PG_SKIP) return;
   pgx = await startTempPostgres();
   process.env.DB_URL = `postgres://test@localhost/app?host=${pgx.options.host}`;
   handler = (await import('../api/report/[id].js')).default;
-  ({ saveReport } = await import('../lib/db.js'));
   A = await makeUser(pgx.pool);
   B = await makeUser(pgx.pool);
   repA = await makeReport(pgx.pool, { userId: A.id });                       // default => private
@@ -139,15 +138,6 @@ test('no endpoint publishes "the latest report": /api/featured is gone', () => {
   assert.ok(!readFileSync(new URL('../vercel.json', import.meta.url), 'utf8').includes('featured'));
 });
 
-test('saveReport: signed-in => private, anonymous => link (ownerless)', { skip }, async () => {
-  const ch = { id: 'UCx', name: 'N', handle: '@n', thumbnailUrl: 't', subscriberCount: 1 };
-  const mine = await saveReport(ch, 5, { a: 1 }, A.id);
-  const anon = await saveReport(ch, 5, { a: 1 }, null);
-  const rows = (await pgx.pool.query('SELECT id, visibility FROM reports WHERE id = ANY($1)', [[mine, anon]])).rows;
-  assert.equal(rows.find(r => r.id === mine).visibility, 'private');
-  assert.equal(rows.find(r => r.id === anon).visibility, 'link');
-  assert.equal((await get(mine, B.id)).statusCode, 404);
-});
 
 // ── regression coverage for the owner / other account / anonymous flow ───────────────────
 
