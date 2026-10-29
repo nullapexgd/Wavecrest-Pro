@@ -51,25 +51,64 @@ To keep every old URL alive instead, change the `UPDATE` in the migration to cov
 npm run migrate
 ```
 
-### Rollback
+### Rollback (corrected)
 
-Primary rollback is **redeploy the previous build**: old code ignores the column and keeps working. The old code is the leaky one, so that is a rollback of the *fix*. To also remove the schema change:
+**Do not redeploy the previous production build** (`master@e4b7943`, Vercel "Instant Rollback" or `isRollbackCandidate` deployments): it contains the report-exposure vulnerability. Every older deployment has it too. See "Fallback ladder" below.
+
+**Migration 004 is never reversed automatically and its column is never dropped.** It is additive: old code ignores `visibility`, new code needs it. If the code has to change again, the column stays. Dropping it would erase owners' share/unshare choices and break the fixed code. (The DROP statements in the earlier draft of this doc were removed on purpose.)
+
+## Production branch (verified)
+
+Vercel project `wavecrest-pro` deploys **`master`**. Evidence (read-only, Vercel deployment history): the three latest production deployments all have `githubCommitRef: master`; the live one is `e4b7943`, identical to `origin/master`. The GitHub default branch is `main`, which is a **stale, diverged** branch (6 June commits of Gemini/Groq experiments not in `master`; `master` has 16 commits not in `main`). Merging this hotfix to `main` would NOT deploy it, and merging `main` into `master` would regress it. This hotfix is based on `master`, which is correct. Also: earlier deployments were made by "dirty CLI deploys" (`vercel --prod` uploads the working directory), so do not run `vercel --prod` from any checkout other than a clean `hotfix-report-access`.
+
+## What the release contains
+
+`git diff origin/master...hotfix-report-access` is 13 files (+ this doc): `api/featured.js` (deleted), `api/report/[id].js`, `api/auth/[...path].js`, `lib/db.js`, `lib/oauth.js` (new), `lib/reports.js` (new), `migrations/004_report_access.sql` (new), and test files. It contains nothing from `wavecrest-3`: no `web/`, no `middleware.js`, no `app.html`/`index.html`, no quota ledger, no sample-creator endpoint, no analyzer/evidence changes. Verify before deploying with `git diff --stat origin/master...hotfix-report-access` and confirm no path starts with `web/` or `docs/wavecrest-3/`.
+
+## Deploy order
+
+Migration FIRST, then code, back to back. Old code runs fine against the new schema; new code needs the column (without it reads 500 and saves fail, closed).
+
+1. Neon: confirm backups / note a restore point (dashboard, manual).
+2. Read-only counts (approval needed to touch production): `SELECT (user_id IS NULL) AS anonymous, count(*) FROM reports GROUP BY 1;` Record them. These are the expected backfill results.
+3. Apply migration 004 (`npm run migrate`, approval needed).
+4. Verify: `SELECT (user_id IS NULL) AS anonymous, visibility, count(*) FROM reports GROUP BY 1,2;` expect anonymous=>link only and signed-in=>private only, counts equal to step 2.
+5. Push `hotfix-report-access` to `master` (approval needed). Wait for the Vercel production build to be READY.
+6. Repair (below), within minutes of step 5.
+7. Post-deploy checklist.
+
+### Anonymous-report repair (exact effect)
+
+Why it exists: between steps 3 and 5 the OLD code is still live. It inserts reports without a visibility value, so anonymous reports created in that window get the column default `private` with no owner, and nobody could ever open them. The repair flips only those to `link`.
+
+Read-only preview first (this is the row count it will touch):
 
 ```sql
-ALTER TABLE reports DROP CONSTRAINT IF EXISTS reports_visibility_check;
-ALTER TABLE reports DROP COLUMN IF EXISTS visibility;
-DELETE FROM _migrations WHERE name = '004_report_access.sql';
+SELECT count(*) FROM reports WHERE user_id IS NULL AND visibility = 'private';
 ```
 
-(Dropping the column loses owners' share/unshare choices. Tested in `migration-access.test.js`.)
-
-## Deploy order: migration FIRST, then code
-
-The new code selects/inserts `visibility`; without the column reads 500 and saves fail (fail closed, but broken). Old code runs fine against the new schema, so the window between the two steps is safe, with **one catch**: anonymous reports created by the old code in that window get the column default `private` with no owner, which nobody can open. After the code is live, run once (idempotent, harmless to repeat):
+Guarded repair (run in a transaction; commit only if the count equals the preview):
 
 ```sql
-UPDATE reports SET visibility = 'link' WHERE user_id IS NULL AND visibility = 'private';
+BEGIN;
+UPDATE reports SET visibility = 'link'
+WHERE user_id IS NULL AND visibility = 'private'
+  AND created_at >= (SELECT applied_at FROM _migrations WHERE name = '004_report_access.sql')
+RETURNING id;
+-- rowCount must equal the preview. If not: ROLLBACK;
+COMMIT;
 ```
+
+Verified on a throwaway local Postgres by simulating the window (5 anonymous + 3 signed-in rows, migration, then 2 anonymous + 1 signed-in created by old code): after migration anonymous=link 5, signed-in=private 3; preview listed exactly the 2 window rows; UPDATE affected 2; afterwards anonymous=link 7, signed-in=private 4 (the signed-in window row stayed private); a second run affected 0 (idempotent). It cannot touch a signed-in report (`user_id IS NULL` is required), and after the new code is live nothing creates an anonymous `private` row. Expected production count: the number of anonymous analyses made in the minutes between steps 3 and 5, typically 0. Production counts have NOT been read.
+
+## Fallback ladder (never "redeploy the old build")
+
+Every rung keeps the fix. Order of preference:
+
+1. **Fix forward (default).** A bad hotfix is repaired with a small new commit on `master` and a redeploy (about a minute). Likely causes and fixes: 500 on `/api/report/*` = migration not applied (apply it, no code change); a user cannot sign in = their provider email is unverified (intended; not a bug); anything else = patch the single file.
+2. **Contain without a deploy.** Vercel Firewall custom rule (dashboard, instant, reversible, no code or data change): block `GET /api/report/*` and `/api/featured`. Fails closed (reports unavailable) instead of open. Remove the rule when fixed. Same rule can also be applied BEFORE the hotfix to stop the ongoing exposure today (needs your approval; nothing has been changed).
+3. **Last resort: previous build, only while rung 2 is active.** Never promote the old deployment without the firewall rule blocking `/api/featured` and `/api/report/*` at the same time.
+4. **Schema:** never dropped. The column stays under every rung.
 
 ## Verification checklist
 
@@ -83,7 +122,7 @@ Post-migration, pre-code
 
 Post-deploy (use two real accounts A, B and a logged-out browser)
 - [ ] `GET /api/featured` => 404 (also from a second network/region, in case a cached copy lingers).
-- [ ] Run the heal `UPDATE` above.
+- [ ] Run the guarded repair above (preview count first; commit only if the counts match).
 - [ ] A creates a report; B and logged-out get 404 on `/api/report/<id>`; A gets 200.
 - [ ] Anonymous analysis (logged out): result page loads, reload of `/app?r=<id>` still works.
 - [ ] An old anonymous report URL still works logged out.
@@ -98,6 +137,24 @@ Post-deploy (use two real accounts A, B and a logged-out browser)
 - Homepage hero "featured" card no longer shows live data (static content only; no error shown).
 - Users whose GitHub account has no verified email, or whose Google email is unverified, can no longer sign in (a generic 500 "Authentication failed"). Unlikely for real accounts.
 - Anyone who copied `GET /api/featured` data in the past already has it; nothing here can recall it.
+
+## Existing shared links (decision needed)
+
+Before the fix there was no access control: any report was readable by anyone holding its UUID, which the old privacy page states ("Anyone with the link can view the report"). `/api/featured` also published the newest report, including its `reportId`, to every visitor.
+
+| Option | Effect on old links | Residual exposure |
+|---|---|---|
+| **A (as built, recommended)**: signed-in users' existing reports become `private` | Links to signed-in users' reports stop working for everyone except the owner (404). The old UI has no share toggle, so owners cannot re-share without help (`PATCH /api/report/:id`, or an admin SQL flip on request). Anonymous reports keep working. | Closes access for any UUID that was harvested from `/api/featured` while it was live. |
+| **C**: existing reports all `link`, only NEW signed-in reports private | Nothing breaks. | Any UUID someone already saved from `/api/featured` stays openable. Change the migration's UPDATE to `UPDATE reports SET visibility = 'link'` (all rows) before applying. |
+
+How many links are affected is unknown until the read-only count in step 2 (signed-in report count = links that stop working under A). Not read.
+
+## Was there an incident? (assessment, needs your decision)
+
+- **What `/api/featured` exposed:** for each request window (CDN cached 300 s), the single newest report of any user: `reportId`, channel name, handle, thumbnail, subscriber count, video count, and the full analysis. **Not exposed:** user id, email, name, avatar, plan, or any other report. Data is analysis of public YouTube channels.
+- **Who could have seen it:** anyone loading the homepage. Which reports were shown cannot be reconstructed exactly: each report was the newest from its creation until the next one. Upper bound = every report created while `/api/featured` was live. Vercel runtime-log retention is short, so request history is probably not recoverable.
+- **Policy context:** the published privacy page already said anyone with a report link can view it and that there is no access control. The homepage publication of signed-in users' reports was not disclosed.
+- **Assessment:** low severity (no account identifiers, public-channel analytics), but signed-in users did not consent to homepage publication. Recommended: record an internal incident note (this section is the draft), decide with legal advice whether any notification is required (a GDPR personal-data-breach notification is unlikely to be triggered by data without identifiers, but that is a legal call, not made here), and consider a courtesy notice to signed-in users once the fix is live. The OAuth issue is separate: whether any account was actually taken over is unknown; see the `users` review under Deferred.
 
 ## Deferred (not in this hotfix)
 
