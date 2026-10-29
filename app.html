@@ -248,6 +248,7 @@
       </div>
     </div>
     <div class="report-actions">
+      <button class="btn btn-ghost" id="share-btn" style="display:none" onclick="toggleShare()" aria-pressed="false"></button>
       <button class="btn btn-ghost" onclick="copyLink()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Copy link
@@ -279,7 +280,7 @@ let currentReport = null;
 let currentReportId = null;
 
 // ─── Init: check for ?r= param ───────────────────────────────────────────────
-(async function init() {
+async function init() {
   const params = new URLSearchParams(location.search);
   const reportId = params.get('r');
   if (reportId) {
@@ -294,7 +295,10 @@ let currentReportId = null;
       showError(err.message || 'Could not load report');
     }
   }
-})();
+}
+// A report deep link reaches showLoading() -> resetSteps(), which reads consts declared further down
+// this script. Run init once the whole script has been evaluated, not while it is still being read.
+document.addEventListener('DOMContentLoaded', init);
 
 // ─── Views ───────────────────────────────────────────────────────────────────
 function showInput() {
@@ -313,6 +317,7 @@ function showLoading() {
 function showReport(data, reportId) {
   currentReport = data;
   currentReportId = reportId;
+  loadSharing(data, reportId);
   renderReport(data);
   setView('view-report');
   document.dispatchEvent(new CustomEvent('report:shown'));
@@ -503,11 +508,11 @@ function renderReport(data) {
     img.className = 'channel-avatar';
     img.alt = channel.name;
     img.onerror = () => {
-      avatarWrap.innerHTML = `<div class="channel-avatar-fallback">${(channel.name || '?')[0]}</div>`;
+      avatarWrap.innerHTML = `<div class="channel-avatar-fallback">${esc((channel.name || '?')[0])}</div>`;
     };
     avatarWrap.appendChild(img);
   } else {
-    avatarWrap.innerHTML = `<div class="channel-avatar-fallback">${(channel.name || '?')[0]}</div>`;
+    avatarWrap.innerHTML = `<div class="channel-avatar-fallback">${esc((channel.name || '?')[0])}</div>`;
   }
 
   document.getElementById('report-channel-name').textContent = channel.name || '';
@@ -525,7 +530,7 @@ function renderReport(data) {
     <div class="stat-chip">
       <span>${c.icon}</span>
       <span style="color:var(--ink-mid)">${c.label}:</span>
-      <strong>${c.val}</strong>
+      <strong>${esc(String(c.val))}</strong>
     </div>
   `).join('');
 
@@ -592,8 +597,8 @@ function renderReport(data) {
         ${(analysis.pillars || []).map(p => `
           <div class="pillar-row">
             <span class="pillar-name">${esc(p.name)}</span>
-            <div class="pillar-track"><div class="pillar-fill" style="width:0%" data-width="${p.percentage}%"></div></div>
-            <span class="pillar-pct">${p.percentage}%</span>
+            <div class="pillar-track"><div class="pillar-fill" style="width:0%" data-width="${Math.min(100, Math.max(0, Number(p.percentage) || 0))}%"></div></div>
+            <span class="pillar-pct">${Math.min(100, Math.max(0, Number(p.percentage) || 0))}%</span>
           </div>
           ${p.description ? `<p style="font-size:12px;color:var(--ink-light);margin-bottom:8px;padding-left:0;line-height:1.5">${esc(p.description)}</p>` : ''}
         `).join('')}
@@ -690,7 +695,53 @@ function copyLink() {
   const url = currentReportId
     ? `${location.origin}/app?r=${currentReportId}`
     : location.href;
-  navigator.clipboard.writeText(url).then(() => toast('Link copied!'));
+  navigator.clipboard.writeText(url).then(() => toast(
+    shareState === 'private' ? 'Link copied. Only you can open it until you turn sharing on.' : 'Link copied!'
+  ));
+}
+
+// Reports are private to their owner. Only the owner sees this control; it flips the report
+// between "private" and "anyone with the link" (PATCH /api/report/:id).
+let shareState = null; // 'private' | 'link' | null (not the owner, or not saved)
+async function loadSharing(data, reportId) {
+  shareState = null;
+  paintShare();
+  if (!reportId) return;
+  try {
+    let d = data;
+    if (d.isOwner === undefined) { // a report that was just analysed arrives without it
+      const r = await fetch(`/api/report/${reportId}`);
+      if (!r.ok) return;
+      d = await r.json();
+    }
+    if (reportId !== currentReportId || !d.isOwner) return;
+    shareState = d.visibility === 'link' ? 'link' : 'private';
+    paintShare();
+  } catch { /* no control shown */ }
+}
+function paintShare() {
+  const btn = document.getElementById('share-btn');
+  if (!btn) return;
+  btn.style.display = shareState ? '' : 'none';
+  btn.setAttribute('aria-pressed', String(shareState === 'link'));
+  btn.textContent = shareState === 'link' ? 'Shared: anyone with the link' : 'Private: only you';
+  btn.title = shareState === 'link' ? 'Click to make this report private' : 'Click to let anyone with the link view this report';
+}
+async function toggleShare() {
+  if (!shareState || !currentReportId) return;
+  const next = shareState === 'link' ? 'private' : 'link';
+  const btn = document.getElementById('share-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/report/${currentReportId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ visibility: next })
+    });
+    if (!r.ok) throw new Error('failed');
+    shareState = (await r.json()).visibility === 'link' ? 'link' : 'private';
+    paintShare();
+    toast(shareState === 'link' ? 'Anyone with the link can now view this report.' : 'This report is private again.');
+  } catch { toast('Could not change sharing. Try again.'); }
+  btn.disabled = false;
 }
 
 function downloadReport() {
