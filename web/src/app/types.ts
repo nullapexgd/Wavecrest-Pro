@@ -14,7 +14,7 @@ export interface Analysis {
   monetization?: { primaryApproach?: string; signals?: string[]; brandAffinities?: string };
   gaps?: { opportunity?: string; rationale?: string }[];
   earningsEstimate?: {
-    monthlyViewsEstimate?: number; cpmRPM?: string; estimatedMonthlyAdRevenue?: string;
+    monthlyViewsEstimate?: number; cpmRPM?: string; /** v1 reports only */ cpmRange?: string; estimatedMonthlyAdRevenue?: string;
     otherRevenue?: string; totalEstimate?: string;
   };
   videoIdeas?: { title?: string; rationale?: string; estimatedPerformance?: string }[];

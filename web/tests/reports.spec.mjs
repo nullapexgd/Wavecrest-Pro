@@ -32,10 +32,9 @@ for (const { version, report } of fixtures) {
   });
 }
 
-test('v1: original CPM range remains visible (Claude analyzer ownership)', async ({ page }) => {
+test('v1: original CPM range remains visible', async ({ page }) => {
   const { report } = fixtures.find(f => f.version === 'v1');
   await openReport(page, report);
-  test.fail(true, 'Compatibility defect: renderer only reads cpmRPM and drops legacy cpmRange; reserved for Claude.');
   await expect(page.locator('#s-earnings')).toContainText('$4-8', { timeout: 1000 });
   await expect(page.locator('#s-earnings')).toContainText('Education');
 });

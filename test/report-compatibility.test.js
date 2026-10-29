@@ -28,6 +28,10 @@ for (const { version, report } of fixtures) {
     assert.ok(html.includes('made before Wavecrest saved its evidence'));
     assert.ok(!html.includes('class="cite"'), 'old citations stay plain text');
     assert.ok(!html.includes('undefined') && !html.includes('NaN'));
+    if (version === 'v1' || version === 'v2' || version === 'v3') {
+      assert.ok(html.includes('$4-8') && html.includes('Education'), 'the RPM range and niche are shown');
+      assert.ok(html.includes('$400–$800'), 'the clean total is the headline figure');
+    }
     if (version === 'v0') {
       assert.ok(html.includes('This report has no video ideas.'));
       assert.ok(html.includes('There was not enough evidence for a revenue range'));

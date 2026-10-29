@@ -218,13 +218,23 @@ function gaps(a: Analysis, ev: Evidence | undefined): string {
 function earnings(a: Analysis): string {
   const e = a.earningsEstimate;
   const none = !e || /unclear/i.test(String(e.totalEstimate ?? 'unclear'));
-  const body = none
-    ? `<div class="empty"><p>There was not enough evidence for a revenue range, so none is shown.</p></div>`
-    : `<div class="calc" role="group" aria-label="How the estimate is built">
+  let body: string;
+  if (none) {
+    body = `<div class="empty"><p>There was not enough evidence for a revenue range, so none is shown.</p></div>`;
+  } else {
+    // Reports before the code-computed earnings used `cpmRange`, and some wrote the model's own
+    // arithmetic ("100000 x 4/1000 = $400 to ...") into the revenue string. Show the clean total
+    // as the result and keep the original wording below it, so nothing stored is hidden.
+    const rpm = String(e!.cpmRPM ?? e!.cpmRange ?? '');
+    const rev = String(e!.estimatedMonthlyAdRevenue ?? '');
+    const arithmetic = /[=×]|\d\s*x\s*\d/.test(rev);
+    const result = arithmetic ? String(e!.totalEstimate ?? '').replace(/\/month$/i, '') : rev;
+    body = `<div class="calc" role="group" aria-label="How the estimate is built">
         <div><small>Views per month</small><b>${e!.monthlyViewsEstimate ? formatViews(e!.monthlyViewsEstimate) : '—'}</b></div><span aria-hidden="true">×</span>
-        <div><small>Assumed RPM</small><b>${esc(String(e!.cpmRPM ?? '').replace(/^.*?(\$)/, '$1') || '—')}</b></div><span aria-hidden="true">=</span>
-        <div class="calc__out"><small>Ad revenue</small><b>${esc(e!.estimatedMonthlyAdRevenue)}</b><small>per month</small></div></div>
-      <dl class="facts">${fact('Niche assumed', String(e!.cpmRPM ?? '').split(' $')[0], 'estimated')}${fact('Other revenue', e!.otherRevenue, 'estimated')}</dl>`;
+        <div><small>Assumed RPM</small><b>${esc(rpm.replace(/^.*?(\$)/, '$1') || '—')}</b></div><span aria-hidden="true">=</span>
+        <div class="calc__out"><small>Ad revenue</small><b>${esc(result)}</b><small>per month</small></div></div>
+      <dl class="facts">${fact('Niche assumed', rpm.split(' $')[0], 'estimated')}${fact('Other revenue', e!.otherRevenue, 'estimated')}${arithmetic ? fact('As written in the original report', rev, 'estimated') : ''}</dl>`;
+  }
   return section('earnings', `<p class="notice">${chip('estimated')} Views per month are lifetime views divided by channel age. The RPM range is the model's pick for the niche. A creator's real RPM and revenue are private to YouTube Studio, so treat this as a rough range, not income.</p>${body}`);
 }
 
