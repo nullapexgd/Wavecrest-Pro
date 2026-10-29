@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm --prefix web ci && npm --prefix web run build",
+  "outputDirectory": "web/dist",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
