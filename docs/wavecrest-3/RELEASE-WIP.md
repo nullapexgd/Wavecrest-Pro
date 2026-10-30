@@ -32,3 +32,10 @@ Base: fetched `origin/master` at `4c27939`.
 No master merge, push, deployment or production migration was performed. Existing worktrees/source branches remain untouched. Deploy only from master when separately resumed and all required gates pass.
 
 Local test logs: `/private/tmp/release-{backend,eval,browser}.log`. Live fixture outputs are ignored under `test/eval/out/`; no credentials are committed. Vercel linking created a local environment file, which was removed without printing it.
+
+## Update 2026-10-30 — analysis enforcement integration
+
+- Merged `ai-quality` (loosened classification/niche/gap rules; live-eval fixes: gap citations from rationale, unverified structural hooks, commercial-wording requirement for monetization signals, shared-tag dedup).
+- Verified on this branch: backend 215/215, 7/7 mutation checks caught, web typecheck/build pass. Historical-report and schema-compat tests pass (no stored-report field removed; new fields optional).
+- Live evaluation (real model) run on 6 of 12 fixtures: mid, brand, shorts-only, shorts-long, tiny, ambiguous. Invariants pass; outputs reviewed by hand. Remaining 6 fixtures not run live.
+- Still open: full Playwright matrix, authenticated real-channel analysis, UI smoke checks. Not merged to master, not deployed.
