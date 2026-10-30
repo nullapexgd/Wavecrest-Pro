@@ -180,3 +180,18 @@ test('Shorts-heavy channel with a niche its content contradicts: category unavai
   assert.equal(run({ channelType: 'creator', niche: 'Food/Cooking' }, c).analysis.quality.niche, 'Food/Cooking');
   assert.notEqual(a.quality.confidence, 'low');
 });
+
+test('live-run regressions: gap citations may sit in the rationale; structural hook patterns are kept at low confidence', () => {
+  const c = build({}, 40, { title: techTitle });
+  const [t1, t2, t3] = c.videos.filter(v => /Review/.test(v.title)).slice(0, 3).map(v => c.tag(v.id)[0]);
+  const a = run({
+    hooks: { primaryPattern: '[Product] [Noun] [Word]', patternTags: [t1, t2, t3] },
+    gaps: [{ opportunity: 'Smart home cameras', rationale: `Adjacent to ${t1} and ${t2}`, tags: [], identityFit: 'high' }]
+  }, c).analysis;
+  assert.deepEqual(a.gaps.map(g => g.opportunity), ['Smart home cameras']);
+  assert.equal(a.hooks.examples.length, 3);
+  assert.equal(a.hooks.confidence, 'low');
+  assert.match(a.hooks.caveat, /Structural pattern/);
+  const few = run({ hooks: { primaryPattern: '[Product] [Noun]', patternTags: [t1, t2] } }, c).analysis;
+  assert.deepEqual(few.hooks.examples, []); // two citations are not enough to trust a wording-free pattern
+});
