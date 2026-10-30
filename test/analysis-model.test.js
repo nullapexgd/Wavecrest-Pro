@@ -33,3 +33,34 @@ test('default model is the supported one, never the retired llama-3.3-70b-versat
 test('GROQ_MODEL overrides the model without a code change', async () => {
   assert.equal((await request('some/other-model')).model, 'some/other-model');
 });
+
+// Provider rate limits: retry the same request a bounded number of times; never retry what cannot improve.
+async function withReplies(replies) {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    const r = replies[Math.min(calls++, replies.length - 1)];
+    return { ok: r.status === 200, status: r.status, headers: { get: h => (h === 'retry-after' ? r.retryAfter : null) },
+      json: async () => ({ choices: [{ message: { content: '{"hooks":{},"gaps":[]}' } }] }), text: async () => 'limit' };
+  };
+  try {
+    const result = await runAnalysis(channel, videos, 'test-key', AbortSignal.timeout(20000)).then(() => 'ok', e => e);
+    return { calls, result };
+  } finally { globalThis.fetch = realFetch; }
+}
+test('a 429 is retried with the same request and then succeeds', async () => {
+  const { calls, result } = await withReplies([{ status: 429, retryAfter: '0' }, { status: 200 }]);
+  assert.equal(calls, 2);
+  assert.equal(result, 'ok');
+});
+test('retries are bounded: three 429s end as an upstream error, not a loop', async () => {
+  const { calls, result } = await withReplies([{ status: 429, retryAfter: '0' }]);
+  assert.equal(calls, 3);
+  assert.equal(result.name, 'UpstreamError');
+  assert.equal(result.upstreamStatus, 429);
+});
+test('a long retry-after (daily limit) and a 413 fail fast without retrying', async () => {
+  assert.equal((await withReplies([{ status: 429, retryAfter: '3600' }])).calls, 1);
+  assert.equal((await withReplies([{ status: 413 }])).calls, 1);
+  assert.equal((await withReplies([{ status: 400 }])).calls, 1);
+});
