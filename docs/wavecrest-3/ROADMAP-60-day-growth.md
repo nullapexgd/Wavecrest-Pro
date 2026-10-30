@@ -60,7 +60,7 @@ Not in scope: new analysis dimensions, the Improve dashboard build (P1+), Access
 
 1. **Research (days 31-45):** during the creator calls, ask what they pay today for tools (vidIQ, TubeBuddy, editors, thumbnail services), what a better "next video" is worth, and four price-sensitivity questions (too cheap, cheap, getting expensive, too expensive per month). 15-20 conversations.
 2. **Anchor test:** show 2-3 price/limit shapes on a waitlist page (copy only, nothing purchasable) and count which one people join. `plans.js` keeps `purchasable:false`; no checkout, no provider.
-3. **Paid pilot:** only with the owner's explicit approval, 3-5 creators pay a founding price by manual invoice for a defined 30-day pilot, with the entitlement granted via the existing `set-plan` admin route. Success means they pay and use it, not that they say yes.
+3. **Paid pilot:** only with the owner's explicit approval **and after the Vercel plan is Pro** (Hobby forbids commercial use), 3-5 creators pay a founding price by manual invoice for a defined 30-day pilot, with the entitlement granted via the existing `set-plan` admin route. Success means they pay and use it, not that they say yes.
 4. **Unit economics today:** model cost is roughly $0.002-0.006 a report, so margin is not the risk; acquisition cost, support time and the free-tier ceiling are. Record the real figures from E6.
 
 ## 7. YouTube API compliance and operating costs
@@ -73,13 +73,19 @@ Verified against Google's pages on 2026-10-30; the owner (or counsel) should re-
 - **User deletion:** the policy expects removal of a user's data within 7 days of a deletion request; report deletion already exists. Account deletion is not yet a self-service flow (note, not a task).
 - **No scraping:** all data goes through the API; keep it that way.
 
-| Cost line | Today | Source |
+Production runs entirely on free tiers (owner-confirmed); the only paid items are the Claude and Codex development tools.
+
+| Cost line | Today | Note |
 |---|---|---|
-| Groq analysis | $0 (free tier; paid upgrade paused by Groq) | Benchmark: about $0.002-0.006/report if billed |
-| Gemini fallback | $0 (free key) | |
-| Vercel, Neon, Upstash | Owner to fill in from the dashboards (plan and monthly cost) | Not checked |
-| Resend (waitlist email) | Owner to fill in | Not checked |
+| Vercel | Hobby, $0 | **Hobby is non-commercial, personal use only** (Vercel docs, Hobby plan page). Must move to Pro (listed at $20 per developer seat a month) before the first paid pilot or any revenue. Hobby also keeps only 1 hour of runtime logs, so Sentry is the real error history |
+| Groq analysis | $0, free tier | About 35 reports a day ceiling; about $0.002-0.006 a report if billed (benchmark). Paid upgrade is paused by Groq |
+| Gemini fallback | $0, free key | Free-tier quotas can change |
+| Neon, Upstash | $0, free tiers | Limits not re-checked here; owner to read the headroom (storage, compute hours, command counts) in the dashboards before acquisition starts |
+| Resend (waitlist email) | $0, free tier | Daily send cap applies |
 | Domain | Owner to fill in | |
+| Claude, Codex | Paid | Development only |
+
+First costs to expect if the pilot works: Vercel Pro seat, then paid Groq (when the upgrade reopens) or a second paid model provider, then Neon/Upstash tiers if usage grows.
 
 ## 8. Day-60 decision criteria (proposed)
 
@@ -94,5 +100,5 @@ Verified against Google's pages on 2026-10-30; the owner (or counsel) should re-
 2. Approve read-only production queries for E1 (funnel).
 3. Choose the 30-day-rule approach for E3.
 4. Approve (or not) a manual-invoice paid pilot, and its founding price.
-5. Fill in the real monthly costs (section 7) so the economics are measured.
+5. Upgrade Vercel to Pro before any paid pilot, and check Neon/Upstash headroom before acquisition starts (section 7).
 6. Confirm whether outreach and public teardown videos name real channels, and the rules for that.
