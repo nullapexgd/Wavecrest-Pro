@@ -14,5 +14,38 @@
     <a href="/pricing">Pricing</a>
     <a href="/changelog">Changelog</a>
   </nav>
+  <button class="nav__icon" type="button" data-settings-open aria-haspopup="dialog" aria-label="Appearance and motion settings" title="Appearance &amp; motion" hidden>
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 6h8M15 6h2M3 14h2M9 14h8" /><circle cx="13" cy="6" r="2" /><circle cx="7" cy="14" r="2" /></svg>
+  </button>
   <a class="btn btn--quiet" href="/login" data-nav-auth>Sign in</a>
 </header>
+
+<dialog class="settings" data-settings aria-labelledby="settings-title">
+  <form method="dialog" class="settings__form">
+    <header class="settings__head">
+      <h2 id="settings-title">Appearance &amp; motion</h2>
+      <button class="nav__icon" value="close" aria-label="Close settings">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+      </button>
+    </header>
+    <fieldset class="seg">
+      <legend>Theme</legend>
+      <div class="seg__row">
+        <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+        <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+        <label><input type="radio" name="theme" value="system"><span>System</span></label>
+      </div>
+      <p class="seg__status" data-status="theme" aria-live="polite"></p>
+    </fieldset>
+    <fieldset class="seg">
+      <legend>Motion</legend>
+      <div class="seg__row">
+        <label><input type="radio" name="motion" value="system"><span>System</span></label>
+        <label><input type="radio" name="motion" value="reduced"><span>Reduced</span></label>
+        <label><input type="radio" name="motion" value="full"><span>Full</span></label>
+      </div>
+      <p class="seg__status" data-status="motion" aria-live="polite"></p>
+    </fieldset>
+    <p class="settings__note">Saved on this device only.</p>
+  </form>
+</dialog>

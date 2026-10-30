@@ -192,9 +192,31 @@ button { font: inherit; color: inherit; }
 }
 :root[data-contrast='more'] { --ink-soft: var(--ink); --line: var(--ink-soft); }
 
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+/* A forced theme also sets the browser's colour scheme (scrollbars, form controls) */
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+
+/* Reduced motion has ONE switch: html[data-motion='reduced'], resolved from the visitor's setting or the system
+   (src/prefs.ts, and the head script before first paint). Without JavaScript nothing here animates anyway except
+   smooth scrolling, so the media query only guards that. */
+html[data-motion='reduced'] { scroll-behavior: auto; }
+html[data-motion='reduced'] *, html[data-motion='reduced'] *::before, html[data-motion='reduced'] *::after {
+  transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;
 }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion]) { scroll-behavior: auto; } }
 
 .beta__note a { color: var(--ink); text-underline-offset: 0.2em; }
+
+/* Scroll entrances (see reveal.ts). Only under html.js; visible from the start, never display:none. */
+.js .band__head, .js .labels .label, .js .beta, .js .doc > section, .js .entry, .js .rows {
+  opacity: 0.85; transform: translateY(18px);
+  transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.js .is-in { opacity: 1 !important; transform: none !important; }
+/* Failsafe: if the script never runs (rv-ready absent) everything settles after 2.5s */
+.js:not(.rv-ready) .band__head, .js:not(.rv-ready) .labels .label, .js:not(.rv-ready) .beta,
+.js:not(.rv-ready) .doc > section, .js:not(.rv-ready) .entry, .js:not(.rv-ready) .rows { animation: rv-settle 1ms 2.5s forwards; }
+@keyframes rv-settle { to { opacity: 1; transform: none; } }
+/* .js and data-motion are both on <html>: one compound selector, not a descendant chain */
+html.js[data-motion='reduced'] :is(.band__head, .labels .label, .beta, .doc > section, .entry, .rows) { opacity: 1; transform: none; transition: none; }

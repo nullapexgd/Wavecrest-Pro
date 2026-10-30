@@ -2,6 +2,8 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/stage.css';
 import { authNav } from './authNav';
+import './settings';
+import { effectiveReduced, onMotionChange } from './prefs';
 import { CREATORS, byHandle, fromLive, fromSnapshot, randomCreator } from './data/creators';
 import { captionText, crestLegend, crestListHtml, factsText, scatterPair } from './data/copy';
 import type { Creator, Model } from './data/model';
@@ -59,11 +61,12 @@ const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
 const caps = {
   webgl2: hasWebGL2(),
   saveData: !!nav.connection?.saveData,
-  reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+  get reduced() { return effectiveReduced(); }, // the visitor's Motion setting, else the system's (src/prefs.ts); live
   fine: matchMedia('(pointer: fine)').matches,
   wide: innerWidth >= 900
 };
-const auto = caps.webgl2 && !caps.saveData && !caps.reduced && caps.fine && caps.wide;
+const wantsAuto = () => caps.webgl2 && !caps.saveData && !caps.reduced && caps.fine && caps.wide;
+const auto = wantsAuto();
 
 // Static mode swaps hero and chart with a short fade; motion mode scrubs them with scroll.
 if (!auto) stage.classList.add('is-static');
@@ -71,7 +74,7 @@ if (!auto) stage.classList.add('is-static');
 // ── the creator on screen ────────────────────────────────────────────────────
 let model: Model | null = null;
 let hint = '';
-let handle: { setModel(m: Model): void; step(d: 1 | -1): void } | null = null;
+let handle: { setModel(m: Model): void; step(d: 1 | -1): void; setPaused(p: boolean): void; dispose(): void } | null = null;
 let chartFocus = -1;
 
 // The hosted single-file preview has no server behind it, so it never asks for live data.
@@ -224,15 +227,20 @@ async function load3D(opts: { fromButton: boolean }) {
     tools.hidden = false;
     const pause = q<HTMLButtonElement>('[data-pause]', tools)!;
     const pauseLabel = q('[data-pause-label]', tools)!;
-    if (caps.reduced) pause.hidden = true; // there is no motion to pause
-    pause.addEventListener('click', () => {
-      const on = pause.getAttribute('aria-pressed') !== 'true';
-      pause.setAttribute('aria-pressed', String(on));
-      pauseLabel.textContent = on ? 'Resume motion' : 'Pause motion';
-      h.setPaused(on);
-    });
-    q<HTMLButtonElement>('[data-prev]', tools)!.addEventListener('click', () => step(-1));
-    q<HTMLButtonElement>('[data-next]', tools)!.addEventListener('click', () => step(1));
+    pause.hidden = caps.reduced; // there is no motion to pause
+    pause.setAttribute('aria-pressed', 'false');
+    pauseLabel.textContent = 'Pause motion';
+    if (!tools.dataset.bound) { // a re-mount (Motion setting changed) must not stack listeners
+      tools.dataset.bound = '1';
+      pause.addEventListener('click', () => {
+        const on = pause.getAttribute('aria-pressed') !== 'true';
+        pause.setAttribute('aria-pressed', String(on));
+        pauseLabel.textContent = on ? 'Resume motion' : 'Pause motion';
+        handle?.setPaused(on);
+      });
+      q<HTMLButtonElement>('[data-prev]', tools)!.addEventListener('click', () => step(-1));
+      q<HTMLButtonElement>('[data-next]', tools)!.addEventListener('click', () => step(1));
+    }
     onState = chart => h.setState(chart ? 1 : 0);
     if (caps.reduced) h.setState(stage.classList.contains('is-chart') ? 1 : 0);
   } catch (err) {
@@ -245,6 +253,28 @@ async function load3D(opts: { fromButton: boolean }) {
     loading = false;
   }
 }
+
+// ── Motion setting changed (or the system's Reduce Motion did) ───────────────
+function teardownScene() {
+  if (!sceneOn) return;
+  handle?.dispose(); handle = null; sceneOn = false;
+  delete stage.dataset.scene; stage.classList.remove('is-3d');
+  onState = () => {};
+  tools.hidden = true;
+}
+async function applyMotion() {
+  if (!model) return;
+  teardownScene();
+  const auto3d = wantsAuto();
+  stage.classList.toggle('is-static', !auto3d);
+  stage.style.setProperty('--p', stage.classList.contains('is-chart') ? '1' : '0'); // static mode: no scrub, just the state
+  if (auto3d) { await load3D({ fromButton: false }); return; }
+  if (caps.webgl2) {
+    exploreBtn.hidden = false;
+    q('[data-explore-label]', exploreBtn)!.textContent = caps.reduced ? 'Explore in 3D, no animation' : 'Explore in 3D';
+  }
+}
+onMotionChange(() => { void applyMotion(); });
 
 // ── go ───────────────────────────────────────────────────────────────────────
 // Tools (prev/next crest, pause) only exist once a scene does; stepping works on the chart too.
@@ -264,3 +294,5 @@ void (async () => {
 })();
 
 authNav();
+import { reveal } from './reveal';
+reveal();
