@@ -25,10 +25,10 @@ Related documents (not repeated here): `ROADMAP-product-lines.md` (Wavecrest / R
 |---|---|---|
 | 1-14 | Measure and polish: funnel numbers from existing data, fix the top friction, feedback prompt, compliance gap, cost numbers | Baseline funnel known; no open reliability or compliance blocker |
 | 15-30 | Acquire: short-form videos, demos, 30 personal creator outreaches, 3 communities | **Proposed:** 150 signups, 100 completed analyses |
-| 31-45 | Pricing research and paid-pilot validation (no billing system) | **Proposed:** 20 creator conversations, 10 written price commitments |
+| 31-45 | Pricing research and demand validation (no billing system, no payments) | **Proposed:** 20 creator conversations, 10 written price commitments |
 | 46-60 | Reelcut proof of concept, then the day-60 decision | PoC result recorded; decision made by the criteria in section 8 |
 
-Metrics, defined once: signup (new user row), activation (completed analysis within 7 days of signup), retention (second analysis or report revisit within 30 days), share (a report set to link visibility), pricing signal (a written commitment, not a compliment). **Proposed** targets by day 60: 300 signups, activation 50%, 30-day return 25%, 10 price commitments, at least 3 paid pilots if the owner approves manual invoicing.
+Metrics, defined once: signup (new user row), activation (completed analysis within 7 days of signup), retention (second analysis or report revisit within 30 days), share (a report set to link visibility), pricing signal (a written commitment, not a compliment). **Proposed** targets by day 60: 300 signups, activation 50%, 30-day return 25%, 10 price commitments. A paid pilot is **not** a day-60 target: there is no payment route yet (Stripe is not available to the owner), and setting one up takes longer than the window.
 
 ## 4. Marketing (cost: time, not money)
 
@@ -60,7 +60,7 @@ Not in scope: new analysis dimensions, the Improve dashboard build (P1+), Access
 
 1. **Research (days 31-45):** during the creator calls, ask what they pay today for tools (vidIQ, TubeBuddy, editors, thumbnail services), what a better "next video" is worth, and four price-sensitivity questions (too cheap, cheap, getting expensive, too expensive per month). 15-20 conversations.
 2. **Anchor test:** show 2-3 price/limit shapes on a waitlist page (copy only, nothing purchasable) and count which one people join. `plans.js` keeps `purchasable:false`; no checkout, no provider.
-3. **Paid pilot:** only with the owner's explicit approval **and after the Vercel plan is Pro** (Hobby forbids commercial use), 3-5 creators pay a founding price by manual invoice for a defined 30-day pilot, with the entitlement granted via the existing `set-plan` admin route. Success means they pay and use it, not that they say yes.
+3. **Paid pilot (after day 60, not on the critical path):** needs a payment route and the Vercel plan on Pro (Hobby forbids commercial use) first. Until then, demand is judged by the price commitments above and by behaviour (return visits, shares, unprompted requests for more analyses). When a route exists and the owner approves, 3-5 creators pay a founding price for a defined 30-day pilot, with the entitlement granted via the existing `set-plan` admin route.
 4. **Unit economics today:** model cost is roughly $0.002-0.006 a report, so margin is not the risk; acquisition cost, support time and the free-tier ceiling are. Record the real figures from E6.
 
 ## 7. YouTube API compliance and operating costs
@@ -89,7 +89,7 @@ First costs to expect if the pilot works: Vercel Pro seat, then paid Groq (when 
 
 ## 8. Day-60 decision criteria (proposed)
 
-- **Continue building:** activation at least 40%, at least 25% of activated users return within 30 days, at least 10 written price commitments (or 3 paid pilots) from the target segment, and nobody finds a compliance or reliability blocker. Then fund the Improve dashboard (P1-P3) and decide the Reelcut bundle on the PoC evidence.
+- **Continue building:** activation at least 40%, at least 25% of activated users return within 30 days, at least 10 written price commitments from the target segment (paid pilots follow once a payment route exists), and nobody finds a compliance or reliability blocker. Then fund the Improve dashboard (P1-P3) and decide the Reelcut bundle on the PoC evidence.
 - **Reposition:** usage is healthy but willingness to pay is weak in this segment, or buyers turn out to be different (agencies, managers, a Reelcut-first audience). Change the segment or the offer, not the code; revisit the product-lines roadmap.
 - **Pause:** under 100 signups after 30 hours of outreach, or activation under 25%, or no price commitment from 15+ conversations. Keep the service running at near-zero cost, stop feature work, and record what was learned.
 - A mixed result gets one more 30-day experiment with a single named hypothesis, not an open-ended extension.
@@ -99,6 +99,6 @@ First costs to expect if the pilot works: Vercel Pro seat, then paid Groq (when 
 1. Accept or change the segment, the targets and the day-60 criteria.
 2. Approve read-only production queries for E1 (funnel).
 3. Choose the 30-day-rule approach for E3.
-4. Approve (or not) a manual-invoice paid pilot, and its founding price.
+4. Decide how a paid pilot will be paid for once Stripe is unavailable (a different provider, or later), and the founding price. Not needed before day 60.
 5. Upgrade Vercel to Pro before any paid pilot, and check Neon/Upstash headroom before acquisition starts (section 7).
 6. Confirm whether outreach and public teardown videos name real channels, and the rules for that.
