@@ -29,7 +29,7 @@ const TECH = ['iPhone 17 Pro Review', 'Galaxy S26 Ultra Review', 'Pixel 11 Revie
 const techTitle = i => `${TECH[i % TECH.length]}${i >= TECH.length ? ` ${2020 + (i % 6)}` : ''}`;
 
 test('MKBHD-like creator: citations verified, fabrications and demographics removed, numbers computed', () => {
-  const c = build({ name: 'Tech Creator', description: 'Consumer Tech reviews by an independent creator', subscriberCount: 19000000 }, 60, { title: techTitle });
+  const c = build({ name: 'Tech Creator', subscriberCount: 19000000 }, 60, { title: techTitle });
   const rev = c.videos.filter(v => /Review/.test(v.title)).slice(0, 5), notRev = c.videos.find(v => /Desk/.test(v.title));
   const tags = vs => vs.flatMap(v => c.tag(v.id));
   const real = c.videos[0].title;
@@ -52,7 +52,9 @@ test('MKBHD-like creator: citations verified, fabrications and demographics remo
   assert.match(a.audience.estimatedAge, /Unknown/);
   assert.deepEqual(a.monetization.signals.length, 1);
   assert.doesNotMatch(JSON.stringify(a.monetization), /NordVPN/);
-  assert.deepEqual(a.gaps, []); // The cited Galaxy review does not establish smart-home relevance.
+  assert.deepEqual(a.gaps.map(g => g.opportunity), ['Smart home cameras']); // kept as a hypothesis the model rates a strong fit
+  assert.equal(a.gaps[0].kind, 'hypothesis');
+  assert.match(a.gaps[0].rationale, /Adjacent to T2.*Hypothesis.*not measured/);
   assert.equal(a.videoIdeas.length, 1);
   assert.match(a.videoIdeas[0].estimatedPerformance, /benchmark, not a forecast/);
   assert.doesNotMatch(a.videoIdeas[0].rationale, /3\.2x/);
@@ -72,7 +74,7 @@ test('small channel: tentative, no gaps, unrealistic budgets rejected', () => {
 });
 
 test('Shorts-heavy channel: Shorts and long-form revenue are never blended', () => {
-  const c = build({ description: 'Finance tutorials by an independent creator' }, 80, { title: i => `Quick trick number ${i}`, short: i => i % 10 !== 0, views: i => 1e6 });
+  const c = build({}, 80, { title: i => `Budget tip number ${i}`, short: i => i % 10 !== 0, views: i => 1e6 });
   const f = c.ctx.facts;
   assert.ok(f.shortsCount > 60 && f.shortsShare > 0.8);
   const a = run({ channelType: 'creator', niche: 'Finance' }, c).analysis;
@@ -111,8 +113,11 @@ test('Apple report replay: invented products, future events and fake monetizatio
   const ideas = a.videoIdeas.map(i => i.title).join(' | ');
   assert.doesNotMatch(ideas, /2027|iPhone 19|Series 13|November 2026/);
   assert.equal(a.videoIdeas.length, 2);
+  assert.deepEqual(a.gaps.map(g => g.opportunity), ['Gaming content']); // the other two cite nothing
   assert.equal(a.monetization.signals.length, 0);
-  assert.match(a.monetization.primaryApproach, /Not applicable/);
+  assert.match(a.monetization.primaryApproach, /Official brand channel/);
+  assert.equal(a.quality.channelTypeBasis, 'corroborated by public wording');
+  assert.equal(a.quality.niche, 'Consumer Tech'); // kept as an assumed category, but never priced for a brand
   assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data');
   assert.ok(a.hooks.examples.every(t => r.videos.some(v => v.title === t)));
   assert.doesNotMatch(JSON.stringify(a), /~\d+M views/);
@@ -127,8 +132,13 @@ test('MrBeast report replay: tags become titles, mean-based forecasts and editor
   assert.equal(a.monetization.signals.length, 0);
   assert.ok(a.videoIdeas.length >= 3);
   assert.ok(a.videoIdeas.every(i => !/avg|M views/.test(i.estimatedPerformance)));
-  assert.equal(a.quality.niche, 'Unclear');
-  assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data'); // Replay lacks a corroborating description.
+  assert.match(a.earningsEstimate.cpmRPM, /^Assumed category: Entertainment/);
+  assert.match(a.earningsEstimate.totalEstimate, /^\$[\d,]+–\$[\d,]+\/month$/);
+  assert.match(a.earningsEstimate.disclaimer, /Not actual or business revenue/);
+  assert.equal(a.quality.channelTypeBasis, 'model-inferred, not verified');
+  assert.deepEqual(a.gaps.map(g => g.opportunity), ['Cooking tutorial videos', 'Makeup/beauty tutorials']);
+  assert.ok(a.gaps.every(g => g.kind === 'hypothesis' && /demand is not measured/.test(g.rationale)));
+  assert.notEqual(a.quality.confidence, 'low'); // an uncertain label no longer sinks the whole report
 });
 
 test('prompts stay concise and benchmark on medians, not averages', () => {
@@ -149,4 +159,24 @@ test('runAnalysis: garbage model output still yields the full stored schema plus
     hasSchema(a);
     assert.ok(a.evidence.videos.length > 0 && a.evidence.medianViews > 0);
   } finally { globalThis.fetch = real; }
+});
+
+test('small creator: assumed category and estimate are kept, with low sample confidence and no gaps', () => {
+  const c = build({ subscriberCount: 900, viewCountTotal: 40000 }, 8, { title: i => `Weekend build ${i} with scrap wood`, views: i => 400 - i * 10 });
+  const a = run({ channelType: 'creator', niche: 'DIY', gaps: [{ opportunity: 'Metalworking', rationale: 'T1', tags: ['T1', 'T2'], identityFit: 'high' }] }, c).analysis;
+  assert.equal(a.quality.nicheBasis, 'Assumed category');
+  assert.match(a.earningsEstimate.cpmRPM, /^Assumed category: DIY/);
+  assert.match(a.earningsEstimate.disclaimer, /Not actual or business revenue/);
+  assert.equal(a.gaps.length, 0); // 8 videos cannot support even a hypothesis
+  assert.equal(a.quality.confidence, 'low'); // the sample is the reason, not the label
+});
+
+test('Shorts-heavy channel with a niche its content contradicts: category unavailable, not guessed', () => {
+  const c = build({}, 80, { title: i => `Pasta recipe number ${i}`, short: i => i % 10 !== 0, views: i => 1e6 });
+  const { analysis: a, dropped } = run({ channelType: 'creator', niche: 'Finance' }, c);
+  assert.equal(a.quality.niche, 'Unclear');
+  assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data');
+  assert.ok(dropped.some(d => d.kind === 'classification.niche'));
+  assert.equal(run({ channelType: 'creator', niche: 'Food/Cooking' }, c).analysis.quality.niche, 'Food/Cooking');
+  assert.notEqual(a.quality.confidence, 'low');
 });
