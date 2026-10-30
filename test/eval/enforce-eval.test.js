@@ -13,6 +13,11 @@ test('all channel fixtures have an adversarial case', () => {
 for (const c of cases) {
   test(`${c.fixture}: cited evidence, computed numbers, unknowns and legacy shape`, () => {
     const ctx = context(loadFixture(c.fixture));
+    // A title only evidences monetization when it carries commercial wording, so the positive control is sponsored.
+    const sponsored = `${c.expected.signal} #ad`;
+    ctx.top[2] = { ...ctx.top[2], title: sponsored };
+    c.raw = structuredClone(c.raw);
+    c.raw.monetization.signals = c.raw.monetization.signals.map(x => (x.quote === c.expected.signal ? { ...x, quote: sponsored } : x));
     const before = JSON.stringify(c.raw);
     const { analysis: a, dropped } = enforceAnalysis(c.raw, ctx);
     assert.equal(JSON.stringify(c.raw), before, 'model input must not be mutated');
@@ -35,8 +40,11 @@ for (const c of cases) {
     }
     assert.doesNotMatch(JSON.stringify(a.monetization), /PhantomCorp|expert explains/);
     assert.doesNotMatch(JSON.stringify(a.audience), /affluent|\bmen\b|\bwomen\b|18-34|income/i);
-    assert.deepEqual(a.monetization.signals, c.raw.channelType === 'brand' ? [] : [`“${c.expected.signal}” (T3)`]);
+    assert.deepEqual(a.monetization.signals, c.raw.channelType === 'brand' ? [] : [`“${sponsored}” (T3)`]);
     assert.ok(dropped.some(d => d.kind === 'hooks.tag'));
+    // A citation that resolves to no shown video must never become evidence.
+    const probe = enforceAnalysis({ ...c.raw, gaps: [{ opportunity: 'Zebra grooming', rationale: 'T99', tags: ['T99'], identityFit: 'high' }] }, ctx).analysis;
+    assert.deepEqual(probe.gaps, []);
     assert.ok(dropped.some(d => d.kind === 'monetization.signal'));
     if (c.fixture === 'tiny') assert.equal(a.quality.confidence, 'low');
     if (c.fixture === 'viral-outlier') assert.match(a.quality.limits.join(' '), /single outlier/);
@@ -201,16 +209,17 @@ test('proposals are deduplicated for punctuation and case without merging distin
   c.raw.videoIdeas = [title, title.toUpperCase() + '!', title + ' today', 'Restore a cabinet using milk paint', 'Build a modular folding workbench'].map(title => ({ title, rationale: 'Workshop project', tags: ['T1'], identityFit: 'high', effort: 'low' }));
   assert.deepEqual(enforceAnalysis(c.raw, ctx).analysis.videoIdeas.map(i => i.title), [title, 'Restore a cabinet using milk paint', 'Build a modular folding workbench']);
 });
-test('exact Unicode quotes and legacy tagged strings survive; altered or misattributed quotes do not', () => {
+test('exact Unicode quotes and legacy tagged strings survive; altered, misattributed or plain-title quotes do not', () => {
   const { c, ctx } = base();
-  ctx.top[2] = { ...ctx.top[2], title: 'Café tools: “Sharp” blades — 手工具' };
+  ctx.top[2] = { ...ctx.top[2], title: 'Sponsored: Café tools “Sharp” blades — 手工具' };
   c.raw.monetization.signals = [
-    { quote: 'Café tools: “Sharp” blades — 手工具', tag: 'T3' },
-    'Café tools T3',
-    { quote: 'café tools', tag: 'T3' },
-    { quote: 'Café tools', tag: 'T1' }
+    { quote: 'Sponsored: Café tools “Sharp” blades — 手工具', tag: 'T3' },
+    'Sponsored: Café tools T3',
+    { quote: 'sponsored: café tools', tag: 'T3' },
+    { quote: 'Sponsored: Café tools', tag: 'T1' },
+    { quote: 'Repair a wooden chair', tag: 'T1' } // exists, but nothing commercial about it
   ];
-  assert.deepEqual(enforceAnalysis(c.raw, ctx).analysis.monetization.signals, ['“Café tools: “Sharp” blades — 手工具” (T3)', '“Café tools” (T3)']);
+  assert.deepEqual(enforceAnalysis(c.raw, ctx).analysis.monetization.signals, ['“Sponsored: Café tools “Sharp” blades — 手工具” (T3)', '“Sponsored: Café tools” (T3)']);
 });
 test('uncorroborated type is reported as inferred; an inconsistent niche is unavailable, not guessed', () => {
   const run = change => { const { c, ctx } = base(); Object.assign(c.raw, change); return enforceAnalysis(c.raw, ctx); };
