@@ -4,6 +4,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runAnalysis } from '../lib/analysis.js';
 
+delete process.env.GEMINI_API_KEY; // fallback tests below set it explicitly; a dev's real key must not change the older ones
+
 const channel = { name: 'C', handle: '@c', description: 'd', subscriberCount: 1000, viewCountTotal: 1e6, publishedAt: '2020-01-01T00:00:00Z' };
 const videos = Array.from({ length: 5 }, (_, i) => ({
   id: `v${i}`, title: `Video ${i}`, publishedAt: `2026-0${i + 1}-01T00:00:00Z`, viewCount: 1000 * (i + 1), likeCount: 10, duration: 600
@@ -63,4 +65,40 @@ test('a long retry-after (daily limit) and a 413 fail fast without retrying', as
   assert.equal((await withReplies([{ status: 429, retryAfter: '3600' }])).calls, 1);
   assert.equal((await withReplies([{ status: 413 }])).calls, 1);
   assert.equal((await withReplies([{ status: 400 }])).calls, 1);
+});
+
+// Optional Gemini fallback: only after Groq fails, only with GEMINI_API_KEY, and the report records who answered.
+async function withProviders({ groq, gemini, key = 'g-key' }) {
+  const realFetch = globalThis.fetch, saved = process.env.GEMINI_API_KEY, urls = [];
+  if (key) process.env.GEMINI_API_KEY = key; else delete process.env.GEMINI_API_KEY;
+  globalThis.fetch = async url => {
+    urls.push(String(url).includes('generativelanguage') ? 'gemini' : 'groq');
+    const r = urls.at(-1) === 'groq' ? groq : gemini;
+    return { ok: r.status === 200, status: r.status, headers: { get: h => (h === 'retry-after' ? '3600' : null) },
+      json: async () => ({ choices: [{ message: { content: '{"hooks":{},"gaps":[]}' } }], candidates: [{ content: { parts: [{ text: '{"hooks":{},"gaps":[]}' }] } }] }), text: async () => 'limit' };
+  };
+  try {
+    const result = await runAnalysis(channel, videos, 'test-key', AbortSignal.timeout(20000)).then(a => a, e => e);
+    return { urls, result };
+  } finally { globalThis.fetch = realFetch; if (saved === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = saved; }
+}
+test('Groq failure falls back to Gemini and the report records the provider', async () => {
+  const { urls, result } = await withProviders({ groq: { status: 429 }, gemini: { status: 200 } });
+  assert.deepEqual(urls, ['groq', 'gemini']);
+  assert.equal(result.quality.provider, 'gemini');
+});
+test('Groq success never touches Gemini', async () => {
+  const { urls, result } = await withProviders({ groq: { status: 200 }, gemini: { status: 500 } });
+  assert.deepEqual(urls, ['groq']);
+  assert.equal(result.quality.provider, 'groq');
+});
+test('without GEMINI_API_KEY a Groq failure is the same upstream error as before', async () => {
+  const { urls, result } = await withProviders({ groq: { status: 413 }, gemini: { status: 200 }, key: '' });
+  assert.deepEqual(urls, ['groq']);
+  assert.equal(result.upstreamStatus, 413);
+});
+test('both providers failing ends as one upstream error, no further attempts', async () => {
+  const { urls, result } = await withProviders({ groq: { status: 429 }, gemini: { status: 503 } });
+  assert.deepEqual(urls, ['groq', 'gemini']);
+  assert.equal(result.name, 'UpstreamError');
 });
