@@ -71,3 +71,11 @@ Local test logs: `/private/tmp/release-{backend,eval,browser}.log`. Live fixture
 3. Create the production deployment for that SHA; wait for READY.
 4. Smoke: `/api/health` ok; home loads; theme/motion gear works; sign in; run one analysis; open it from Recent Reports; second account cannot open the first's report (404); quota message after the monthly allowance.
 5. Rollback: promote the previous production deployment (`4c27939`). No migration to undo.
+
+## Production release — 2026-10-30 — VERIFIED
+
+- Released `52f583d` (fast-forward of master from `4c27939`). Production deployment `dpl_46tUT8XF1t2w6tpo7i3533THJGNV`, aliased to wavecrest.pro. No migrations, env changes or billing changes.
+- Rollback target if ever needed: `dpl_4YPBZSFLv6aCaYZFvYhzJeAwsTJR` (`4c27939`). Rollback is for functionality, security or data-integrity regressions only.
+- Anonymous checks: `/api/health` ok, public pages 200, `/api/auth/me` and `/api/reports` 401, unknown report 404.
+- Owner authenticated smoke test passed: Google sign-in, one analysis, Recent Reports reopen, private report 404 from a second browser, link-share access, second-analysis quota refusal. Runtime logs clean (only a Node `url.parse()` deprecation warning).
+- Open follow-ups (not blockers): mark API keys Sensitive in Vercel; add CSP/HSTS headers; add error tracking (shipped code does not read `SENTRY_DSN`); validator gaps (invented products without numbers, course/bundle monetization wording).
