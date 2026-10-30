@@ -102,3 +102,13 @@ test('both providers failing ends as one upstream error, no further attempts', a
   assert.deepEqual(urls, ['groq', 'gemini']);
   assert.equal(result.name, 'UpstreamError');
 });
+
+test('the report records the token count the provider reported', async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"hooks":{},"gaps":[]}' } }], usage: { total_tokens: 5321 } }) });
+  try {
+    const a = await runAnalysis(channel, videos, 'test-key', AbortSignal.timeout(5000));
+    assert.equal(a.quality.tokens, 5321);
+    assert.equal(a.quality.provider, 'groq');
+  } finally { globalThis.fetch = realFetch; }
+});

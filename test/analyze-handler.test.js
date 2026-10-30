@@ -254,3 +254,23 @@ test('server misconfiguration is reported without naming the missing key', async
   assert.equal(res.statusCode, 500);
   assert.doesNotMatch(everythingSent(res), /GROQ/);
 });
+
+// One structured line per run, so a failure has a reason and cost per report is measured.
+async function runLines(over) {
+  const real = console.log, lines = [];
+  console.log = (...a) => lines.push(a.join(' '));
+  try { const { handler } = rig(over); await handler(post(), makeRes()); } finally { console.log = real; }
+  return lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(l => l?.evt === 'analysis_run');
+}
+test('a successful run logs provider, tokens and duration, and nothing else of the report', async () => {
+  const [line, ...extra] = await runLines({ runAnalysis: async () => ({ hooks: {}, quality: { provider: 'gemini', tokens: 5400, confidence: 'medium' } }) });
+  assert.equal(extra.length, 0);
+  assert.deepEqual([line.ok, line.provider, line.tokens, line.videos, line.confidence], [true, 'gemini', 5400, 4, 'medium']);
+  assert.equal(typeof line.ms, 'number');
+});
+test('a failed run logs the failure class and upstream status, never the upstream body or keys', async () => {
+  const lines = await runLines({ runAnalysis: async () => { throw new UpstreamError('ai', 429, 'org_9f2 key gsk_SECRETKEY body {"error":"x"}'); } });
+  assert.equal(lines.length, 1);
+  assert.deepEqual([lines[0].ok, lines[0].failure, lines[0].service, lines[0].upstreamStatus], [false, 'UpstreamError', 'ai', 429]);
+  assert.doesNotMatch(JSON.stringify(lines[0]), /gsk_|org_9f2|SECRET/);
+});
