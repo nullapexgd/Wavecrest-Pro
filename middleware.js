@@ -6,6 +6,7 @@
 //         enough not to lock out several real users behind one shared IP (office, carrier NAT).
 //         Both GET (API key) and POST (signed-in browser) are counted.
 //         /api/subscribe      3/hr (sends 2 Resend emails per call).
+//         /api/feedback       10/hr (sends 1 Resend email per call).
 //
 // KV env vars missing: fail OPEN in dev/preview so local work isn't blocked,
 // fail CLOSED in production for analyze-stream (misconfig must not expose
@@ -14,13 +15,14 @@
 const LIMITS = {
   '/api/analyze-stream': { max: 20, windowSecs: 3600, methods: ['GET', 'POST'] },
   '/api/subscribe':      { max: 3,  windowSecs: 3600, methods: ['POST'] },
+  '/api/feedback':       { max: 10, windowSecs: 3600, methods: ['POST'] },
   // Public and cacheable, so this is only a brake. The key is protected by the allowlist,
   // cache, lock and daily unit budget inside the handler (lib/handlers/sample-creator.js).
   '/api/sample-creator': { max: 60, windowSecs: 3600, methods: ['GET'] }
 };
 
 export const config = {
-  matcher: ['/api/analyze-stream', '/api/subscribe', '/api/sample-creator']
+  matcher: ['/api/analyze-stream', '/api/subscribe', '/api/feedback', '/api/sample-creator']
 };
 
 export default async function middleware(request) {

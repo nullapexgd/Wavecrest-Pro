@@ -29,6 +29,11 @@ export async function me(): Promise<Me | null> {
 
 export const getReport = (id: string) => fetch(`/api/report/${encodeURIComponent(id)}`, same).then(r => json<Report>(r));
 
+export const sendFeedback = (useful: 'yes' | 'no', message: string, reportId?: string) =>
+  fetch('/api/feedback', {
+    ...same, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ useful, message, reportId })
+  }).then(r => json<{ ok: true }>(r));
+
 export const listReports = () =>
   fetch('/api/reports', same).then(r => json<{ reports: ReportListItem[] }>(r)).then(b => b.reports);
 

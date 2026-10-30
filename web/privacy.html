@@ -25,6 +25,7 @@
             <div><dt>Channels you analyze</dt><dd>The channel you submit, and the public channel and video data YouTube returns for it (titles, descriptions, dates, view, like and comment counts, durations). No private data and no YouTube account access.</dd></div>
             <div><dt>Reports</dt><dd>The result of each analysis, linked to your account. Reports are private by default. A report can be opened by others only if you turn on its share link.</dd></div>
             <div><dt>Usage records</dt><dd>For each run we keep a timestamp, status and the channel key, so we can enforce one analysis a month and avoid charging failed runs.</dd></div>
+            <div><dt>Feedback</dt><dd>If you answer "Was this report useful?", we receive your answer, your message, your account email and the report's ID, by email. It is not shown to anyone else.</dd></div>
             <div><dt>API keys</dt><dd>If you create one, we store a hash and a short prefix. The full key is shown once and cannot be recovered.</dd></div>
             <div><dt>IP address</dt><dd>Used only for per-hour rate limits. It lives in Upstash for the length of the window and is not tied to your account or reports.</dd></div>
           </dl>
@@ -58,7 +59,7 @@
 
         <section aria-labelledby="keep">
           <h2 id="keep">How long we keep it</h2>
-          <p>Reports and account details stay until you delete them or ask us to. We do not yet run an automatic deletion job, so we would rather say that than promise a period we do not enforce. Rate-limit counters expire within an hour. Cached sample data expires within a week.</p>
+          <p>Reports and account details stay until you delete them or ask us to. Following YouTube's API rules, a daily job removes the YouTube statistics (view and like counts, medians, subscriber counts and the revenue estimate built from them) from a report once it is 30 days old. The analysis text is kept, and the report says so. We do not otherwise delete reports automatically. Rate-limit counters expire within an hour. Cached sample data expires within a week.</p>
         </section>
 
         <section aria-labelledby="rights">

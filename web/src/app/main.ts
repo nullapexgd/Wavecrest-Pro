@@ -203,6 +203,7 @@ function show(report: Report): void {
   swap(renderReport(report), 'h1');
   setTitle(`${report.channel.name} report`);
   actions(report);
+  bindFeedback(report);
   const rail = root.querySelectorAll<HTMLAnchorElement>('[data-spy]');
   const secs = [...root.querySelectorAll<HTMLElement>('[data-section]')];
   spy = new IntersectionObserver(entries => {
@@ -215,6 +216,34 @@ function show(report: Report): void {
     }
   }, { rootMargin: '-25% 0px -65% 0px' });
   secs.forEach(s => spy!.observe(s));
+}
+
+function bindFeedback(r: Report): void {
+  const form = root.querySelector<HTMLFormElement>('[data-feedback-form]');
+  if (!form) return;
+  const send = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const status = form.querySelector<HTMLElement>('[data-feedback-status]')!;
+  const text = form.querySelector<HTMLTextAreaElement>('textarea')!;
+  const choices = [...form.querySelectorAll<HTMLButtonElement>('[data-useful]')];
+  let useful: 'yes' | 'no' | null = null;
+  choices.forEach(b => b.addEventListener('click', () => {
+    useful = b.dataset.useful as 'yes' | 'no';
+    choices.forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+    send.disabled = false;
+  }));
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!useful) return;
+    send.disabled = true; status.textContent = 'Sending…';
+    try {
+      await api.sendFeedback(useful, text.value, r.reportId);
+      status.textContent = 'Thank you. This helps us decide what to fix next.';
+      form.querySelectorAll<HTMLElement>('button, textarea').forEach(el => el.setAttribute('disabled', ''));
+    } catch {
+      status.textContent = 'Could not send that. Try again in a moment.';
+      send.disabled = false;
+    }
+  });
 }
 
 function actions(r: Report): void {

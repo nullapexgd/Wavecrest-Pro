@@ -265,6 +265,25 @@ function evidenceTable(ev: Evidence | undefined): string {
     'Every video behind the citations above, with its numbers.');
 }
 
+/** One question at the end of an owned report; the answer is emailed to the team (api/feedback). */
+function feedback(r: Report): string {
+  if (!r.isOwner || r.fixture) return '';
+  return `<section class="fb" aria-labelledby="h-feedback" data-feedback>
+    <h2 class="fb__title" id="h-feedback">Was this report useful?</h2>
+    <form data-feedback-form novalidate>
+      <div class="fb__choice" role="group" aria-labelledby="h-feedback">
+        <button type="button" class="btn btn--ghost" data-useful="yes" aria-pressed="false"><span>Useful</span></button>
+        <button type="button" class="btn btn--ghost" data-useful="no" aria-pressed="false"><span>Not useful</span></button>
+      </div>
+      <label class="fb__label" for="fb-msg">What is missing or wrong? <span class="muted">Optional</span></label>
+      <textarea id="fb-msg" name="message" rows="3" maxlength="1000"></textarea>
+      <div class="fb__row"><button type="submit" class="btn btn--primary" disabled><span>Send feedback</span></button>
+        <p class="fb__status" role="status" data-feedback-status></p></div>
+    </form>
+    <p class="note">Sent to the Wavecrest team together with your account email, so we can reply. Nothing is shown publicly.</p>
+  </section>`;
+}
+
 /* ───────────── the report ───────────── */
 
 export function renderReport(r: Report): string {
@@ -301,7 +320,7 @@ export function renderReport(r: Report): string {
       <nav class="rail" aria-label="Report sections"><ol>${rail}</ol></nav>
       <div class="rp__main">
         ${a.statsPurgedAt ? `<p class="notice" role="note"><b>Statistics removed.</b> YouTube's data rules do not allow Wavecrest to keep view counts and similar numbers for more than 30 days, so they were removed from this report on ${day(a.statsPurgedAt)}. The analysis text is kept. Run a new analysis to see current numbers.</p>` : ''}
-        ${ideas(a, ev)}${map(ev, a)}${hooks(a, ev)}${thumbnails(a, ev)}${cadence(a, ev)}${audience(a, ev)}${pillars(a, ev)}${monetization(a, ev)}${gaps(a, ev)}${earnings(a)}${evidenceTable(ev)}
+        ${ideas(a, ev)}${map(ev, a)}${hooks(a, ev)}${thumbnails(a, ev)}${cadence(a, ev)}${audience(a, ev)}${pillars(a, ev)}${monetization(a, ev)}${gaps(a, ev)}${earnings(a)}${evidenceTable(ev)}${feedback(r)}
       </div>
     </div>
   </div>`;
