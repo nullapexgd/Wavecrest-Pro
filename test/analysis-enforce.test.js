@@ -25,7 +25,7 @@ const run = (raw, c) => enforceAnalysis(raw, c.ctx);
 const money = s => (s.match(/\$([\d,]+)–\$([\d,]+)/) || []).slice(1).map(x => +x.replace(/,/g, ''));
 const hasSchema = a => { for (const k of KEYS) assert.ok(a[k] && typeof a[k] === 'object', `missing ${k}`); assert.ok(Array.isArray(a.pillars) && Array.isArray(a.gaps) && Array.isArray(a.videoIdeas)); };
 
-const TECH = ['iPhone 17 Pro Review', 'Galaxy S26 Ultra Review', 'Pixel 11 Review', 'Why I switched laptops', 'Desk setup tour', 'The best earbuds you can buy', 'MacBook Air M5 Review', 'Smart speaker showdown'];
+const TECH = ['iPhone 17 Pro Review', 'Galaxy S26 Ultra Review', 'Pixel 11 Review', 'Why I switched laptops', 'Desk setup tour', 'The best earbuds you can buy', 'MacBook Air M5 Review', 'Sponsored smart speaker showdown'];
 const techTitle = i => `${TECH[i % TECH.length]}${i >= TECH.length ? ` ${2020 + (i % 6)}` : ''}`;
 
 test('MKBHD-like creator: citations verified, fabrications and demographics removed, numbers computed', () => {
@@ -38,7 +38,7 @@ test('MKBHD-like creator: citations verified, fabrications and demographics remo
     hooks: { primaryPattern: '[Product] Review', patternTags: [...tags(rev), ...tags([notRev]), 'R99'] },
     pillars: [{ name: 'Reviews', description: 'Product reviews', tags: tags(rev) }, { name: 'Setups', description: 'Desk tours', tags: tags(c.videos.filter(v => /Desk|laptops/.test(v.title)).slice(0, 4)) }],
     audience: { primaryProfile: 'Men 18-34 with high income', viewerIntent: 'Decide what to buy' },
-    monetization: { signals: [{ quote: 'Sponsored by NordVPN', tag: 'T1' }, { quote: 'Smart speaker showdown', tag: tags(c.videos.filter(v => /speaker/.test(v.title)).slice(0, 1))[0] }], brandAffinities: ['Apple', 'NordVPN'] },
+    monetization: { signals: [{ quote: 'Sponsored by NordVPN', tag: 'T1' }, { quote: 'Pixel 11 Review', tag: 'T1' }, { quote: 'Sponsored smart speaker showdown', tag: tags(c.videos.filter(v => /speaker/.test(v.title)).slice(0, 1))[0] }], brandAffinities: ['Apple', 'NordVPN'] },
     gaps: [{ opportunity: 'Gaming', rationale: 'x T1', tags: ['T1'], identityFit: 'low' }, { opportunity: 'Smart home cameras', rationale: 'Adjacent to T2', tags: ['T2'], identityFit: 'high' }, { opportunity: 'Pixel 11 Review', rationale: 'T1', tags: ['T1'], identityFit: 'high' }],
     videoIdeas: [{ title: real, rationale: 'copy', tags: ['T1'], identityFit: 'high', effort: 'low' }, { title: 'Pixel 12 Review: worth waiting?', rationale: 'Follows the Pixel 11 Review (3.2x median)', tags: tags(rev.slice(2, 3)), identityFit: 'high', effort: 'low' }]
   }, c);
@@ -196,4 +196,19 @@ test('live-run regressions: gap citations may sit in the rationale; structural h
   assert.equal(a.hooks.verified, false);
   const few = run({ hooks: { primaryPattern: '[Product] [Noun]', patternTags: [t1, t2] } }, c).analysis;
   assert.deepEqual(few.hooks.examples, []); // two citations are not enough to trust a wording-free pattern
+});
+
+test('live-run regressions: plain titles are not sponsor signals; a video in both lists is counted once', () => {
+  const c = build({}, 40, { title: techTitle });
+  const v = c.videos[0]; // newest, and in both the top and recent lists for this fixture shape
+  const rev = c.videos.filter(x => /Review/.test(x.title)).slice(0, 3);
+  const allTags = rev.flatMap(x => c.tag(x.id));
+  const a = run({ hooks: { primaryPattern: '[Product] Review', patternTags: allTags }, monetization: { signals: [{ quote: v.title, tag: c.tag(v.id)[0] }] } }, c).analysis;
+  assert.equal(a.monetization.signals.length, 0);
+  assert.match(a.monetization.primaryApproach, /No monetization signals/);
+  assert.equal(new Set(a.hooks.examples).size, a.hooks.examples.length);
+  const m = Number(a.hooks.frequency.match(/; (\d+) of/)[1]);
+  assert.ok(m <= rev.length, `frequency counts ${m} for ${rev.length} distinct videos`);
+  const s = run({ hooks: { primaryPattern: '[A] [B] [C]', patternTags: allTags } }, c).analysis;
+  assert.match(s.hooks.frequency, /cited by the model; not independently counted/);
 });
