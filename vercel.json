@@ -1,6 +1,7 @@
 {
   "buildCommand": "npm --prefix web ci --include=dev && npm --prefix web run build",
   "outputDirectory": "web/dist",
+  "crons": [{ "path": "/api/cron/purge", "schedule": "17 3 * * *" }],
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
