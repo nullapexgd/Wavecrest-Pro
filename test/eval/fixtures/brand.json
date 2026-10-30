@@ -1,0 +1,172 @@
+{
+  "channel": {
+    "name": "Orchard",
+    "description": "Official Orchard product channel",
+    "handle": "@brand",
+    "subscriberCount": 21000000,
+    "viewCountTotal": 1050000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "brand-1",
+      "title": "Introducing Phone 8",
+      "viewCount": 20000,
+      "likeCount": 666,
+      "duration": 600,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "brand-2",
+      "title": "Introducing Tablet 4",
+      "viewCount": 19000,
+      "likeCount": 633,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "brand-3",
+      "title": "Phone camera workshop",
+      "viewCount": 18000,
+      "likeCount": 600,
+      "duration": 600,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "brand-4",
+      "title": "Tablet drawing workshop",
+      "viewCount": 17000,
+      "likeCount": 566,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "brand-5",
+      "title": "Orchard privacy guide",
+      "viewCount": 16000,
+      "likeCount": 533,
+      "duration": 600,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "brand-6",
+      "title": "Orchard accessibility guide",
+      "viewCount": 15000,
+      "likeCount": 500,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "brand-7",
+      "title": "Introducing Phone 8 — field notes",
+      "viewCount": 14000,
+      "likeCount": 466,
+      "duration": 600,
+      "publishedAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "brand-8",
+      "title": "Introducing Tablet 4 — field notes",
+      "viewCount": 13000,
+      "likeCount": 433,
+      "duration": 600,
+      "publishedAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": "brand-9",
+      "title": "Phone camera workshop — field notes",
+      "viewCount": 12000,
+      "likeCount": 400,
+      "duration": 600,
+      "publishedAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": "brand-10",
+      "title": "Tablet drawing workshop — field notes",
+      "viewCount": 11000,
+      "likeCount": 366,
+      "duration": 600,
+      "publishedAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": "brand-11",
+      "title": "Orchard privacy guide — field notes",
+      "viewCount": 10000,
+      "likeCount": 333,
+      "duration": 600,
+      "publishedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "brand-12",
+      "title": "Orchard accessibility guide — field notes",
+      "viewCount": 9000,
+      "likeCount": 300,
+      "duration": 600,
+      "publishedAt": "2026-09-11T12:00:00Z"
+    },
+    {
+      "id": "brand-13",
+      "title": "Introducing Phone 8 — materials",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 600,
+      "publishedAt": "2026-09-07T12:00:00Z"
+    },
+    {
+      "id": "brand-14",
+      "title": "Introducing Tablet 4 — materials",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2026-09-03T12:00:00Z"
+    },
+    {
+      "id": "brand-15",
+      "title": "Phone camera workshop — materials",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 600,
+      "publishedAt": "2026-08-30T12:00:00Z"
+    },
+    {
+      "id": "brand-16",
+      "title": "Tablet drawing workshop — materials",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2026-08-26T12:00:00Z"
+    },
+    {
+      "id": "brand-17",
+      "title": "Orchard privacy guide — materials",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 600,
+      "publishedAt": "2026-08-22T12:00:00Z"
+    },
+    {
+      "id": "brand-18",
+      "title": "Orchard accessibility guide — materials",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2026-08-18T12:00:00Z"
+    },
+    {
+      "id": "brand-19",
+      "title": "Introducing Phone 8 — technique",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 600,
+      "publishedAt": "2026-08-14T12:00:00Z"
+    },
+    {
+      "id": "brand-20",
+      "title": "Introducing Tablet 4 — technique",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2026-08-10T12:00:00Z"
+    }
+  ]
+}

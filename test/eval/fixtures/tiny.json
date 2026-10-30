@@ -1,0 +1,60 @@
+{
+  "channel": {
+    "name": "Balcony Sprouts",
+    "description": "Growing herbs in small spaces",
+    "handle": "@tiny",
+    "subscriberCount": 400,
+    "viewCountTotal": 105000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "tiny-1",
+      "title": "Grow basil on a balcony",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 600,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "tiny-2",
+      "title": "Grow mint on a balcony",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "tiny-3",
+      "title": "Compost kitchen scraps",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 600,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "tiny-4",
+      "title": "Water seedlings",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "tiny-5",
+      "title": "Harvest parsley",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 600,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "tiny-6",
+      "title": "Repot rosemary",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    }
+  ]
+}

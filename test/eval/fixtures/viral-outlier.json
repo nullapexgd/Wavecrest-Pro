@@ -1,0 +1,108 @@
+{
+  "channel": {
+    "name": "Quiet Kitchen",
+    "description": "Simple home cooking",
+    "handle": "@viral-outlier",
+    "subscriberCount": 18000,
+    "viewCountTotal": 250429000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "viral-outlier-1",
+      "title": "Bake a sourdough loaf",
+      "viewCount": 50000000,
+      "likeCount": 1666666,
+      "duration": 600,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-2",
+      "title": "Bake a rye loaf",
+      "viewCount": 8800,
+      "likeCount": 293,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-3",
+      "title": "Make vegetable stock",
+      "viewCount": 8600,
+      "likeCount": 286,
+      "duration": 600,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-4",
+      "title": "Cook lentil soup",
+      "viewCount": 8400,
+      "likeCount": 280,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-5",
+      "title": "Knead pizza dough",
+      "viewCount": 8200,
+      "likeCount": 273,
+      "duration": 600,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-6",
+      "title": "Roast garden carrots",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-7",
+      "title": "Bake a sourdough loaf — field notes",
+      "viewCount": 7800,
+      "likeCount": 260,
+      "duration": 600,
+      "publishedAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-8",
+      "title": "Bake a rye loaf — field notes",
+      "viewCount": 7600,
+      "likeCount": 253,
+      "duration": 600,
+      "publishedAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-9",
+      "title": "Make vegetable stock — field notes",
+      "viewCount": 7400,
+      "likeCount": 246,
+      "duration": 600,
+      "publishedAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-10",
+      "title": "Cook lentil soup — field notes",
+      "viewCount": 7200,
+      "likeCount": 240,
+      "duration": 600,
+      "publishedAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-11",
+      "title": "Knead pizza dough — field notes",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "viral-outlier-12",
+      "title": "Roast garden carrots — field notes",
+      "viewCount": 6800,
+      "likeCount": 226,
+      "duration": 600,
+      "publishedAt": "2026-09-11T12:00:00Z"
+    }
+  ]
+}
