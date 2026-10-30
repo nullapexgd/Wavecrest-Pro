@@ -33,6 +33,14 @@ as historical context. Evaluation commits and all JSON fixtures/cases are unchan
 - Historical schema and replay tests remain passing. API signatures and stored
   report field types are unchanged. No pushes, deploys or production data access.
 
+### Commit handoff
+
+- `1b60433`: production fixes and active regression tests.
+- `c4b9bbf`: reusable mutation checks and handoff documentation.
+- Preserved evaluation history: `fd6af8a`, `441803d`, `115690b`.
+- No known release blockers from the verified schema, API or regression checks.
+  Conservative abstention described below is an intentional behavior change.
+
 ### Limits and integration
 
 Classification uses explicit public wording, not semantic verification. Literal
@@ -45,13 +53,24 @@ Gap wording overlap is only a candidate filter; generated text expressly avoids
 claiming proven semantic relevance or demand. Numeric forecast patterns cover
 explicit performance promises, not every possible paraphrase or language.
 
-After the user's integration approval, Claude should use the designated integration
-checkout (not the active `scroll-reveals` worktree), confirm it is clean, and merge
-`codex/analysis-fixes` with `git merge --no-ff codex/analysis-fixes`. This brings the
-preserved evaluation history plus the fixes. If evaluation commits are already on
-the target, Git will include only the new follow-up commits. Rerun the four checks
-above and the mutation script, resolve any changes to analysis enforcement/tests
-carefully, and leave deployment/pushing for separate user approval.
+After Claude's review and the user's integration approval, run the following in
+an existing **clean integration checkout on `ai-quality`**, never `scroll-reveals`.
+Stop if the status command shows changes or the branch is not `ai-quality`.
+
+```sh
+git status --short
+git branch --show-current
+git merge --no-ff codex/analysis-fixes
+LC_ALL=en_US.UTF-8 npm test
+node --test test/eval/
+node scripts/eval-mutations.js
+npm --prefix web run typecheck
+npm --prefix web run build
+```
+
+The merge includes preserved evaluation history; already integrated commits are
+not duplicated. Resolve any conflicts in enforcement/tests carefully and repeat
+verification. Leave pushing and deployment for separate user approval.
 
 ## Original independent evaluation (before fixes)
 
