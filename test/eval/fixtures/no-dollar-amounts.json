@@ -1,0 +1,108 @@
+{
+  "channel": {
+    "name": "Moss Journal",
+    "description": "Natural history field notes",
+    "handle": "@no-dollar-amounts",
+    "subscriberCount": 1200,
+    "viewCountTotal": 390000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "no-dollar-amounts-1",
+      "title": "Observe woodland moss",
+      "viewCount": 12000,
+      "likeCount": 400,
+      "duration": 600,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-2",
+      "title": "Observe woodland fungi",
+      "viewCount": 11000,
+      "likeCount": 366,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-3",
+      "title": "Sketch a fern",
+      "viewCount": 10000,
+      "likeCount": 333,
+      "duration": 600,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-4",
+      "title": "Identify a lichen",
+      "viewCount": 9000,
+      "likeCount": 300,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-5",
+      "title": "Record a bird call",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 600,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-6",
+      "title": "Map a stream",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-7",
+      "title": "Observe woodland moss — field notes",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 600,
+      "publishedAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-8",
+      "title": "Observe woodland fungi — field notes",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-9",
+      "title": "Sketch a fern — field notes",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 600,
+      "publishedAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-10",
+      "title": "Identify a lichen — field notes",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-11",
+      "title": "Record a bird call — field notes",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 600,
+      "publishedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "no-dollar-amounts-12",
+      "title": "Map a stream — field notes",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2026-09-11T12:00:00Z"
+    }
+  ]
+}

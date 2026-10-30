@@ -1,0 +1,108 @@
+{
+  "channel": {
+    "name": "Odd Notebook",
+    "description": "Experiments, music, walks and notes",
+    "handle": "@ambiguous",
+    "subscriberCount": 3000,
+    "viewCountTotal": 390000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "ambiguous-1",
+      "title": "Notebook sketch of rain",
+      "viewCount": 12000,
+      "likeCount": 400,
+      "duration": 600,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-2",
+      "title": "Notebook sketch of clouds",
+      "viewCount": 11000,
+      "likeCount": 366,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-3",
+      "title": "Play a piano phrase",
+      "viewCount": 10000,
+      "likeCount": 333,
+      "duration": 600,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-4",
+      "title": "Walk beside the canal",
+      "viewCount": 9000,
+      "likeCount": 300,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-5",
+      "title": "Repair a loose button",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 600,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-6",
+      "title": "Read a poem aloud",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-7",
+      "title": "Notebook sketch of rain — field notes",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 600,
+      "publishedAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-8",
+      "title": "Notebook sketch of clouds — field notes",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-9",
+      "title": "Play a piano phrase — field notes",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 600,
+      "publishedAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-10",
+      "title": "Walk beside the canal — field notes",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-11",
+      "title": "Repair a loose button — field notes",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 600,
+      "publishedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "ambiguous-12",
+      "title": "Read a poem aloud — field notes",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2026-09-11T12:00:00Z"
+    }
+  ]
+}

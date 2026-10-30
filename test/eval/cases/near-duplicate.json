@@ -1,0 +1,136 @@
+{
+  "fixture": "near-duplicate",
+  "raw": {
+    "channelType": "creator",
+    "niche": "Consumer Tech",
+    "hooks": {
+      "primaryPattern": "Repair a vintage [item]",
+      "patternTags": [
+        "T1",
+        "T2",
+        "T3",
+        "T99"
+      ],
+      "secondaryPatterns": [
+        "Repair a vintage [item]",
+        "Celebrity yacht sponsorship"
+      ]
+    },
+    "pillars": [
+      {
+        "name": "Main series",
+        "description": "Recurring title series",
+        "tags": [
+          "T1",
+          "T2",
+          "T99"
+        ]
+      },
+      {
+        "name": "Practical notes",
+        "description": "Other observed topics",
+        "tags": [
+          "T3",
+          "T4",
+          "T5",
+          "T6"
+        ]
+      }
+    ],
+    "audience": {
+      "primaryProfile": "Affluent men 18-34 with high income",
+      "viewerIntent": "Help women choose products"
+    },
+    "monetization": {
+      "signals": [
+        {
+          "quote": "Test a studio light",
+          "tag": "T3"
+        },
+        {
+          "quote": "Sponsored by PhantomCorp",
+          "tag": "T1"
+        },
+        {
+          "quote": "Test a studio light",
+          "tag": "T99"
+        },
+        {
+          "quote": "An expert explains the best technique",
+          "tag": "T2"
+        }
+      ],
+      "brandAffinities": [
+        "PhantomCorp"
+      ]
+    },
+    "gaps": [
+      {
+        "opportunity": "Test a studio light",
+        "rationale": "Adjacent to the topics in T3",
+        "tags": [
+          "T3"
+        ],
+        "identityFit": "high"
+      },
+      {
+        "opportunity": "Maintenance checklist",
+        "rationale": "A practical follow up to T1",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "medium"
+      },
+      {
+        "opportunity": "Celebrity gossip",
+        "rationale": "Famous people get clicks T99",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low"
+      }
+    ],
+    "videoIdeas": [
+      {
+        "title": "Repair a vintage camera!",
+        "rationale": "Will earn 300% more views",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Repair a camera strap with stitched leather",
+        "rationale": "Expect 3.2× the median and 80% growth",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Celebrity yacht giveaway",
+        "rationale": "A new direction",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low",
+        "effort": "high"
+      }
+    ]
+  },
+  "expected": {
+    "hookExamples": [
+      "Repair a vintage camera",
+      "Repair a vintage lens"
+    ],
+    "signal": "Test a studio light",
+    "ideaTitles": [
+      "Repair a camera strap with stitched leather"
+    ],
+    "gapOpportunities": [],
+    "channelType": "creator",
+    "niche": "Consumer Tech"
+  }
+}

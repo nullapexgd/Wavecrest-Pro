@@ -1,0 +1,108 @@
+{
+  "channel": {
+    "name": "Circuit Notes",
+    "description": "Electronics tutorials and quick tips",
+    "handle": "@shorts-long",
+    "subscriberCount": 90000,
+    "viewCountTotal": 390000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "shorts-long-1",
+      "title": "Repair a circuit board",
+      "viewCount": 12000,
+      "likeCount": 400,
+      "duration": 45,
+      "publishedAt": "2026-10-25T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-2",
+      "title": "Repair a broken radio",
+      "viewCount": 11000,
+      "likeCount": 366,
+      "duration": 600,
+      "publishedAt": "2026-10-21T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-3",
+      "title": "Solder wire joints",
+      "viewCount": 10000,
+      "likeCount": 333,
+      "duration": 45,
+      "publishedAt": "2026-10-17T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-4",
+      "title": "Test a battery",
+      "viewCount": 9000,
+      "likeCount": 300,
+      "duration": 600,
+      "publishedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-5",
+      "title": "Build a circuit tester",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 45,
+      "publishedAt": "2026-10-09T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-6",
+      "title": "Measure a resistor",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-7",
+      "title": "Repair a circuit board — field notes",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 45,
+      "publishedAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-8",
+      "title": "Repair a broken radio — field notes",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-9",
+      "title": "Solder wire joints — field notes",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 45,
+      "publishedAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-10",
+      "title": "Test a battery — field notes",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-11",
+      "title": "Build a circuit tester — field notes",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 45,
+      "publishedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "shorts-long-12",
+      "title": "Measure a resistor — field notes",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2026-09-11T12:00:00Z"
+    }
+  ]
+}
