@@ -20,6 +20,8 @@ export interface Analysis {
   videoIdeas?: { title?: string; rationale?: string; estimatedPerformance?: string }[];
   /** Present on reports made after evidence storage; absent on older ones. */
   evidence?: Evidence;
+  /** Set when the YouTube statistics were purged after 30 days (server-side). */
+  statsPurgedAt?: string;
 }
 
 export interface Channel {

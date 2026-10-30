@@ -99,10 +99,9 @@ function ideas(a: Analysis, ev: Evidence | undefined): string {
     const { videos, missing } = resolveCitations(idea.rationale, ev);
     const s = strengthOf(videos.length);
     const strip = videos.slice(0, 3).map(v => {
-      const m = multiple(v, ev);
       return `<li><button type="button" class="vchip" data-video="${esc(v.id)}">
         <img src="${esc(thumbUrl(v.id))}" alt="" width="160" height="90" loading="lazy" decoding="async">
-        <span class="vchip__txt"><b>${m ? `${formatMultiple(m)} median` : `${formatViews(v.views)} views`}</b><span>${esc(v.title)}</span></span></button></li>`;
+        <span class="vchip__txt"><b>${vstat(v, ev)}</b><span>${esc(v.title)}</span></span></button></li>`;
     }).join('');
     return `<article class="idea" style="--i:${n}">
       <div class="idea__top"><span class="idea__n" aria-hidden="true">${n + 1}</span>
@@ -118,11 +117,21 @@ function ideas(a: Analysis, ev: Evidence | undefined): string {
     'Ideas the model proposes from this channel\'s own history. Each one lists the videos it relied on; open any to check the numbers.');
 }
 
+/** The one-line numbers on a video chip: a multiple of the median, else the views, else nothing (statistics purged). */
+const vstat = (v: EvidenceVideo, ev: Evidence | undefined): string => {
+  const m = multiple(v, ev);
+  return m ? `${formatMultiple(m)} median` : v.views > 0 ? `${formatViews(v.views)} views` : '';
+};
+const PURGED_NOTE = 'Removed after 30 days.';
+
 /* ───────────── performance map ───────────── */
 
 function map(ev: Evidence | undefined, a: Analysis): string {
   if (!ev || ev.videos.length < 3) {
     return section('map', `<div class="empty"><p>The video data was not saved with this older report, so there is no map to draw. New analyses save it.</p></div>`);
+  }
+  if (a.statsPurgedAt || ev.medianViews <= 0) {
+    return section('map', `<div class="empty"><p>The performance map is drawn from view counts. ${PURGED_NOTE}</p></div>`);
   }
   const cited = new Set<string>();
   for (const i of a.videoIdeas ?? []) for (const v of resolveCitations(i.rationale, ev).videos) cited.add(v.id);
@@ -162,7 +171,7 @@ function thumbnails(a: Analysis, ev: Evidence | undefined): string {
   const grid = top.length
     ? `<ul class="thumbs" aria-label="Thumbnails of the most-viewed videos">${top.map(v => `<li><button type="button" class="vchip vchip--big" data-video="${esc(v.id)}">
         <img src="${esc(thumbUrl(v.id))}" alt="Thumbnail: ${esc(v.title)}" width="320" height="180" loading="lazy" decoding="async">
-        <span class="vchip__txt"><b>${(() => { const m = multiple(v, ev); return m ? `${formatMultiple(m)} median` : `${formatViews(v.views)} views`; })()}</b><span>${esc(v.title)}</span></span></button></li>`).join('')}</ul>`
+        <span class="vchip__txt"><b>${vstat(v, ev)}</b><span>${esc(v.title)}</span></span></button></li>`).join('')}</ul>`
     : '';
   const body = t
     ? `<dl class="facts">${fact('Formula', t.formula, 'inferred')}${fact('Elements', list(t.characteristics), 'inferred')}${fact('Text on the image', t.textOverlayStyle, 'inferred')}</dl>`
@@ -216,6 +225,9 @@ function gaps(a: Analysis, ev: Evidence | undefined): string {
 }
 
 function earnings(a: Analysis): string {
+  if (a.statsPurgedAt) {
+    return section('earnings', `<div class="empty"><p>The revenue range is built from view counts. ${PURGED_NOTE} Run a new analysis for a current estimate.</p></div>`);
+  }
   const e = a.earningsEstimate;
   const none = !e || /unclear/i.test(String(e.totalEstimate ?? 'unclear'));
   let body: string;
@@ -246,7 +258,7 @@ function evidenceTable(ev: Evidence | undefined): string {
     const m = multiple(v, ev);
     return `<tr><td><button type="button" class="cite" data-video="${esc(v.id)}">${esc(v.tags.join(' · '))}</button></td>
       <th scope="row"><button type="button" class="linklike" data-video="${esc(v.id)}">${esc(v.title)}</button></th>
-      <td>${day(v.publishedAt)}</td><td class="num">${formatViews(v.views)}</td><td class="num">${m ? formatMultiple(m) : '—'}</td><td>${v.short ? 'Short' : 'Video'}</td></tr>`;
+      <td>${day(v.publishedAt)}</td><td class="num">${v.views > 0 ? formatViews(v.views) : '—'}</td><td class="num">${m ? formatMultiple(m) : '—'}</td><td>${v.short ? 'Short' : 'Video'}</td></tr>`;
   }).join('');
   return section('evidence', `<div class="tablewrap"><table class="etable"><thead><tr><th>Tag</th><th>Video</th><th>Published</th><th class="num">Views</th><th class="num">× median</th><th>Format</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="note">${ev.videos.length} videos the analysis was based on, read ${day(ev.computedAt)} from the YouTube Data API. Tags: T = rank by views, R = rank by recency. Views and likes are public counts at that time.</p>`,
@@ -262,7 +274,8 @@ export function renderReport(r: Report): string {
   const median = ev?.medianViews;
   const metric = (label: string, value: string, kind: Provenance) =>
     `<div class="metric"><dt>${esc(label)} ${chip(kind)}</dt><dd>${value}</dd></div>`;
-  const subs = ch.subscriberCount ? formatViews(ch.subscriberCount) : '<span class="muted">Unavailable</span>';
+  const gone = a.statsPurgedAt ? 'Removed' : 'Unavailable';
+  const subs = ch.subscriberCount ? formatViews(ch.subscriberCount) : `<span class="muted">${gone}</span>`;
 
   const avatar = ch.thumbnailUrl
     ? `<img class="avatar" src="${esc(ch.thumbnailUrl)}" alt="" width="64" height="64" referrerpolicy="no-referrer">`
@@ -279,7 +292,7 @@ export function renderReport(r: Report): string {
       <dl class="metrics">
         ${metric('Subscribers', subs, ch.subscriberCount ? 'observed' : 'unavailable')}
         ${metric('Videos analysed', esc(r.videoCount), 'observed')}
-        ${metric('Median views', median ? formatViews(median) : '<span class="muted">Unavailable</span>', median ? 'calculated' : 'unavailable')}
+        ${metric('Median views', median ? formatViews(median) : `<span class="muted">${gone}</span>`, median ? 'calculated' : 'unavailable')}
         ${metric('Uploads a month', a.cadence?.videosPerMonth ? esc(a.cadence.videosPerMonth) : '<span class="muted">Unavailable</span>', a.cadence?.videosPerMonth ? 'calculated' : 'unavailable')}
       </dl>
       <div class="rp__actions" data-actions></div>
@@ -287,6 +300,7 @@ export function renderReport(r: Report): string {
     <div class="rp__body">
       <nav class="rail" aria-label="Report sections"><ol>${rail}</ol></nav>
       <div class="rp__main">
+        ${a.statsPurgedAt ? `<p class="notice" role="note"><b>Statistics removed.</b> YouTube's data rules do not allow Wavecrest to keep view counts and similar numbers for more than 30 days, so they were removed from this report on ${day(a.statsPurgedAt)}. The analysis text is kept. Run a new analysis to see current numbers.</p>` : ''}
         ${ideas(a, ev)}${map(ev, a)}${hooks(a, ev)}${thumbnails(a, ev)}${cadence(a, ev)}${audience(a, ev)}${pillars(a, ev)}${monetization(a, ev)}${gaps(a, ev)}${earnings(a)}${evidenceTable(ev)}
       </div>
     </div>
@@ -323,9 +337,9 @@ export function drawerHtml(v: EvidenceVideo, ev: Evidence | undefined, by: strin
     <h2 class="drawer__title" id="drawer-title">${esc(v.title)}</h2>
     <dl class="drawer__facts">
       <div><dt>Published</dt><dd>${day(v.publishedAt)}</dd></div>
-      <div><dt>Views</dt><dd>${v.views.toLocaleString('en-US')}</dd></div>
+      <div><dt>Views</dt><dd>${v.views > 0 ? v.views.toLocaleString('en-US') : '—'}</dd></div>
       <div><dt>Versus channel median ${chip('calculated')}</dt><dd>${m ? `${formatMultiple(m)}` : '—'}</dd></div>
-      <div><dt>Likes per view</dt><dd>${rate ?? 'Not public'}</dd></div>
+      <div><dt>Likes per view</dt><dd>${rate ?? (v.views > 0 ? 'Not public' : '—')}</dd></div>
       <div><dt>Format</dt><dd>${v.short ? 'Short (3 minutes or less)' : 'Video'}</dd></div>
     </dl>
     ${by.length ? `<p class="drawer__by"><b>Used in this report by</b></p><ul class="bul">${by.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : '<p class="muted">Not cited by name; it is part of the evidence set.</p>'}

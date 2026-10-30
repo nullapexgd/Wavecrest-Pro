@@ -93,3 +93,22 @@ test('list-valued fields render as real lists, not escaped markup', () => {
   assert.ok(!html.includes('&lt;ul'), 'no literal <ul> text');
   assert.ok(html.includes('<li>one</li>') && html.includes('<li>b</li>'));
 });
+
+test('a purged report renders without zero views, NaN or invented numbers, and says what happened', () => {
+  const purgedEv = { ...ev, medianViews: 0, videos: ev.videos.map(v => ({ ...v, views: 0, likes: 0 })) };
+  const html = renderReport(report({
+    statsPurgedAt: '2026-03-05T00:00:00Z', evidence: purgedEv,
+    videoIdeas: [{ title: 'Idea', rationale: 'Builds on T1.', estimatedPerformance: 'Statistics were removed after 30 days.' }],
+    hooks: { primaryPattern: 'kept text' }
+  }, { channel: { name: 'Chan', subscriberCount: 0 } }));
+  assert.match(html, /Statistics removed\./);
+  assert.match(html, /kept text/, 'analysis text survives');
+  assert.doesNotMatch(html, /NaN|Infinity|undefined/);
+  assert.doesNotMatch(html, /\b0 views\b/, 'a purged count is never shown as zero');
+  assert.match(html, /Removed after 30 days\./, 'sections built from statistics say so');
+  assert.match(html, /Removed<\/span>/, 'subscribers and median show as removed, not unavailable');
+});
+
+test('a report that is not purged shows no purge notice', () => {
+  assert.doesNotMatch(renderReport(report({ evidence: ev })), /Statistics removed/);
+});
