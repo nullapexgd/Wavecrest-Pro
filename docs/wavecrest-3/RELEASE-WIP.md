@@ -49,7 +49,7 @@ Local test logs: `/private/tmp/release-{backend,eval,browser}.log`. Live fixture
 | Backend (`npm test`, throwaway Postgres) | 215/215 pass |
 | Mutation checks | 7/7 caught |
 | Web typecheck + build | pass |
-| Playwright full matrix (4 widths x light/dark) | see "Playwright" line below |
+| Playwright full matrix (4 widths x light/dark, 8 projects: theme, motion, nav, hero, reports UI) | 268 passed, 12 skipped by design, 0 failed (exit 0) |
 | Historical reports / schema | `report-compatibility`, `schema-compat` and 12-fixture eval pass; every legacy key kept, new fields optional, no migration |
 | Ownership isolation, quota, idempotency (automated, two accounts) | `report-access`, `reports-access`, `quota`, `policy` tests pass |
 | Live model, 6/12 fixtures | invariants pass; outputs hand-reviewed |
@@ -63,7 +63,7 @@ Local test logs: `/private/tmp/release-{backend,eval,browser}.log`. Live fixture
 - Small creator (Clickspring): estimate labelled assumed category ($593-$2,879/mo from 5 recent uploads), 0.7 uploads/month, low-confidence ideas marked "no benchmark". Good.
 - Questionable, not fixed (model quality, not enforcement bugs): Apple idea "Vision Pro Pro Edition" is an invented product that passed (no number to trigger the brand check); Clickspring gap/idea "CNC milling" contradicts the channel's hand-machining identity; a "giveaway" title is phrased as a "possible sponsor tie-in" (unverified wording); a 0% pillar can appear; idea benchmarks cite top performers so multiples look optimistic; gap rationales can include outside knowledge ("Apple's public commitments"). Next step is benchmarking stronger models, not more heuristics.
 
-**Recommendation: conditional GO** once Playwright finishes green and the owner accepts the manual-smoke gap. Low blast radius: analysis output only plus front-end polish; no DB/env change; instant rollback.
+**Recommendation: conditional GO** (Playwright is green) once the owner accepts the manual-smoke gap. Low blast radius: analysis output only plus front-end polish; no DB/env change; instant rollback.
 
 **Deploy steps (all need owner approval):**
 1. `git fetch`; confirm `origin/master` is still `4c27939`; confirm release HEAD (record exact SHA here).
