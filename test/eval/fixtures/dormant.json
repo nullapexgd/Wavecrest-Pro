@@ -1,0 +1,108 @@
+{
+  "channel": {
+    "name": "Trail Archive",
+    "description": "Walking trails and outdoor gear",
+    "handle": "@dormant",
+    "subscriberCount": 45000,
+    "viewCountTotal": 390000,
+    "publishedAt": "2020-01-01T12:00:00Z"
+  },
+  "videos": [
+    {
+      "id": "dormant-1",
+      "title": "Walk the coastal trail",
+      "viewCount": 12000,
+      "likeCount": 400,
+      "duration": 600,
+      "publishedAt": "2023-07-13T12:00:00Z"
+    },
+    {
+      "id": "dormant-2",
+      "title": "Walk the forest trail",
+      "viewCount": 11000,
+      "likeCount": 366,
+      "duration": 600,
+      "publishedAt": "2023-07-09T12:00:00Z"
+    },
+    {
+      "id": "dormant-3",
+      "title": "Pack a hiking bag",
+      "viewCount": 10000,
+      "likeCount": 333,
+      "duration": 600,
+      "publishedAt": "2023-07-05T12:00:00Z"
+    },
+    {
+      "id": "dormant-4",
+      "title": "Read a trail map",
+      "viewCount": 9000,
+      "likeCount": 300,
+      "duration": 600,
+      "publishedAt": "2023-07-01T12:00:00Z"
+    },
+    {
+      "id": "dormant-5",
+      "title": "Pitch a tent",
+      "viewCount": 8000,
+      "likeCount": 266,
+      "duration": 600,
+      "publishedAt": "2023-06-27T12:00:00Z"
+    },
+    {
+      "id": "dormant-6",
+      "title": "Filter drinking water",
+      "viewCount": 7000,
+      "likeCount": 233,
+      "duration": 600,
+      "publishedAt": "2023-06-23T12:00:00Z"
+    },
+    {
+      "id": "dormant-7",
+      "title": "Walk the coastal trail — field notes",
+      "viewCount": 6000,
+      "likeCount": 200,
+      "duration": 600,
+      "publishedAt": "2023-06-19T12:00:00Z"
+    },
+    {
+      "id": "dormant-8",
+      "title": "Walk the forest trail — field notes",
+      "viewCount": 5000,
+      "likeCount": 166,
+      "duration": 600,
+      "publishedAt": "2023-06-15T12:00:00Z"
+    },
+    {
+      "id": "dormant-9",
+      "title": "Pack a hiking bag — field notes",
+      "viewCount": 4000,
+      "likeCount": 133,
+      "duration": 600,
+      "publishedAt": "2023-06-11T12:00:00Z"
+    },
+    {
+      "id": "dormant-10",
+      "title": "Read a trail map — field notes",
+      "viewCount": 3000,
+      "likeCount": 100,
+      "duration": 600,
+      "publishedAt": "2023-06-07T12:00:00Z"
+    },
+    {
+      "id": "dormant-11",
+      "title": "Pitch a tent — field notes",
+      "viewCount": 2000,
+      "likeCount": 66,
+      "duration": 600,
+      "publishedAt": "2023-06-03T12:00:00Z"
+    },
+    {
+      "id": "dormant-12",
+      "title": "Filter drinking water — field notes",
+      "viewCount": 1000,
+      "likeCount": 33,
+      "duration": 600,
+      "publishedAt": "2023-05-30T12:00:00Z"
+    }
+  ]
+}

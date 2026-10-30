@@ -1,0 +1,145 @@
+{
+  "fixture": "no-dollar-amounts",
+  "raw": {
+    "channelType": "creator",
+    "niche": "Education",
+    "hooks": {
+      "primaryPattern": "Observe woodland [species]",
+      "patternTags": [
+        "T1",
+        "T2",
+        "T3",
+        "T99"
+      ],
+      "secondaryPatterns": [
+        "Observe woodland [species]",
+        "Celebrity yacht sponsorship"
+      ]
+    },
+    "pillars": [
+      {
+        "name": "Main series",
+        "description": "Recurring title series",
+        "tags": [
+          "T1",
+          "T2",
+          "T99"
+        ]
+      },
+      {
+        "name": "Practical notes",
+        "description": "Other observed topics",
+        "tags": [
+          "T3",
+          "T4",
+          "T5",
+          "T6"
+        ]
+      }
+    ],
+    "audience": {
+      "primaryProfile": "Affluent men 18-34 with high income",
+      "viewerIntent": "Help women choose products"
+    },
+    "monetization": {
+      "signals": [
+        {
+          "quote": "Sketch a fern",
+          "tag": "T3"
+        },
+        {
+          "quote": "Sponsored by PhantomCorp",
+          "tag": "T1"
+        },
+        {
+          "quote": "Sketch a fern",
+          "tag": "T99"
+        },
+        {
+          "quote": "An expert explains the best technique",
+          "tag": "T2"
+        }
+      ],
+      "brandAffinities": [
+        "PhantomCorp"
+      ]
+    },
+    "gaps": [
+      {
+        "opportunity": "Sketch a fern",
+        "rationale": "Adjacent to the topics in T3",
+        "tags": [
+          "T3"
+        ],
+        "identityFit": "high"
+      },
+      {
+        "opportunity": "Maintenance checklist",
+        "rationale": "A practical follow up to T1",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "medium"
+      },
+      {
+        "opportunity": "Celebrity gossip",
+        "rationale": "Famous people get clicks T99",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low"
+      }
+    ],
+    "videoIdeas": [
+      {
+        "title": "Observe woodland moss",
+        "rationale": "Will earn 300% more views",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Observe moss growth through a magnifying lens",
+        "rationale": "Expect 3.2× the median and 80% growth",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Celebrity yacht giveaway",
+        "rationale": "A new direction",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low",
+        "effort": "high"
+      },
+      {
+        "title": "Observe moss aboard a $250,000 expedition",
+        "rationale": "New field notes",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "high"
+      }
+    ]
+  },
+  "expected": {
+    "hookExamples": [
+      "Observe woodland moss",
+      "Observe woodland fungi"
+    ],
+    "signal": "Sketch a fern",
+    "ideaTitles": [
+      "Observe moss growth through a magnifying lens"
+    ],
+    "gapOpportunities": [],
+    "channelType": "creator",
+    "niche": "Education"
+  }
+}

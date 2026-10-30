@@ -1,0 +1,136 @@
+{
+  "fixture": "tiny",
+  "raw": {
+    "channelType": "creator",
+    "niche": "Education",
+    "hooks": {
+      "primaryPattern": "Grow [herb] on a balcony",
+      "patternTags": [
+        "T1",
+        "T2",
+        "T3",
+        "T99"
+      ],
+      "secondaryPatterns": [
+        "Grow [herb] on a balcony",
+        "Celebrity yacht sponsorship"
+      ]
+    },
+    "pillars": [
+      {
+        "name": "Main series",
+        "description": "Recurring title series",
+        "tags": [
+          "T1",
+          "T2",
+          "T99"
+        ]
+      },
+      {
+        "name": "Practical notes",
+        "description": "Other observed topics",
+        "tags": [
+          "T3",
+          "T4",
+          "T5",
+          "T6"
+        ]
+      }
+    ],
+    "audience": {
+      "primaryProfile": "Affluent men 18-34 with high income",
+      "viewerIntent": "Help women choose products"
+    },
+    "monetization": {
+      "signals": [
+        {
+          "quote": "Compost kitchen scraps",
+          "tag": "T3"
+        },
+        {
+          "quote": "Sponsored by PhantomCorp",
+          "tag": "T1"
+        },
+        {
+          "quote": "Compost kitchen scraps",
+          "tag": "T99"
+        },
+        {
+          "quote": "An expert explains the best technique",
+          "tag": "T2"
+        }
+      ],
+      "brandAffinities": [
+        "PhantomCorp"
+      ]
+    },
+    "gaps": [
+      {
+        "opportunity": "Compost kitchen scraps",
+        "rationale": "Adjacent to the topics in T3",
+        "tags": [
+          "T3"
+        ],
+        "identityFit": "high"
+      },
+      {
+        "opportunity": "Maintenance checklist",
+        "rationale": "A practical follow up to T1",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "medium"
+      },
+      {
+        "opportunity": "Celebrity gossip",
+        "rationale": "Famous people get clicks T99",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low"
+      }
+    ],
+    "videoIdeas": [
+      {
+        "title": "Grow basil on a balcony",
+        "rationale": "Will earn 300% more views",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Grow thyme in a self watering pot",
+        "rationale": "Expect 3.2× the median and 80% growth",
+        "tags": [
+          "T1"
+        ],
+        "identityFit": "high",
+        "effort": "low"
+      },
+      {
+        "title": "Celebrity yacht giveaway",
+        "rationale": "A new direction",
+        "tags": [
+          "T99"
+        ],
+        "identityFit": "low",
+        "effort": "high"
+      }
+    ]
+  },
+  "expected": {
+    "hookExamples": [
+      "Grow basil on a balcony",
+      "Grow mint on a balcony"
+    ],
+    "signal": "Compost kitchen scraps",
+    "ideaTitles": [
+      "Grow thyme in a self watering pot"
+    ],
+    "gapOpportunities": [],
+    "channelType": "creator",
+    "niche": "Education"
+  }
+}
