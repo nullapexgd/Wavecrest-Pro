@@ -191,7 +191,9 @@ test('live-run regressions: gap citations may sit in the rationale; structural h
   assert.deepEqual(a.gaps.map(g => g.opportunity), ['Smart home cameras']);
   assert.equal(a.hooks.examples.length, 3);
   assert.equal(a.hooks.confidence, 'low');
-  assert.match(a.hooks.caveat, /Structural pattern/);
+  assert.match(a.hooks.caveat, /Unverified structural pattern/);
+  assert.match(a.hooks.primaryPattern, /\(unverified structural pattern\)$/); // visible even where caveats aren't rendered
+  assert.equal(a.hooks.verified, false);
   const few = run({ hooks: { primaryPattern: '[Product] [Noun]', patternTags: [t1, t2] } }, c).analysis;
   assert.deepEqual(few.hooks.examples, []); // two citations are not enough to trust a wording-free pattern
 });
