@@ -1,5 +1,60 @@
 # Analysis evaluation report
 
+## Follow-up: fixes on `codex/analysis-fixes`
+
+The user authorized production changes after the original evaluation. The five
+TODOs below are now active, passing regressions; the original findings are retained
+as historical context. Evaluation commits and all JSON fixtures/cases are unchanged.
+
+| Bug | Implemented fix |
+| --- | --- |
+| Numeric forecasts in titles | Reject explicit numeric performance promises in titles; scrub those promises from rationale. Preserve topic numbers, product versions, dimensions, budgets and composition percentages. Computed benchmarks are unchanged. |
+| Unsupported gaps | Abstain without shared topic wording in a cited title. Retained candidates get generated evidence text, low confidence and an explicit warning that identity fit/audience demand are unverified. Model demand assertions are not retained. |
+| Duplicate proposed ideas | Compare each proposal against already accepted ideas using normalized equality and the existing similarity threshold, in addition to checking published titles. |
+| Unsupported classification | Require corroborating public wording. Unsupported type/niche values abstain; no unsupported niche RPM is selected. Corroborated labels remain tentative. Brand wording activates brand protections even if the model incorrectly says creator. |
+| Non-verbatim quotes | Check the exact stored quote substring against the cited title, preserving case, punctuation and Unicode. Legacy tagged strings still work when their quote is exact. |
+
+### Final verification
+
+- `LC_ALL=en_US.UTF-8 npm test`: **211 passed, 0 failed, 0 TODO**, exit 0.
+  Existing temporary Postgres tests ran with sandbox permission for shared memory.
+- `node --test test/eval/`: **50 passed, 0 failed, 0 TODO**, exit 0.
+- `node scripts/eval-mutations.js`: **7/7 caught**, after an unmodified baseline
+  passes. Checks assert assertion failures, not syntax errors or crashes. Mutation
+  sources run only in a disposable temporary directory and are removed afterward.
+- `npm --prefix web run typecheck` and `npm --prefix web run build`: passed.
+  Installed existing locked frontend dependencies from the offline cache; no
+  dependency or lockfile changes. No frontend source changes.
+- Added edges for creative quantities, forecast rationale, literal gap candidates,
+  absent/fake citations, dollar-sign-only non-evidence, proposal similarity,
+  exact Unicode and legacy quotes,
+  independent classification failures, corroborated creator/media/brand labels,
+  Shorts-only and mixed revenue, and conflicting model brand classification.
+- Historical schema and replay tests remain passing. API signatures and stored
+  report field types are unchanged. No pushes, deploys or production data access.
+
+### Limits and integration
+
+Classification uses explicit public wording, not semantic verification. Literal
+niche labels (description, or at least two sampled titles) are required; synonyms
+and many non-English descriptions abstain. Some previously assigned RPMs therefore
+become unknown, including the description-less MrBeast replay. Supported RPM tests
+now provide explicit public topic wording rather than relying on a model label.
+Brand clues are heuristic, with confidence capped and a public-data caveat.
+Gap wording overlap is only a candidate filter; generated text expressly avoids
+claiming proven semantic relevance or demand. Numeric forecast patterns cover
+explicit performance promises, not every possible paraphrase or language.
+
+After the user's integration approval, Claude should use the designated integration
+checkout (not the active `scroll-reveals` worktree), confirm it is clean, and merge
+`codex/analysis-fixes` with `git merge --no-ff codex/analysis-fixes`. This brings the
+preserved evaluation history plus the fixes. If evaluation commits are already on
+the target, Git will include only the new follow-up commits. Rerun the four checks
+above and the mutation script, resolve any changes to analysis enforcement/tests
+carefully, and leave deployment/pushing for separate user approval.
+
+## Original independent evaluation (before fixes)
+
 ## Scope and completed plan
 
 - Added 12 synthetic channel fixtures and 12 hand-authored adversarial model cases:
