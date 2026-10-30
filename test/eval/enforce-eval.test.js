@@ -21,11 +21,18 @@ for (const c of cases) {
     assert.deepEqual(a.hooks.examples, c.expected.hookExamples);
     assert.equal(a.pillars.length, 2);
     assert.deepEqual(a.videoIdeas.map(i => i.title), c.expected.ideaTitles);
-    // The original cases proposed labels and generic gaps without corroborating wording.
-    assert.deepEqual(a.gaps, []);
-    assert.equal(a.quality.channelType, c.fixture === 'brand' ? 'brand' : 'unclear');
-    assert.equal(a.quality.niche, 'Unclear');
-    assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data');
+    // Gaps survive only as labelled hypotheses; labels are model-inferred unless wording corroborates them.
+    const titles = [...ctx.top, ...ctx.recent].map(v => v.title.toLowerCase());
+    for (const g of a.gaps) assert.ok(!titles.some(t => t.includes(g.opportunity.toLowerCase())), `gap already covered: ${g.opportunity}`);
+    for (const g of a.gaps) assert.ok(g.kind === 'hypothesis' && g.confidence === 'low' && /demand is not measured/.test(g.rationale));
+    if (c.fixture === 'brand') assert.equal(a.quality.channelType, 'brand');
+    else assert.notEqual(a.quality.channelTypeBasis, 'corroborated by public wording');
+    if (a.quality.niche === 'Unclear' || a.quality.channelType === 'brand') assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data');
+    else {
+      assert.equal(a.quality.nicheBasis, 'Assumed category');
+      assert.match(a.earningsEstimate.cpmRPM, /^Assumed category:/);
+      assert.match(a.earningsEstimate.disclaimer, /Not actual or business revenue/);
+    }
     assert.doesNotMatch(JSON.stringify(a.monetization), /PhantomCorp|expert explains/);
     assert.doesNotMatch(JSON.stringify(a.audience), /affluent|\bmen\b|\bwomen\b|18-34|income/i);
     assert.deepEqual(a.monetization.signals, c.raw.channelType === 'brand' ? [] : [`“${c.expected.signal}” (T3)`]);
@@ -51,8 +58,13 @@ test('forecasts in idea titles are removed', () => {
 });
 test('citations for a gap must support its identity fit', () => {
   const { c, ctx } = base();
-  c.raw.gaps = [{ opportunity: 'Celebrity yacht gossip', rationale: 'Repair tutorials prove celebrity demand T1', tags: ['T1'], identityFit: 'high' }];
+  const gap = fit => ({ opportunity: 'Celebrity yacht gossip', rationale: 'Repair tutorials prove celebrity demand T1', tags: ['T1'], identityFit: fit });
+  c.raw.gaps = [gap('medium')]; // one unrelated citation is not enough evidence
   assert.deepEqual(enforceAnalysis(c.raw, ctx).analysis.gaps, []);
+  c.raw.gaps = [gap('high')]; // a strong-fit claim is kept, but only as a flagged speculation
+  const [kept] = enforceAnalysis(c.raw, ctx).analysis.gaps;
+  assert.equal(kept.support, 'single cited video');
+  assert.equal(kept.confidence, 'low');
 });
 test('duplicate proposed ideas are deduplicated against each other', () => {
   const { c, ctx } = base();
@@ -64,9 +76,12 @@ test('plausible but wrong channel classification stays unknown', () => {
   const { c, ctx } = base();
   c.raw.channelType = 'brand';
   c.raw.niche = 'Insurance';
-  const a = enforceAnalysis(c.raw, ctx).analysis;
-  assert.equal(a.quality.channelType, 'unclear');
-  assert.equal(a.quality.niche, 'Unclear');
+  const { analysis: a, dropped } = enforceAnalysis(c.raw, ctx);
+  assert.equal(a.quality.channelType, 'brand'); // reported, but as an inference
+  assert.equal(a.quality.channelTypeBasis, 'model-inferred, not verified');
+  assert.match(a.monetization.primaryApproach, /inferred, not verified/);
+  assert.equal(a.quality.niche, 'Unclear'); // nothing in a woodworking channel is consistent with Insurance
+  assert.ok(dropped.some(d => d.kind === 'classification.niche'));
 });
 test('monetization quotes must be verbatim, including punctuation', () => {
   const { c, ctx } = base();
@@ -168,15 +183,16 @@ test('gap candidates keep literal topic links but abstain from semantic demand c
     { opportunity: 'Chair maintenance checklist', rationale: 'T1 proves enormous audience demand', tags: ['T1', 'T99'], identityFit: 'high' },
     { opportunity: 'Chair joinery guide', rationale: 'Another claim T99', tags: ['T99'], identityFit: 'high' },
     { opportunity: 'Sharpen a hand plane', rationale: 'Already covered T3', tags: ['T3'], identityFit: 'high' },
-    { opportunity: '$100 sponsorship', rationale: 'A dollar sign is not topic support T2', tags: ['T2'], identityFit: 'high' }
+    { opportunity: '$100 sponsorship', rationale: 'A dollar sign is not topic support T2', tags: ['T2'], identityFit: 'medium' }
   ];
   const { analysis, dropped } = enforceAnalysis(c.raw, ctx);
   assert.deepEqual(analysis.gaps.map(g => g.opportunity), ['Chair maintenance checklist']);
   assert.equal(analysis.gaps[0].confidence, 'low');
-  assert.match(analysis.gaps[0].rationale, /Identity fit and audience demand are unverified/);
-  assert.match(analysis.gaps[0].rationale, /T1 “Repair a wooden chair”/);
-  assert.doesNotMatch(analysis.gaps[0].rationale, /proves|enormous|T99/);
+  assert.equal(analysis.gaps[0].support, 'cited videos share topic wording');
+  assert.match(analysis.gaps[0].rationale, /Hypothesis: absent from the sampled titles; audience demand is not measured/);
+  assert.doesNotMatch(analysis.gaps[0].rationale, /T99/); // unresolved tags are stripped
   assert.ok(dropped.some(d => /already appears/.test(d.why)));
+  assert.ok(dropped.some(d => /unrelated/.test(d.why)));
   assert.ok(dropped.some(d => /cites no video/.test(d.why)));
 });
 test('proposals are deduplicated for punctuation and case without merging distinct projects', () => {
@@ -196,17 +212,23 @@ test('exact Unicode quotes and legacy tagged strings survive; altered or misattr
   ];
   assert.deepEqual(enforceAnalysis(c.raw, ctx).analysis.monetization.signals, ['“Café tools: “Sharp” blades — 手工具” (T3)', '“Café tools” (T3)']);
 });
-test('unsupported type and niche independently abstain and never select the proposed RPM', () => {
-  for (const change of [{ channelType: 'brand' }, { channelType: 'media' }, { niche: 'Insurance' }]) {
-    const { c, ctx } = base();
-    Object.assign(c.raw, change);
-    const { analysis, dropped } = enforceAnalysis(c.raw, ctx);
-    assert.equal(analysis.quality.channelType, 'unclear');
-    assert.equal(analysis.quality.niche, 'Unclear');
-    assert.equal(analysis.earningsEstimate.totalEstimate, 'unclear from data');
-    assert.equal(analysis.quality.confidence, 'low');
-    assert.ok(dropped.some(d => d.kind === 'classification.niche'));
-  }
+test('uncorroborated type is reported as inferred; an inconsistent niche is unavailable, not guessed', () => {
+  const run = change => { const { c, ctx } = base(); Object.assign(c.raw, change); return enforceAnalysis(c.raw, ctx); };
+  const brand = run({ channelType: 'brand' }).analysis;
+  assert.equal(brand.quality.channelType, 'brand');
+  assert.equal(brand.quality.channelTypeBasis, 'model-inferred, not verified');
+  assert.equal(brand.earningsEstimate.totalEstimate, 'unclear from data'); // no ad revenue implied for a brand
+  assert.deepEqual(brand.monetization.signals, []);
+  const media = run({ channelType: 'media' }).analysis;
+  assert.equal(media.quality.channelType, 'media');
+  assert.match(media.quality.limits.join(' '), /model-inferred and not verified/);
+  const wrong = run({ niche: 'Insurance' });
+  assert.equal(wrong.analysis.quality.niche, 'Unclear');
+  assert.equal(wrong.analysis.earningsEstimate.totalEstimate, 'unclear from data');
+  assert.match(wrong.analysis.earningsEstimate.cpmRPM, /^unavailable/);
+  assert.notEqual(wrong.analysis.quality.confidence, 'low'); // one uncertain label must not sink the report
+  assert.ok(wrong.dropped.some(d => d.kind === 'classification.niche'));
+  assert.equal(run({ channelType: 'wizard' }).analysis.quality.channelType, 'unclear');
 });
 test('corroborated labels stay tentative; supported RPM still separates Shorts revenue', () => {
   for (const name of ['shorts-only', 'shorts-long']) {
@@ -238,8 +260,8 @@ test('classification requires whole phrases, rejects name-only inference, and pr
   c.raw.niche = 'Music';
   c.raw.channelType = 'brand';
   const unknown = enforceAnalysis(c.raw, context(fixture)).analysis;
-  assert.equal(unknown.quality.channelType, 'unclear');
-  assert.equal(unknown.quality.niche, 'Unclear');
+  assert.equal(unknown.quality.channelTypeBasis, 'model-inferred, not verified'); // a name alone corroborates nothing
+  assert.equal(unknown.quality.niche, 'Unclear'); // "musical woodworking" is not Music
   const brand = loadFixture('brand');
   brand.channel.description += ' Consumer Tech';
   const raw = structuredClone(cases.find(c => c.fixture === 'brand').raw);
