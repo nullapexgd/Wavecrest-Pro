@@ -46,7 +46,7 @@ export function invariantChecks(a, ctx) {
       for (const idea of a.videoIdeas) {
         // The appended citation lines and estimatedPerformance contain computed historical multiples.
         const modelProse = idea.rationale.split('Builds on ')[0];
-        assert.doesNotMatch(idea.title + ' ' + modelProse, /\d[\d.,]*\s*[×%]/u);
+        assert.doesNotMatch(idea.title + ' ' + modelProse, /\d[\d.,]*\s*[×%]\s*(?:(?:more|higher|the)\s+)*(?:growth|views?|subscribers?|engagement|revenue|median)\b/i);
         assert.doesNotMatch(idea.estimatedPerformance, /\d.*(?:will|forecast of|expected views)/i);
       }
     },

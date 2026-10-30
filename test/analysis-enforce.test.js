@@ -29,7 +29,7 @@ const TECH = ['iPhone 17 Pro Review', 'Galaxy S26 Ultra Review', 'Pixel 11 Revie
 const techTitle = i => `${TECH[i % TECH.length]}${i >= TECH.length ? ` ${2020 + (i % 6)}` : ''}`;
 
 test('MKBHD-like creator: citations verified, fabrications and demographics removed, numbers computed', () => {
-  const c = build({ name: 'Tech Creator', subscriberCount: 19000000 }, 60, { title: techTitle });
+  const c = build({ name: 'Tech Creator', description: 'Consumer Tech reviews by an independent creator', subscriberCount: 19000000 }, 60, { title: techTitle });
   const rev = c.videos.filter(v => /Review/.test(v.title)).slice(0, 5), notRev = c.videos.find(v => /Desk/.test(v.title));
   const tags = vs => vs.flatMap(v => c.tag(v.id));
   const real = c.videos[0].title;
@@ -52,7 +52,7 @@ test('MKBHD-like creator: citations verified, fabrications and demographics remo
   assert.match(a.audience.estimatedAge, /Unknown/);
   assert.deepEqual(a.monetization.signals.length, 1);
   assert.doesNotMatch(JSON.stringify(a.monetization), /NordVPN/);
-  assert.deepEqual(a.gaps.map(g => g.opportunity), ['Smart home cameras']);
+  assert.deepEqual(a.gaps, []); // The cited Galaxy review does not establish smart-home relevance.
   assert.equal(a.videoIdeas.length, 1);
   assert.match(a.videoIdeas[0].estimatedPerformance, /benchmark, not a forecast/);
   assert.doesNotMatch(a.videoIdeas[0].rationale, /3\.2x/);
@@ -72,7 +72,7 @@ test('small channel: tentative, no gaps, unrealistic budgets rejected', () => {
 });
 
 test('Shorts-heavy channel: Shorts and long-form revenue are never blended', () => {
-  const c = build({}, 80, { title: i => `Quick trick number ${i}`, short: i => i % 10 !== 0, views: i => 1e6 });
+  const c = build({ description: 'Finance tutorials by an independent creator' }, 80, { title: i => `Quick trick number ${i}`, short: i => i % 10 !== 0, views: i => 1e6 });
   const f = c.ctx.facts;
   assert.ok(f.shortsCount > 60 && f.shortsShare > 0.8);
   const a = run({ channelType: 'creator', niche: 'Finance' }, c).analysis;
@@ -127,7 +127,8 @@ test('MrBeast report replay: tags become titles, mean-based forecasts and editor
   assert.equal(a.monetization.signals.length, 0);
   assert.ok(a.videoIdeas.length >= 3);
   assert.ok(a.videoIdeas.every(i => !/avg|M views/.test(i.estimatedPerformance)));
-  assert.match(a.earningsEstimate.cpmRPM, /Entertainment/);
+  assert.equal(a.quality.niche, 'Unclear');
+  assert.equal(a.earningsEstimate.totalEstimate, 'unclear from data'); // Replay lacks a corroborating description.
 });
 
 test('prompts stay concise and benchmark on medians, not averages', () => {
