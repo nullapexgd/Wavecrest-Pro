@@ -79,3 +79,10 @@ Local test logs: `/private/tmp/release-{backend,eval,browser}.log`. Live fixture
 - Anonymous checks: `/api/health` ok, public pages 200, `/api/auth/me` and `/api/reports` 401, unknown report 404.
 - Owner authenticated smoke test passed: Google sign-in, one analysis, Recent Reports reopen, private report 404 from a second browser, link-share access, second-analysis quota refusal. Runtime logs clean (only a Node `url.parse()` deprecation warning).
 - Open follow-ups (not blockers): mark API keys Sensitive in Vercel; add CSP/HSTS headers; add error tracking (shipped code does not read `SENTRY_DSN`); validator gaps (invented products without numbers, course/bundle monetization wording).
+
+## Post-release hardening — 2026-10-30
+
+- **Secrets:** `GROQ_API_KEY` and `GEMINI_API_KEY` are now Sensitive (Secret) in Production and Preview. Same values re-saved, no rotation; the Groq value was hash-checked against the working local copy first. KV tokens and `REDIS_URL` (Upstash-managed) were left as they were. A Secret cannot be pulled back: do not run `vercel env pull` over `.env.local`, which live evals read.
+- **Gemini fallback:** proven locally (Groq key cleared, Gemini answered in about 12 s, `quality.provider: "gemini"`). Not exercised on production, and the stored Gemini Secret cannot be read back.
+- **CSP:** enforced from `747f2de` (`vercel.json`; production `dpl_Be5WCUU1UPdpLjdezJ3MV8ReoGZ9`, master `747f2de`). Self scripts plus the two inline bootstrap scripts by sha256, self styles with inline allowed, YouTube image hosts, same-origin connect and fonts, no objects, `frame-ancestors 'none'`. If either inline script in `web/` is edited, its hash must be updated or it will be blocked. `/about` (legacy, unlinked, loads gsap and Google Fonts) is excluded. HSTS is already served by Vercel. Verified: zero violations on 8 live signed-out routes, and the owner confirmed a signed-in report renders (thumbnails and avatar).
+- **Open:** error tracking (shipped code does not read `SENTRY_DSN`), validator gaps (invented products without version numbers, course or bundle monetization wording), `/about` CSP.
