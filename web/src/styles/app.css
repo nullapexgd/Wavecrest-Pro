@@ -96,6 +96,20 @@ ol { list-style: none; padding: 0; margin: 0; }
 .metric dd { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; }
 .rp__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: flex-end; grid-column: 2; grid-row: 1; }
 .sharebox { display: flex; flex: 1 1 100%; gap: var(--s-3); flex-wrap: wrap; }
+/* ───────────── thumbnails that fail to load ───────────── */
+.thumb-fail {
+  display: inline-grid; place-items: center; align-content: center; gap: var(--s-1); flex: none; box-sizing: border-box;
+  padding: var(--s-2); text-align: center; color: var(--ink-soft); background: var(--paper-2);
+  border: 1px dashed var(--line); border-radius: 0.5rem; font-size: 0.75rem; line-height: 1.2;
+}
+.thumb-fail svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.thumbwarn {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap;
+  margin: 0 0 var(--s-5); padding: var(--s-4) var(--s-5); background: var(--paper-2); border: 1px solid var(--line);
+  border-left: 4px solid var(--signal); border-radius: var(--r-surface); animation: fb-rise 240ms var(--ease-out) both;
+}
+.thumbwarn p { margin: var(--s-1) 0 0; color: var(--ink-soft); font-size: var(--fs-small); max-width: 46rem; }
+
 /* ───────────── clip these (hand-off to Reelcut) ───────────── */
 .picks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
 .pick { display: grid; grid-template-columns: 8rem 1fr auto; gap: var(--s-4); align-items: center; padding: var(--s-3) 0; border-top: 1px solid var(--line); }

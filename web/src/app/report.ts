@@ -101,7 +101,7 @@ function ideas(a: Analysis, ev: Evidence | undefined): string {
     const s = strengthOf(videos.length);
     const strip = videos.slice(0, 3).map(v => {
       return `<li><button type="button" class="vchip" data-video="${esc(v.id)}">
-        <img src="${esc(thumbUrl(v.id))}" alt="" width="160" height="90" loading="lazy" decoding="async">
+        <img src="${esc(thumbUrl(v.id))}" alt="" data-thumb width="160" height="90" loading="lazy" decoding="async">
         <span class="vchip__txt"><b>${vstat(v, ev)}</b><span>${esc(v.title)}</span></span></button></li>`;
     }).join('');
     return `<article class="idea" style="--i:${n}">
@@ -144,7 +144,7 @@ function clips(a: Analysis, ev: Evidence | undefined, r: Report): string {
   const bundle = JSON.stringify({ source: 'wavecrest', report: r.reportId, channel: r.channel.name,
     videos: picks.map(p => ({ id: p.video.id, url: watchUrl(p.video.id), title: p.video.title, instructions: clipBrief(p.idea) })) });
   const rows = picks.map(p => `<li class="pick">
-      <img src="${esc(thumbUrl(p.video.id))}" alt="" width="160" height="90" loading="lazy" decoding="async">
+      <img src="${esc(thumbUrl(p.video.id))}" alt="" data-thumb width="160" height="90" loading="lazy" decoding="async">
       <div class="pick__txt"><button type="button" class="linklike" data-video="${esc(p.video.id)}">${esc(p.video.title)}</button>
         <p class="meta">${esc(formatMultiple(p.multiple))} the channel median · ${Math.round(p.video.duration / 60)} min${p.idea ? ` · supports idea: ${esc(p.idea)}` : ''}</p></div>
       <a class="btn btn--ghost pick__go" href="${esc(reelcutLink(p.video.id, p.idea))}" target="_blank" rel="noopener noreferrer"><span>Send to Reelcut</span></a></li>`).join('');
@@ -198,7 +198,7 @@ function thumbnails(a: Analysis, ev: Evidence | undefined): string {
   const top = ev ? [...ev.videos].sort((x, y) => y.views - x.views).slice(0, 6) : [];
   const grid = top.length
     ? `<ul class="thumbs" aria-label="Thumbnails of the most-viewed videos">${top.map(v => `<li><button type="button" class="vchip vchip--big" data-video="${esc(v.id)}">
-        <img src="${esc(thumbUrl(v.id))}" alt="Thumbnail: ${esc(v.title)}" width="320" height="180" loading="lazy" decoding="async">
+        <img src="${esc(thumbUrl(v.id))}" alt="Thumbnail: ${esc(v.title)}" data-thumb width="320" height="180" loading="lazy" decoding="async">
         <span class="vchip__txt"><b>${vstat(v, ev)}</b><span>${esc(v.title)}</span></span></button></li>`).join('')}</ul>`
     : '';
   const body = t
@@ -386,7 +386,7 @@ export function citedBy(a: Analysis): Map<string, string[]> {
 export function drawerHtml(v: EvidenceVideo, ev: Evidence | undefined, by: string[]): string {
   const m = multiple(v, ev);
   const rate = v.likes > 0 && v.views > 0 ? `${((v.likes / v.views) * 100).toFixed(1)}%` : null;
-  return `<img class="drawer__img" src="${esc(thumbUrl(v.id))}" alt="Thumbnail: ${esc(v.title)}" width="320" height="180" loading="lazy" decoding="async">
+  return `<img class="drawer__img" src="${esc(thumbUrl(v.id))}" alt="Thumbnail: ${esc(v.title)}" data-thumb width="320" height="180" loading="lazy" decoding="async">
     <p class="drawer__tag">${esc(v.tags.join(' · '))} ${chip('observed')}</p>
     <h2 class="drawer__title" id="drawer-title">${esc(v.title)}</h2>
     <dl class="drawer__facts">

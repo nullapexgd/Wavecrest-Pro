@@ -10,6 +10,7 @@ import { formatDate } from '../data/model.ts';
 import * as api from './api.ts';
 import { ApiError } from './api.ts';
 import { citedBy, chip, drawerHtml, esc, renderReport } from './report.ts';
+import { watchThumbs } from './thumbs.ts';
 import { tagIndex } from './evidence.ts';
 import type { Me, Report, ReportListItem } from './types.ts';
 
@@ -204,6 +205,7 @@ function show(report: Report): void {
   setTitle(`${report.channel.name} report`);
   actions(report);
   bindFeedback(report);
+  watchThumbs(root, root.querySelector<HTMLElement>('.rp__main') ?? root);
   const rail = root.querySelectorAll<HTMLAnchorElement>('[data-spy]');
   const secs = [...root.querySelectorAll<HTMLElement>('[data-section]')];
   spy = new IntersectionObserver(entries => {
@@ -318,6 +320,7 @@ function openVideo(find: (ev: NonNullable<Report['analysis']['evidence']>) => Re
 function wire(): void {
   drawer = document.querySelector<HTMLDialogElement>('[data-drawer]')!;
   drawer.querySelector('[data-drawer-close]')!.addEventListener('click', () => drawer.close());
+  watchThumbs(drawer, drawer.querySelector<HTMLElement>('[data-drawer-body]')!); // the drawer's picture gets the same fallback
   drawer.addEventListener('click', e => { if (e.target === drawer) drawer.close(); });
 
   root.addEventListener('click', async e => {
