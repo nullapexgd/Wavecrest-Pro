@@ -21,7 +21,7 @@ test('signed-in feedback is emailed to the owner with the account email and repo
   await handler(post({ useful: 'no', message: 'Missing thumbnails', reportId: RID }), res);
   assert.equal(res.statusCode, 200);
   assert.equal(sent.length, 1);
-  assert.equal(sent[0].to, 'owner@example.test');
+  assert.deepEqual(sent[0].to, ['owner@example.test']);
   assert.match(sent[0].html, /Not useful/);
   assert.match(sent[0].html, /creator@example\.test/);
   assert.match(sent[0].html, new RegExp(RID));
@@ -59,4 +59,17 @@ test('a malformed report id is dropped, not emailed; missing email config answer
   const c = rig({ send: async () => { throw new Error('resend 500 key re_SECRET'); } }); const rc = makeRes(); await c.handler(post({ useful: 'yes' }), rc);
   assert.equal(rc.statusCode, 502);
   assert.doesNotMatch(everythingSent(rc), /re_SECRET|resend 500/);
+});
+
+test('NOTIFY_EMAIL may list several addresses; blanks and malformed entries are ignored', async () => {
+  const { handler, sent } = rig({ env: { ...ENV, NOTIFY_EMAIL: ' dev@example.test , owner+dev@example.test,,not-an-address,<x@y.z> ' } });
+  const res = makeRes();
+  await handler(post({ useful: 'yes' }), res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(sent[0].to, ['dev@example.test', 'owner+dev@example.test']);
+  const none = rig({ env: { ...ENV, NOTIFY_EMAIL: 'nope, also nope' } });
+  const r2 = makeRes();
+  await none.handler(post({ useful: 'yes' }), r2);
+  assert.equal(r2.statusCode, 503);
+  assert.equal(none.sent.length, 0);
 });
