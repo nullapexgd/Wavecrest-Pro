@@ -153,3 +153,12 @@ test('the report lists the picks with working links, and says so when there are 
   assert.match(renderReport(report({ hooks: {} })), /made before Wavecrest saved its video data/);
   assert.match(renderReport(report({ statsPurgedAt: '2026-03-05T00:00:00Z', evidence: { ...ev, medianViews: 0, videos: ev.videos.map(v => ({ ...v, views: 0 })) } })), /Removed after 30 days/);
 });
+
+test('hook examples stored as citation tags show the video they point to, not "Not matched"', () => {
+  const html = renderReport(report({ evidence: ev, hooks: { primaryPattern: 'x', examples: ['T1', ' R1 ', 'T99', 'A real title that is not in the evidence'] } }));
+  const hooks = html.slice(html.indexOf('id="s-hooks"'), html.indexOf('id="s-thumbnails"'));
+  assert.match(hooks, /<q>Alpha video<\/q>[\s\S]*?Real title/, 'T1 resolves to its title');
+  assert.match(hooks, /data-tag="T1"/, 'and keeps a button that opens the evidence');
+  assert.equal((hooks.match(/Not matched to a saved title/g) ?? []).length, 2, 'only T99 and the unknown title stay unmatched');
+  assert.doesNotMatch(hooks, /<q>T1<\/q>/);
+});

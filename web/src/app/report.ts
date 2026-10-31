@@ -181,7 +181,11 @@ function map(ev: Evidence | undefined, a: Analysis): string {
 function hooks(a: Analysis, ev: Evidence | undefined): string {
   const h = a.hooks;
   if (!h) return section('hooks', `<div class="empty"><p>No hook analysis in this report.</p></div>`);
+  // Some reports stored a citation tag ("T5") where the title belongs; show the video it points to instead.
+  const byTag = tagIndex(ev);
   const examples = (h.examples ?? []).map(t => {
+    const tagged = typeof t === 'string' && /^\s*[TR]\d{1,3}\s*$/.test(t) ? byTag.get(t.trim()) : undefined;
+    if (tagged) return `<li><q>${esc(tagged.title)}</q> ${chip('observed', 'Real title')} ${cite(t.trim(), ev)}</li>`;
     const real = isRealTitle(t, ev);
     return `<li><q>${esc(t)}</q> ${ev ? (real ? chip('observed', 'Real title') : `<span class="muted">Not matched to a saved title</span>`) : ''}</li>`;
   }).join('');
