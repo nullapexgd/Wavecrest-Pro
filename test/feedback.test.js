@@ -73,3 +73,9 @@ test('NOTIFY_EMAIL may list several addresses; blanks and malformed entries are 
   assert.equal(r2.statusCode, 503);
   assert.equal(none.sent.length, 0);
 });
+
+test('NOTIFY_EMAIL entries may carry a display name in front of the address', async () => {
+  const { handler, sent } = rig({ env: { ...ENV, NOTIFY_EMAIL: 'Wavecrest <dev@example.test>, Wavecrest Dev <owner+dev@example.test>' } });
+  await handler(post({ useful: 'no' }), makeRes());
+  assert.deepEqual(sent[0].to, ['Wavecrest <dev@example.test>', 'Wavecrest Dev <owner+dev@example.test>']);
+});
