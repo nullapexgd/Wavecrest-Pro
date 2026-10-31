@@ -219,29 +219,40 @@ function show(report: Report): void {
 }
 
 function bindFeedback(r: Report): void {
-  const form = root.querySelector<HTMLFormElement>('[data-feedback-form]');
-  if (!form) return;
+  const box = root.querySelector<HTMLElement>('[data-feedback]');
+  const form = box?.querySelector<HTMLFormElement>('[data-feedback-form]');
+  if (!box || !form) return;
   const send = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const label = send.querySelector<HTMLElement>('[data-send-label]')!;
   const status = form.querySelector<HTMLElement>('[data-feedback-status]')!;
   const text = form.querySelector<HTMLTextAreaElement>('textarea')!;
+  const count = form.querySelector<HTMLElement>('[data-feedback-count]')!;
   const choices = [...form.querySelectorAll<HTMLButtonElement>('[data-useful]')];
   let useful: 'yes' | 'no' | null = null;
   choices.forEach(b => b.addEventListener('click', () => {
     useful = b.dataset.useful as 'yes' | 'no';
     choices.forEach(c => c.setAttribute('aria-pressed', String(c === b)));
     send.disabled = false;
+    status.textContent = ''; status.removeAttribute('data-error');
   }));
+  text.addEventListener('input', () => {
+    count.textContent = text.value ? `${text.value.length} / ${text.maxLength}` : '';
+  });
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    if (!useful) return;
-    send.disabled = true; status.textContent = 'Sending…';
+    if (!useful || send.hasAttribute('data-loading')) return;
+    send.setAttribute('data-loading', ''); send.setAttribute('aria-busy', 'true');
+    label.textContent = 'Sending'; status.textContent = ''; status.removeAttribute('data-error');
     try {
       await api.sendFeedback(useful, text.value, r.reportId);
-      status.textContent = 'Thank you. This helps us decide what to fix next.';
+      box.classList.add('is-sent');
+      box.querySelector<HTMLElement>('[data-feedback-done]')!.hidden = false;
+      box.querySelector<HTMLElement>('[data-feedback-sr]')!.textContent = 'Feedback sent. Thank you.';
       form.querySelectorAll<HTMLElement>('button, textarea').forEach(el => el.setAttribute('disabled', ''));
     } catch {
       status.textContent = 'Could not send that. Try again in a moment.';
-      send.disabled = false;
+      status.setAttribute('data-error', '');
+      send.removeAttribute('data-loading'); send.removeAttribute('aria-busy'); label.textContent = 'Send feedback';
     }
   });
 }

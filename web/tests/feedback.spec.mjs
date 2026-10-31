@@ -40,9 +40,16 @@ test('the owner can send feedback: choose, write, send, confirm', async ({ page 
   await expect(form.getByRole('button', { name: 'Useful', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(send).toBeEnabled();
   await form.getByLabel(/What is missing or wrong/).fill('Add thumbnails');
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/feedback-${page.viewportSize().width}.png`, fullPage: false });
+  await page.waitForTimeout(450); // let the 200ms transitions finish before looking
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/feedback-${page.viewportSize().width}-${test.info().project.name}.png`, fullPage: false });
+  const box = await send.boundingBox(), label = await send.locator('[data-send-label]').boundingBox();
+  expect(Math.abs((label.x + label.width / 2) - (box.x + box.width / 2))).toBeLessThan(2); // label dead centre in the button
   await send.click();
-  await expect(form.locator('[data-feedback-status]')).toContainText('Thank you');
+  await expect(page.locator('[data-feedback-done]')).toBeVisible();
+  await expect(page.locator('[data-feedback-done]')).toContainText('Thank you');
+  await expect(page.locator('[data-feedback-sr]')).toHaveText('Feedback sent. Thank you.');
+  await page.waitForTimeout(900);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/feedback-sent-${page.viewportSize().width}-${test.info().project.name}.png`, fullPage: false });
   expect(sent).toEqual([{ useful: 'yes', message: 'Add thumbnails', reportId: base.reportId }]);
   await noOverflow(page);
   expect(errors).toEqual([]);

@@ -212,3 +212,23 @@ test('live-run regressions: plain titles are not sponsor signals; a video in bot
   const s = run({ hooks: { primaryPattern: '[A] [B] [C]', patternTags: allTags } }, c).analysis;
   assert.match(s.hooks.frequency, /cited by the model; not independently counted/);
 });
+
+test('product channels: measured product claims the titles do not support are dropped; topics and grounded numbers stay', () => {
+  const c = build({ name: 'Tech News' }, 40, { title: techTitle });
+  const t1 = c.tag(c.videos[0].id), idea = (title, over = {}) => ({ title, rationale: 'Fits.', tags: t1, identityFit: 'high', effort: 'low', ...over });
+  const claims = ['Apple Watch Ultra can survive a drop from 10 ft', 'the new M3 chip runs AI tasks 3× faster', 'iPhone 18 Pro battery lasts double the usual', 'this laptop charges in 5 mins'];
+  const keepers = ['Apple Watch Ultra durability test: what actually breaks?', 'Is the new chip really faster for AI?'];
+  const out = run({ channelType: 'creator', niche: 'Consumer Tech', videoIdeas: [...claims, ...keepers].map(t => idea(t)) }, c);
+  assert.deepEqual(out.analysis.videoIdeas.map(i => i.title), keepers);
+  assert.equal(out.dropped.filter(d => d.kind === 'idea' && /measured product claim/.test(d.why)).length, claims.length);
+});
+
+test('product channels: a measurement that appears in the titles shown is allowed; other niches are not restricted', () => {
+  const grounded = build({ name: 'Tech News' }, 40, { title: i => (i === 0 ? 'the phone hits 25 in 5 mins with 80w charging' : techTitle(i)) });
+  const t = grounded.tag(grounded.videos[0].id);
+  const ok = run({ channelType: 'creator', niche: 'Consumer Tech', videoIdeas: [{ title: 'Can 80w charging really fill a phone in 5 mins?', rationale: 'Builds on it.', tags: t, identityFit: 'high', effort: 'low' }] }, grounded);
+  assert.equal(ok.analysis.videoIdeas.length, 1);
+  const diy = build({ name: 'Maker' }, 40, { title: i => ['Building a workbench', 'Router jig basics', 'Sanding mistakes', 'Shop tour'][i % 4] + (i >= 4 ? ` part ${i}` : '') });
+  const d = run({ channelType: 'creator', niche: 'DIY', videoIdeas: [{ title: 'Build a shelf in 5 hours', rationale: 'A challenge.', tags: diy.tag(diy.videos[0].id), identityFit: 'high', effort: 'medium' }] }, diy);
+  assert.equal(d.analysis.videoIdeas.length, 1);
+});

@@ -96,21 +96,64 @@ ol { list-style: none; padding: 0; margin: 0; }
 .metric dd { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; }
 .rp__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: flex-end; grid-column: 2; grid-row: 1; }
 .sharebox { display: flex; flex: 1 1 100%; gap: var(--s-3); flex-wrap: wrap; }
-/* ───────────── feedback (end of an owned report) ───────────── */
+/* ───────────── feedback (end of an owned report) ─────────────
+   One orchestrated moment: the thank-you (check draws, form folds away). Everything else answers an action
+   (hover, press, focus, send) in 150 to 250ms, on transform and opacity only. Reduced motion is the global switch
+   in base.css (durations drop to ~0), so the end states below must be the complete picture. */
 .fb { margin-top: var(--s-8); padding-top: var(--s-6); border-top: 1px solid var(--line); max-width: 40rem; }
+@supports (animation-timeline: view()) {
+  .fb { animation: fb-in linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+  html[data-motion='reduced'] .fb { animation: none; }
+}
+@keyframes fb-in { from { opacity: 0.55; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .fb__title { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; margin: 0 0 var(--s-4); }
+.fb__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 260ms var(--ease-out), opacity 200ms var(--ease-out); }
+.fb__panel-in { min-height: 0; overflow: hidden; padding: 3px; margin: -3px; } /* room for the focus rings */
+.fb.is-sent .fb__panel { grid-template-rows: 0fr; opacity: 0; }
 .fb form { display: grid; gap: var(--s-3); }
 .fb__choice { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+.fb__opt { gap: var(--s-2); transition: background-color var(--t-ui) var(--ease-out), border-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out), transform 150ms var(--ease-out); }
+.fb__opt:hover { transform: translateY(-1px); }
+.fb__opt:active { transform: scale(0.97); }
+.fb__opt[aria-pressed='true'] { background: var(--ink); color: var(--paper-2); border-color: var(--ink); }
+.fb__tick { display: grid; place-items: center; width: 1.125rem; height: 1.125rem; border-radius: var(--r-pill); border: 1.5px solid currentColor; opacity: 0.55; transition: opacity var(--t-ui) var(--ease-out), transform 240ms var(--ease-spring); }
+.fb__tick svg { width: 0.75rem; height: 0.75rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 220ms var(--ease-out) 60ms; }
+.fb__tick path { stroke-dasharray: 14; stroke-dashoffset: 14; transition: stroke-dashoffset 220ms var(--ease-out) 60ms; }
+.fb__opt[aria-pressed='true'] .fb__tick { opacity: 1; transform: scale(1.08); }
+.fb__opt[aria-pressed='true'] .fb__tick path { stroke-dashoffset: 0; }
 .fb__label { font-weight: 600; }
+.fb__field { position: relative; }
 .fb textarea {
-  width: 100%; min-height: 5.5rem; padding: var(--s-3) var(--s-4); font: inherit; color: var(--ink); resize: vertical;
+  width: 100%; min-height: 5.5rem; padding: var(--s-3) var(--s-4) var(--s-5); font: inherit; color: var(--ink); resize: vertical;
   background: var(--paper-2); border: 1.5px solid var(--ink-soft); border-radius: var(--r-surface);
-  transition: border-color var(--t-ui) var(--ease-out);
+  transition: border-color var(--t-ui) var(--ease-out), box-shadow var(--t-ui) var(--ease-out);
 }
 .fb textarea:hover { border-color: var(--ink); }
-.fb textarea:focus-visible { border-color: var(--ink); outline-offset: 2px; }
+.fb textarea:focus-visible { border-color: var(--ink); outline-offset: 2px; box-shadow: 0 0 0 4px color-mix(in oklab, var(--tide) 24%, transparent); }
+.fb__count { position: absolute; right: calc(var(--s-4) + 0.875rem); bottom: var(--s-2); font: var(--fs-data) var(--font-data); color: var(--ink-soft); pointer-events: none; opacity: 0; transition: opacity var(--t-ui) var(--ease-out); }
+.fb__count:not(:empty) { opacity: 1; }
 .fb__row { display: flex; gap: var(--s-4); align-items: center; flex-wrap: wrap; }
+.fb__send { padding-inline: var(--s-6); justify-content: center; min-width: 11rem; } /* .btn--primary keeps room for an arrow; this one has none, so the label sits dead centre */
+.fb__send:not(:disabled):hover { transform: translateY(-1px); }
+.fb__send:not(:disabled):active { transform: scale(0.98); }
+.fb__send { transition: background-color var(--t-ui) var(--ease-out), transform 150ms var(--ease-out), opacity var(--t-ui) var(--ease-out); }
+.fb__spin { display: none; width: 1rem; height: 1rem; border-radius: var(--r-pill); border: 2px solid color-mix(in oklab, currentColor 30%, transparent); border-top-color: currentColor; animation: fb-spin 700ms linear infinite; }
+.fb__send[data-loading] { opacity: 1; cursor: progress; }
+.fb__send[data-loading] .fb__spin { display: inline-block; }
+@keyframes fb-spin { to { transform: rotate(360deg); } }
 .fb__status { margin: 0; color: var(--ink); font-size: var(--fs-small); }
+.fb__status[data-error] { font-weight: 600; animation: fb-nope 260ms var(--ease-out); }
+@keyframes fb-nope { 20% { transform: translateX(-4px); } 45% { transform: translateX(4px); } 70% { transform: translateX(-2px); } to { transform: none; } }
+.fb__done { display: flex; align-items: center; gap: var(--s-4); margin-top: calc(var(--s-4) * -1); }
+.fb__done[hidden] { display: none; }
+.fb__check { flex: none; width: 3.25rem; height: 3.25rem; fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.fb__check circle { stroke-dasharray: 1; stroke-dashoffset: 1; animation: fb-draw 520ms var(--ease-out) 120ms both; }
+.fb__check path { stroke: var(--signal); stroke-dasharray: 1; stroke-dashoffset: 1; animation: fb-draw 320ms var(--ease-out) 520ms both; }
+.fb__thanks { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; animation: fb-rise 320ms var(--ease-out) 280ms both; }
+.fb__done .note { margin: 0; animation: fb-rise 320ms var(--ease-out) 380ms both; }
+@keyframes fb-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes fb-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fb__fine { margin-top: var(--s-4); }
 @media print { .fb { display: none; } }
 
 .sharebox input { flex: 1 1 16rem; min-height: var(--hit); padding: 0 var(--s-4); border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--paper-2); color: var(--ink); font: var(--fs-data) var(--font-data); }

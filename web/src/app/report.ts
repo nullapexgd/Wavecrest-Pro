@@ -268,19 +268,26 @@ function evidenceTable(ev: Evidence | undefined): string {
 /** One question at the end of an owned report; the answer is emailed to the team (api/feedback). */
 function feedback(r: Report): string {
   if (!r.isOwner || r.fixture) return '';
+  const opt = (v: string, label: string) => `<button type="button" class="btn btn--ghost fb__opt" data-useful="${v}" aria-pressed="false">
+          <span class="fb__tick" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>${label}</span></button>`;
   return `<section class="fb" aria-labelledby="h-feedback" data-feedback>
     <h2 class="fb__title" id="h-feedback">Was this report useful?</h2>
-    <form data-feedback-form novalidate>
-      <div class="fb__choice" role="group" aria-labelledby="h-feedback">
-        <button type="button" class="btn btn--ghost" data-useful="yes" aria-pressed="false"><span>Useful</span></button>
-        <button type="button" class="btn btn--ghost" data-useful="no" aria-pressed="false"><span>Not useful</span></button>
-      </div>
-      <label class="fb__label" for="fb-msg">What is missing or wrong? <span class="muted">Optional</span></label>
-      <textarea id="fb-msg" name="message" rows="3" maxlength="1000"></textarea>
-      <div class="fb__row"><button type="submit" class="btn btn--primary" disabled><span>Send feedback</span></button>
-        <p class="fb__status" role="status" data-feedback-status></p></div>
-    </form>
-    <p class="note">Sent to the Wavecrest team together with your account email, so we can reply. Nothing is shown publicly.</p>
+    <div class="fb__panel"><div class="fb__panel-in">
+      <form data-feedback-form novalidate>
+        <div class="fb__choice" role="group" aria-labelledby="h-feedback">${opt('yes', 'Useful')}${opt('no', 'Not useful')}</div>
+        <label class="fb__label" for="fb-msg">What is missing or wrong? <span class="muted">Optional</span></label>
+        <div class="fb__field"><textarea id="fb-msg" name="message" rows="3" maxlength="1000"></textarea>
+          <span class="fb__count" data-feedback-count aria-hidden="true"></span></div>
+        <div class="fb__row"><button type="submit" class="btn btn--primary fb__send" disabled><span class="fb__spin" aria-hidden="true"></span><span data-send-label>Send feedback</span></button>
+          <p class="fb__status" role="status" data-feedback-status></p></div>
+      </form>
+    </div></div>
+    <div class="fb__done" data-feedback-done hidden>
+      <svg class="fb__check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" pathLength="1"/><path d="M15 27l8 8 14-16" pathLength="1"/></svg>
+      <div><p class="fb__thanks">Thank you.</p><p class="note">This helps us decide what to fix next.</p></div>
+    </div>
+    <span class="sr-only" role="status" data-feedback-sr></span>
+    <p class="note fb__fine">Sent to the Wavecrest team together with your account email, so we can reply. Nothing is shown publicly.</p>
   </section>`;
 }
 
