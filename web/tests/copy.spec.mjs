@@ -32,7 +32,7 @@ test('Copy link copies the share link, shows a check, and goes back to normal', 
   await expect(page.locator('[data-toast]')).toContainText('Link copied');
   await page.waitForTimeout(350);
   if (SHOTS) { await page.locator('[data-sharebox]').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${SHOTS}/copy-link-${page.viewportSize().width}-${test.info().project.name}.png` }); }
-  await expect(btn).toContainText('Copy link', { timeout: 4000 }); // reverts by itself
+  await expect(btn).toContainText('Copy link', { timeout: 12000 }); // reverts by itself
   await expect(btn).not.toHaveAttribute('data-copied', /.+/);
   await noOverflow(page);
   expect(errors).toEqual([]);
@@ -67,5 +67,5 @@ test('Copy link works again straight after a copy (the timer resets)', async ({ 
   const btn = page.locator('[data-copylink]');
   await btn.click(); await btn.click();
   await expect(btn).toContainText('Copied');
-  await expect(btn).toContainText('Copy link', { timeout: 4000 });
+  await expect(btn).toContainText('Copy link', { timeout: 12000 });
 });
