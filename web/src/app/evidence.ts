@@ -81,5 +81,22 @@ export function parseFrequency(text: unknown): number | null {
   return m ? Number(m[1]) : null;
 }
 
+export interface ClipPick { video: EvidenceVideo; multiple: number; idea?: string }
+
+/**
+ * Long-form videos that clearly beat the channel median: the ones worth cutting into Shorts. Arithmetic on the stored
+ * evidence only (no model, nothing invented); a purged report has no views, so it has no picks. `idea` is the first
+ * idea in the report that cites the video, used to steer the clip search.
+ */
+export function clipPicks(ev: Evidence | undefined, ideas: { title?: string; rationale?: string }[] = [], max = 5): ClipPick[] {
+  if (!ev || !(ev.medianViews > 0)) return [];
+  return ev.videos
+    .filter(v => !v.short && v.duration >= 480 && v.views >= 1.5 * ev.medianViews)
+    .map(v => ({ video: v, multiple: v.views / ev.medianViews }))
+    .sort((a, b) => b.multiple - a.multiple)
+    .slice(0, max)
+    .map(p => ({ ...p, idea: ideas.find(i => i.title && resolveCitations(i.rationale, ev).videos.some(x => x.id === p.video.id))?.title }));
+}
+
 export const thumbUrl = (id: string) => `https://i.ytimg.com/vi/${encodeURIComponent(id)}/mqdefault.jpg`;
 export const watchUrl = (id: string) => `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`;

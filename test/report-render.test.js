@@ -112,3 +112,44 @@ test('a purged report renders without zero views, NaN or invented numbers, and s
 test('a report that is not purged shows no purge notice', () => {
   assert.doesNotMatch(renderReport(report({ evidence: ev })), /Statistics removed/);
 });
+
+// "Clip these": long videos that clearly beat the channel median, chosen by arithmetic on stored evidence.
+import { clipPicks } from '../web/src/app/evidence.ts';
+import { reelcutLink } from '../web/src/app/report.ts';
+const long = (id, title, views, extra = {}) => ({ id, title, publishedAt: '2026-02-01T00:00:00Z', views, likes: 10, duration: 900, short: false, tags: [id], ...extra });
+const clipEv = { medianViews: 1000, computedAt: '2026-02-01T00:00:00Z', videos: [
+  long('hit1', 'Big hit', 4000), long('hit2', 'Solid', 2000), long('meh', 'Below bar', 1200), long('tiny', 'Too short a video', 5000, { duration: 300 }),
+  long('shortv', 'A Short', 9000, { short: true, duration: 40 }), long('noviews', 'No views', 0)] };
+
+test('clip picks: long-form, 8+ minutes, at least 1.5x the median, best first, nothing invented', () => {
+  const picks = clipPicks(clipEv, [{ title: 'Follow up the hit', rationale: 'Builds on hit1.' }, { title: 'Cited by tag', rationale: 'Builds on T2.' }]);
+  assert.deepEqual(picks.map(p => p.video.id), ['hit1', 'hit2']);
+  assert.deepEqual(picks.map(p => p.multiple), [4, 2]);
+  assert.deepEqual(clipPicks(undefined), []);
+  assert.deepEqual(clipPicks({ ...clipEv, medianViews: 0 }), [], 'a purged report (no median) has no picks');
+  assert.equal(clipPicks(clipEv, [], 1).length, 1);
+});
+test('clip picks attach the first idea that cites the video', () => {
+  const ev = { ...clipEv, videos: [long('aaa', 'Hit', 4000, { tags: ['T1'] }), long('bbb', 'Other', 3000, { tags: ['T2'] })] };
+  const picks = clipPicks(ev, [{ title: 'Idea one', rationale: 'Builds on T1 and T2.' }, { title: 'Idea two', rationale: 'Builds on T2.' }]);
+  assert.deepEqual(picks.map(p => p.idea), ['Idea one', 'Idea one']);
+});
+test('Send to Reelcut is a plain link carrying the video and a brief, escaped', () => {
+  const link = new URL(reelcutLink('abc123', 'Say "hi" & <go>'));
+  assert.equal(link.origin, 'http://127.0.0.1:3000');
+  assert.equal(link.searchParams.get('url'), 'https://www.youtube.com/watch?v=abc123');
+  assert.match(link.searchParams.get('instructions'), /Say "hi" & <go>/);
+  assert.ok(link.searchParams.get('instructions').length < 400);
+});
+test('the report lists the picks with working links, and says so when there are none or the numbers were purged', () => {
+  const idea = [{ title: 'Follow up', rationale: 'Builds on T1.' }];
+  const ev = { ...clipEv, videos: [long('aaa', 'Hit <b>x</b>', 4000, { tags: ['T1'] }), long('bbb', 'Meh', 900, { tags: ['T2'] })] };
+  const html = renderReport(report({ evidence: ev, videoIdeas: idea }));
+  assert.match(html, /id="s-clips"/);
+  assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/\?url=https%3A%2F%2Fwww\.youtube\.com%2Fwatch%3Fv%3Daaa/);
+  assert.doesNotMatch(html, /<b>x<\/b>/, 'titles are escaped');
+  assert.match(html, /Copy this list as JSON/);
+  assert.match(renderReport(report({ evidence: { ...ev, videos: [long('bbb', 'Meh', 900)] } })), /No long video in this report clearly beat/);
+  assert.match(renderReport(report({ hooks: {} })), /made before Wavecrest saved its video data/);
+  assert.match(renderReport(report({ statsPurgedAt: '2026-03-05T00:00:00Z', evidence: { ...ev, medianViews: 0, videos: ev.videos.map(v => ({ ...v, views: 0 })) } })), /Removed after 30 days/);
+});

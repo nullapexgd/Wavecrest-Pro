@@ -96,6 +96,18 @@ ol { list-style: none; padding: 0; margin: 0; }
 .metric dd { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; }
 .rp__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: flex-end; grid-column: 2; grid-row: 1; }
 .sharebox { display: flex; flex: 1 1 100%; gap: var(--s-3); flex-wrap: wrap; }
+/* ───────────── clip these (hand-off to Reelcut) ───────────── */
+.picks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+.pick { display: grid; grid-template-columns: 8rem 1fr auto; gap: var(--s-4); align-items: center; padding: var(--s-3) 0; border-top: 1px solid var(--line); }
+.pick:first-child { border-top: 0; }
+.pick img { width: 8rem; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.5rem; background: var(--paper-2); }
+.pick__txt { min-width: 0; }
+.pick__txt .linklike { text-align: left; font-weight: 600; overflow-wrap: anywhere; }
+.pick__txt .meta { margin: var(--s-1) 0 0; }
+.pick__go { white-space: nowrap; transition: transform 150ms var(--ease-out), background-color var(--t-ui) var(--ease-out), border-color var(--t-ui) var(--ease-out); }
+.pick__go:hover { transform: translateY(-1px); }
+@media (max-width: 640px) { .pick { grid-template-columns: 5.5rem 1fr; } .pick img { width: 5.5rem; } .pick__go { grid-column: 1 / -1; justify-content: center; } }
+
 /* ───────────── feedback (end of an owned report) ─────────────
    One orchestrated moment: the thank-you (check draws, form folds away). Everything else answers an action
    (hover, press, focus, send) in 150 to 250ms, on transform and opacity only. Reduced motion is the global switch

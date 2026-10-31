@@ -15,7 +15,7 @@ for (const { version, report } of fixtures) {
   test(`${version}: saved report deep link, layout and legacy citations`, async ({ page }) => {
     const { requests, errors } = await openReport(page, report);
     await expect(page.getByRole('heading', { name: report.channel.name, exact: true })).toBeVisible();
-    await expect(page.locator('[data-section]')).toHaveCount(11);
+    await expect(page.locator('[data-section]')).toHaveCount(12);
     await expect(page.locator('#s-evidence')).toContainText('made before Wavecrest saved its evidence');
     await expect(page.locator('button.cite')).toHaveCount(0);
     await expect(page.locator('[data-actions]')).not.toContainText('Delete');

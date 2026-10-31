@@ -5,7 +5,7 @@ import { formatDate, formatMultiple, formatViews } from '../data/model.ts';
 import { performanceMap, pillarBar, rhythm } from './charts.ts';
 import {
   type Evidence, type EvidenceVideo, type Provenance, type Strength,
-  citedTags, isRealTitle, multiple, resolveCitations, strengthOf, tagIndex, thumbUrl, watchUrl
+  citedTags, clipPicks, isRealTitle, multiple, resolveCitations, strengthOf, tagIndex, thumbUrl, watchUrl
 } from './evidence.ts';
 import type { Analysis, Report } from './types.ts';
 
@@ -54,6 +54,7 @@ export function cite(text: unknown, ev: Evidence | undefined): string {
 
 const SECTIONS: { id: string; label: string; kinds: Provenance[] }[] = [
   { id: 'next', label: 'What to make next', kinds: ['inferred'] },
+  { id: 'clips', label: 'Clip these', kinds: ['calculated'] },
   { id: 'map', label: 'Performance map', kinds: ['observed', 'calculated'] },
   { id: 'hooks', label: 'Hooks', kinds: ['inferred'] },
   { id: 'thumbnails', label: 'Thumbnails', kinds: ['inferred'] },
@@ -123,6 +124,33 @@ const vstat = (v: EvidenceVideo, ev: Evidence | undefined): string => {
   return m ? `${formatMultiple(m)} median` : v.views > 0 ? `${formatViews(v.views)} views` : '';
 };
 const PURGED_NOTE = 'Removed after 30 days.';
+
+/* ───────────── clip these (hand-off to Reelcut) ───────────── */
+
+/** Reelcut runs on the owner's own machine, so this is a plain link to it, never a request from this page. */
+const REELCUT = 'http://127.0.0.1:3000/';
+const clipBrief = (idea?: string) => (idea
+  ? `Find the moments that best support this video idea: "${idea.slice(0, 160)}". Prefer a clear hook and a payoff, no setup needed.`
+  : 'Find the strongest standalone moments: a clear hook and a payoff, no setup needed.');
+export const reelcutLink = (id: string, idea?: string) => `${REELCUT}?${new URLSearchParams({ url: watchUrl(id), instructions: clipBrief(idea) })}`;
+
+function clips(a: Analysis, ev: Evidence | undefined, r: Report): string {
+  const intro = 'Long videos that clearly beat this channel\'s median are the ones worth cutting into Shorts. Picked by arithmetic on the stored numbers, not by the model.';
+  if (a.statsPurgedAt) return section('clips', `<div class="empty"><p>This list is built from view counts. ${PURGED_NOTE} Run a new analysis for a current list.</p></div>`, intro);
+  const picks = clipPicks(ev, a.videoIdeas);
+  if (!picks.length) {
+    return section('clips', `<div class="empty"><p>${ev ? 'No long video in this report clearly beat the channel median, so there is nothing to recommend cutting yet.' : 'This report was made before Wavecrest saved its video data, so it cannot recommend clips. Run a new analysis.'}</p></div>`, intro);
+  }
+  const bundle = JSON.stringify({ source: 'wavecrest', report: r.reportId, channel: r.channel.name,
+    videos: picks.map(p => ({ id: p.video.id, url: watchUrl(p.video.id), title: p.video.title, instructions: clipBrief(p.idea) })) });
+  const rows = picks.map(p => `<li class="pick">
+      <img src="${esc(thumbUrl(p.video.id))}" alt="" width="160" height="90" loading="lazy" decoding="async">
+      <div class="pick__txt"><button type="button" class="linklike" data-video="${esc(p.video.id)}">${esc(p.video.title)}</button>
+        <p class="meta">${esc(formatMultiple(p.multiple))} the channel median · ${Math.round(p.video.duration / 60)} min${p.idea ? ` · supports idea: ${esc(p.idea)}` : ''}</p></div>
+      <a class="btn btn--ghost pick__go" href="${esc(reelcutLink(p.video.id, p.idea))}" target="_blank" rel="noopener noreferrer"><span>Send to Reelcut</span></a></li>`).join('');
+  return section('clips', `<ul class="picks">${rows}</ul>
+    <p class="note">Reelcut is a separate app that runs on your own computer. The button opens it with the video and a brief filled in; nothing is sent from this page. <button type="button" class="linklike" data-copy="${esc(bundle)}" data-copymsg="List copied as JSON">Copy this list as JSON</button></p>`, intro);
+}
 
 /* ───────────── performance map ───────────── */
 
@@ -327,7 +355,7 @@ export function renderReport(r: Report): string {
       <nav class="rail" aria-label="Report sections"><ol>${rail}</ol></nav>
       <div class="rp__main">
         ${a.statsPurgedAt ? `<p class="notice" role="note"><b>Statistics removed.</b> YouTube's data rules do not allow Wavecrest to keep view counts and similar numbers for more than 30 days, so they were removed from this report on ${day(a.statsPurgedAt)}. The analysis text is kept. Run a new analysis to see current numbers.</p>` : ''}
-        ${ideas(a, ev)}${map(ev, a)}${hooks(a, ev)}${thumbnails(a, ev)}${cadence(a, ev)}${audience(a, ev)}${pillars(a, ev)}${monetization(a, ev)}${gaps(a, ev)}${earnings(a)}${evidenceTable(ev)}${feedback(r)}
+        ${ideas(a, ev)}${clips(a, ev, r)}${map(ev, a)}${hooks(a, ev)}${thumbnails(a, ev)}${cadence(a, ev)}${audience(a, ev)}${pillars(a, ev)}${monetization(a, ev)}${gaps(a, ev)}${earnings(a)}${evidenceTable(ev)}${feedback(r)}
       </div>
     </div>
   </div>`;

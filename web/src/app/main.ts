@@ -328,7 +328,7 @@ function wire(): void {
     else if (t.classList.contains('mk')) openVideo(ev => ev.videos.find(v => v.id === t.getAttribute('data-id')));
     else if (t.dataset.copy || t.dataset.copylink) {
       const text = t.dataset.copy ?? root.querySelector<HTMLInputElement>('[data-link]')?.value ?? '';
-      try { await navigator.clipboard.writeText(text); toast(t.dataset.copy ? 'Title copied' : 'Link copied'); }
+      try { await navigator.clipboard.writeText(text); toast(t.dataset.copy ? (t.dataset.copymsg ?? 'Title copied') : 'Link copied'); }
       catch { toast('Copy is blocked here. Select and copy it manually.'); }
     }
   });
