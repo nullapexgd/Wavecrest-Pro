@@ -11,6 +11,7 @@ import * as api from './api.ts';
 import { ApiError } from './api.ts';
 import { citedBy, chip, drawerHtml, esc, renderReport } from './report.ts';
 import { watchThumbs } from './thumbs.ts';
+import { copyText, flashCopied } from './copy.ts';
 import { tagIndex } from './evidence.ts';
 import type { Me, Report, ReportListItem } from './types.ts';
 
@@ -329,10 +330,14 @@ function wire(): void {
     if (t.dataset.tag) openVideo(ev => tagIndex(ev).get(t.dataset.tag!));
     else if (t.dataset.video) openVideo(ev => ev.videos.find(v => v.id === t.dataset.video));
     else if (t.classList.contains('mk')) openVideo(ev => ev.videos.find(v => v.id === t.getAttribute('data-id')));
-    else if (t.dataset.copy || t.dataset.copylink) {
-      const text = t.dataset.copy ?? root.querySelector<HTMLInputElement>('[data-link]')?.value ?? '';
-      try { await navigator.clipboard.writeText(text); toast(t.dataset.copy ? (t.dataset.copymsg ?? 'Title copied') : 'Link copied'); }
-      catch { toast('Copy is blocked here. Select and copy it manually.'); }
+    else if (t.dataset.copy !== undefined || t.hasAttribute('data-copylink')) {
+      // data-copylink has no value, so test for the attribute, not its (empty, falsy) string
+      const link = t.hasAttribute('data-copylink');
+      const field = link ? root.querySelector<HTMLInputElement>('[data-link]') : null;
+      const text = link ? field?.value ?? '' : t.dataset.copy ?? '';
+      const ok = !!text && await copyText(text, field);
+      flashCopied(t, ok);
+      toast(ok ? (link ? 'Link copied' : t.dataset.copymsg ?? 'Title copied') : 'Copy is blocked here. Select and copy it manually.');
     }
   });
   root.addEventListener('keydown', e => {
