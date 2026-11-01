@@ -1,0 +1,7 @@
+.reelcut { max-width: 40rem; margin: 0 auto; padding: calc(var(--s-9) + var(--s-5)) var(--gutter) var(--s-8); display: grid; gap: var(--s-5); }
+.reelcut .fine { color: var(--ink-soft); font-size: var(--fs-small); }
+.reelcut [hidden] { display: none; }
+.reelcut__brief { border-left: 3px solid var(--ink-soft); padding-left: var(--s-4); display: grid; gap: var(--s-2); overflow-wrap: anywhere; }
+.reelcut__drop { display: grid; gap: var(--s-3); justify-items: start; padding: var(--s-6); border: 2px dashed var(--ink-soft); border-radius: 1rem; }
+.reelcut__drop[data-over] { border-color: var(--ink); }
+.reelcut [data-state="error"] { color: var(--ink); font-weight: 600; }
