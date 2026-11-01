@@ -80,7 +80,7 @@ ol { list-style: none; padding: 0; margin: 0; }
 .prov .glyph { width: 0.75rem; height: 0.75rem; border-width: 1.5px; }
 
 /* ── report ── */
-.ribbon { margin: 0 0 var(--s-6); padding: var(--s-3) var(--s-5); border-left: 3px solid var(--signal); background: var(--paper-2); border-radius: 0 var(--r-surface) var(--r-surface) 0; max-width: 60rem; }
+.ribbon { margin: 0 0 var(--s-6); padding: var(--s-3) var(--s-5); border-left: 3px solid var(--tide); background: var(--paper-2); border-radius: 0 var(--r-surface) var(--r-surface) 0; max-width: 60rem; }
 .rp__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-5) var(--s-6); align-items: center; padding-bottom: var(--s-5); }
 .rp__head > .metrics { grid-column: 1 / -1; grid-row: 2; }
 .rp__id { display: flex; align-items: center; gap: var(--s-5); }
@@ -204,7 +204,7 @@ ol { list-style: none; padding: 0; margin: 0; }
 .rail ol { display: grid; gap: 0; border-left: 1px solid var(--line); }
 .rail a { display: block; padding: var(--s-2) var(--s-4); margin-left: -1px; border-left: 2px solid transparent; color: var(--ink-soft); text-decoration: none; font-size: var(--fs-small); min-height: 2rem; }
 .rail a:hover { color: var(--ink); }
-.rail a[aria-current] { color: var(--ink); border-left-color: var(--signal); font-weight: 600; }
+.rail a[aria-current] { color: var(--ink); border-left-color: var(--tide); font-weight: 600; }
 
 .rs { padding: var(--s-7) 0; border-top: 1px solid var(--line); display: grid; gap: var(--s-5); scroll-margin-top: calc(var(--s-8) + var(--s-3)); }
 .rs__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); }

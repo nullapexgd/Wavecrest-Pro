@@ -8,6 +8,7 @@
 }
 .page__head { display: grid; gap: var(--s-5); align-content: start; position: sticky; top: calc(var(--s-9) - var(--s-2)); }
 .page__head .lead { max-width: 28rem; }
+.page__head .btn { justify-self: start; }
 .meta { font-family: var(--font-data); font-size: var(--fs-data); color: var(--ink-soft); }
 
 .doc { display: grid; gap: var(--s-7); max-width: 42rem; }
@@ -22,9 +23,9 @@
 .doc a:hover { text-decoration-thickness: 2px; }
 .doc code { font-family: var(--font-data); font-size: 0.9em; color: var(--ink); }
 
-/* One honest callout: a signal rule, not a card */
+/* One honest callout: a periwinkle rule, not a card (vermilion is kept for errors and the main action) */
 .notice {
-  border-left: 3px solid var(--signal); padding: var(--s-3) var(--s-5);
+  border-left: 3px solid var(--tide); padding: var(--s-3) var(--s-5);
   background: var(--paper-2); border-radius: 0 var(--r-surface) var(--r-surface) 0;
   color: var(--ink); text-wrap: pretty;
 }
