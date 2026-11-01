@@ -23,7 +23,19 @@
           <input type="file" data-file accept="video/*,.mkv" />
           <span class="fine" data-file-status role="status">MP4, MOV, MKV or WebM.</span>
         </label>
-        <p><button class="btn" type="button" data-go disabled><span>Find clips (coming soon)</span></button></p>
+        <div class="reelcut__range" data-range hidden>
+          <p class="fine" data-range-note></p>
+          <label>Start at minute <input type="number" min="0" step="1" value="0" inputmode="numeric" data-start /></label>
+        </div>
+        <p><button class="btn" type="button" data-go disabled><span>Find clips</span></button></p>
+        <div class="reelcut__work" data-work hidden>
+          <progress max="1" value="0" data-bar aria-label="Progress"></progress>
+          <p data-work-msg role="status"></p>
+          <p class="fine">Keep this tab open. Nothing is uploaded except the transcript text used to pick clips.</p>
+          <button class="btn btn--ghost" type="button" data-cancel><span>Cancel</span></button>
+        </div>
+        <p class="reelcut__error" data-error role="alert" hidden></p>
+        <ol class="reelcut__clips" data-clips></ol>
       </section>
       <section data-blocked hidden>
         <p class="lead" data-blocked-msg></p>

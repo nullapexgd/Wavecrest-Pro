@@ -194,16 +194,16 @@ test('a model that finds nothing is a 422, and an upstream failure is a 502 with
   assert.equal(r.statusCode, 502); assert.doesNotMatch(everythingSent(r), /SECRET|gsk_/);
 });
 
-test('pick needs a live run of this user, and each run has three searches', async () => {
+test('pick needs a live run of this user, and a free run has two searches', async () => {
   const calls = [];
   const { handler } = rig({ pickClips: async c => { calls.push(c.length); return [{ start: 10, end: 45, title: 't', hook: 'h', reason: '' }]; } });
   const s = makeRes(); await handler(post({ action: 'start' }), s);
   const pick = (runId, extra) => handler(post({ action: 'pick', runId, chunks: T, ...extra }), (extra.res = makeRes()));
   const none = {}; await pick('123e4567-e89b-42d3-a456-426614174999', none); assert.equal(none.res.statusCode, 409);
   const bad = {}; await pick('nope', bad); assert.equal(bad.res.statusCode, 400);
-  for (let i = 0; i < 3; i++) { const o = {}; await pick(s.body.runId, o); assert.equal(o.res.statusCode, 200); assert.equal(o.res.body.clips.length, 1); }
+  for (let i = 0; i < 2; i++) { const o = {}; await pick(s.body.runId, o); assert.equal(o.res.statusCode, 200); assert.equal(o.res.body.clips.length, 1); }
   const over = {}; await pick(s.body.runId, over); assert.equal(over.res.statusCode, 429); assert.equal(over.res.body.code, 'PICK_LIMIT');
-  assert.equal(calls.length, 3); // the model was not called for the refused requests
+  assert.equal(calls.length, 2); // the model was not called for the refused requests
   // after a refund the run no longer exists, so it cannot be used to spend the model
   await handler(post({ action: 'refund', runId: s.body.runId }), makeRes());
   const gone = {}; await pick(s.body.runId, gone); assert.equal(gone.res.statusCode, 409);
@@ -217,4 +217,15 @@ test('a too-long transcript is refused before the model is called', async () => 
   assert.equal(r.statusCode, 413); assert.equal(r.body.code, 'TRANSCRIPT_TOO_LONG');
   const st = makeRes(); await handler(post({ action: 'status' }), st); // the refused request cost nothing
   assert.equal(st.body.used, 1);
+});
+
+test('plans decide how many parts of a long video one run may search; unknown plans are free', async () => {
+  for (const [plan, parts] of [['free', 2], ['pro', 6], ['__proto__', 2], [undefined, 2]]) {
+    const kv = fakeKv(); const quota = makeReelcutQuota({ kv, newId: ids });
+    const handler = makeReelcutHandler({ getUser: async () => ({ ...USER, plan }), quota, pickClips: async () => [{ start: 10, end: 45, title: 't', hook: 'h', reason: '' }] });
+    const s = makeRes(); await handler(post({ action: 'start' }), s);
+    assert.equal(s.body.parts, parts);
+    let ok = 0; for (let i = 0; i < 8; i++) { const r = makeRes(); await handler(post({ action: 'pick', runId: s.body.runId, chunks: T }), r); if (r.statusCode === 200) ok++; }
+    assert.equal(ok, parts, plan);
+  }
 });

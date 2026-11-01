@@ -31,15 +31,16 @@ async function load(device: 'webgpu' | 'wasm') {
   });
 }
 
-async function run(file: File, language: string | undefined, want: 'webgpu' | 'wasm' | undefined) {
+async function run(file: File, language: string | undefined, want: 'webgpu' | 'wasm' | undefined, range: { start: number; end: number } | undefined) {
   // A browser can expose navigator.gpu and still have no adapter (blocklisted GPU, headless). Ask first:
   // once the runtime has failed to start WebGPU in this worker it will not start wasm either.
   const gpu = (navigator as unknown as { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
   const device: 'webgpu' | 'wasm' = want ?? ((await gpu?.requestAdapter().catch(() => null)) ? 'webgpu' : 'wasm');
   const asr = await load(device);
-  const total = await audioDuration(file);
+  const total = Math.min(range?.end ?? Infinity, await audioDuration(file));
+  const from = Math.max(0, range?.start ?? 0);
   const chunks: TranscriptChunk[] = [];
-  for (let t = 0; t < total; t += WINDOW) {
+  for (let t = from; t < total; t += WINDOW) {
     const end = Math.min(total, t + WINDOW);
     const audio = await decodeWindow(file, t, end);
     if (audio.length < 16000) break; // under a second left
@@ -49,12 +50,12 @@ async function run(file: File, language: string | undefined, want: 'webgpu' | 'w
       const text = String(c.text).trim();
       if (text) chunks.push({ start: t + s, end: t + (e ?? s + 2), text });
     }
-    send({ type: 'progress', stage: 'transcribe', value: end / total });
+    send({ type: 'progress', stage: 'transcribe', value: (end - from) / (total - from) });
   }
   send({ type: 'done', chunks, device });
 }
 
 self.onmessage = (e: MessageEvent<ToWorker>) => {
   if (e.data.type !== 'start') return;
-  run(e.data.file, e.data.language, e.data.device).catch(err => send({ type: 'error', message: err instanceof Error ? err.message : String(err) }));
+  run(e.data.file, e.data.language, e.data.device, e.data.range).catch(err => send({ type: 'error', message: err instanceof Error ? err.message : String(err) }));
 };
