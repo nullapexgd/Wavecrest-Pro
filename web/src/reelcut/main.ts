@@ -43,6 +43,7 @@ async function setupTool() {
   const go = $<HTMLButtonElement>('[data-go]');
   const range = $('[data-range]');
   const startMin = $<HTMLInputElement>('[data-start]');
+  const length = $<HTMLSelectElement>('[data-length]');
   const work = $('[data-work]');
   const bar = $<HTMLProgressElement>('[data-bar]');
   const msg = $('[data-work-msg]');
@@ -113,7 +114,7 @@ async function setupTool() {
       let lastErr: unknown;
       for (const part of parts) {
         if (cancelled) throw new Error('Cancelled');
-        try { picked.push(...await api.pick(runId, part, prefill.instructions)); } catch (e) { lastErr = e; if (e instanceof ReelcutError && e.code !== 'NO_CLIPS') break; }
+        try { picked.push(...await api.pick(runId, part, prefill.instructions, ...(length.value.split('-').map(Number) as [number, number]))); } catch (e) { lastErr = e; if (e instanceof ReelcutError && e.code !== 'NO_CLIPS') break; }
       }
       if (!picked.length) throw lastErr ?? new ReelcutError('No clips came out of that video.', 'NO_CLIPS', 0);
       haveClips = true;

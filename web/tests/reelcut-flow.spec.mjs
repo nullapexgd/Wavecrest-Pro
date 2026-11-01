@@ -52,12 +52,14 @@ test('live: file to transcript to clips to a downloadable MP4, refunding nothing
     return { json: { ok: true } };
   });
   await pickFile(page);
+  await page.locator('[data-length]').selectOption('90-180');
   await page.locator('[data-go]').click();
   const card = page.locator('.clipcard').first();
   await expect(card).toBeVisible({ timeout: 200_000 });
   await expect(card.locator('h2')).toHaveText('The quick brown fox');
   const pick = calls.find(c => c.action === 'pick');
   expect(pick.runId).toBe(RUN);
+  expect([pick.minSec, pick.maxSec]).toEqual([90, 180]);
   expect(pick.chunks.map(c => c.text).join(' ').toLowerCase()).toContain('quick brown fox');
   await card.getByRole('button', { name: 'Make this clip' }).click();
   const dl = card.getByRole('link', { name: 'Download' });

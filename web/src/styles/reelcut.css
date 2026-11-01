@@ -6,7 +6,7 @@
 .reelcut__drop[data-over] { border-color: var(--ink); }
 .reelcut [data-state="error"] { color: var(--ink); font-weight: 600; }
 .reelcut__range { display: grid; gap: var(--s-2); }
-.reelcut__range input { width: 6rem; min-height: var(--hit); padding: 0 var(--s-3); border: 1px solid var(--ink-soft); border-radius: var(--r-pill); background: var(--paper-2); color: var(--ink); font: inherit; }
+.reelcut__range input, .reelcut__range select { width: 6rem; min-height: var(--hit); padding: 0 var(--s-3); border: 1px solid var(--ink-soft); border-radius: var(--r-pill); background: var(--paper-2); color: var(--ink); font: inherit; }
 .reelcut__work { display: grid; gap: var(--s-3); justify-items: start; }
 .reelcut__work progress { width: 100%; height: 0.5rem; accent-color: var(--tide); }
 .reelcut__error { border-left: 3px solid var(--signal); padding-left: var(--s-4); color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }

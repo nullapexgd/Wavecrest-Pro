@@ -229,3 +229,12 @@ test('plans decide how many parts of a long video one run may search; unknown pl
     assert.equal(ok, parts, plan);
   }
 });
+
+test('clips up to three minutes are accepted when asked for, never longer, and a short default still refuses them', async () => {
+  const long = Array.from({ length: 40 }, (_, i) => ({ start: i * 10, end: i * 10 + 10, text: `line ${i} carries part of one long story` }));
+  const c = cleanTranscript(long);
+  const ask = (start, end, opts) => validatePicks({ clips: [{ start, end, title: 't', hook: 'line 1 carries part' }] }, c, opts);
+  assert.equal(ask(0, 170, { minSec: 90, maxSec: 180 }).length, 1);
+  assert.equal(ask(0, 170).length, 0, 'the default 20-60 s still refuses a 170 s clip');
+  assert.equal(ask(0, 400, { minSec: 90, maxSec: 999 }).length, 0, 'the server never goes past 3 minutes');
+});

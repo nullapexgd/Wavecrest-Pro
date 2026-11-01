@@ -27,6 +27,15 @@
           <p class="fine" data-range-note></p>
           <label>Start at minute <input type="number" min="0" step="1" value="0" inputmode="numeric" data-start /></label>
         </div>
+        <div class="reelcut__range">
+          <label>Clip length
+            <select data-length>
+              <option value="20-60" selected>Short, 20 to 60 seconds</option>
+              <option value="45-120">Medium, 45 seconds to 2 minutes</option>
+              <option value="90-180">Long, 90 seconds to 3 minutes</option>
+            </select>
+          </label>
+        </div>
         <p><button class="btn" type="button" data-go disabled><span>Find clips</span></button></p>
         <div class="reelcut__work" data-work hidden>
           <progress max="1" value="0" data-bar aria-label="Progress"></progress>

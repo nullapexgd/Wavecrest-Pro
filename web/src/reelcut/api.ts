@@ -18,6 +18,6 @@ async function call<T>(body: unknown): Promise<T> {
 export const api = {
   start: () => call<{ runId: string; remaining: number; parts: number }>({ action: 'start' }),
   refund: (runId: string) => call<{ ok: true }>({ action: 'refund', runId }).catch(() => undefined), // best effort: a failed refund must not hide the real error
-  pick: (runId: string, chunks: { start: number; end: number; text: string }[], instructions: string) =>
-    call<{ clips: Clip[] }>({ action: 'pick', runId, chunks, instructions }).then(r => r.clips)
+  pick: (runId: string, chunks: { start: number; end: number; text: string }[], instructions: string, minSec?: number, maxSec?: number) =>
+    call<{ clips: Clip[] }>({ action: 'pick', runId, chunks, instructions, minSec, maxSec }).then(r => r.clips)
 };
