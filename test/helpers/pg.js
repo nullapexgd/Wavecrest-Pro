@@ -17,7 +17,8 @@ const CANDIDATES = [
   '/opt/homebrew/opt/postgresql@16/bin',
   '/opt/homebrew/opt/postgresql@17/bin',
   '/usr/local/opt/postgresql@16/bin',
-  '/usr/lib/postgresql/16/bin'
+  '/usr/lib/postgresql/16/bin',
+  '/usr/bin' // Arch and other distros that install the server binaries on the PATH
 ].filter(Boolean);
 
 export function findPgBin() {
