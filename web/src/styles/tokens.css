@@ -20,14 +20,15 @@
   color-scheme: light dark;
 
   /* Light: daylight chart */
-  --paper: #e5ecea;
-  --paper-2: #f2f6f5;
+  --paper: #eaf7f1;
+  --paper-2: #fafefc;
+  --wash: #cfe6fb;
   --ink: #0c2431;
   --ink-soft: #3c5760;
-  --line: #a9bdbf;
-  --tide: #2c6b7a;
-  --signal: #ee4b26;
-  --on-signal: #06141c;
+  --line: #a9c9c0;
+  --tide: #1b6aa8;
+  --signal: #ff2e93;
+  --on-signal: #1a0612;
   /* Glass edge highlight (navigation layer only) */
   --glass-hi: rgb(255 255 255 / 0.62);
   --glass-sh: rgb(12 36 49 / 0.28);
@@ -54,6 +55,8 @@
   --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem;
   --s-6: 2rem; --s-7: 3rem; --s-8: 4.5rem; --s-9: 7rem;
   --gutter: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  /* One left/right edge for the stage, the bands and the footer: the gutter, or the 78rem content column's edge on wide screens. */
+  --edge: max(var(--gutter), calc((100vw - 78rem) / 2 + var(--gutter)));
 
   /* Shape: one rule. Controls are pills, surfaces are 18px, data marks are square. */
   --r-pill: 999px;
@@ -78,27 +81,29 @@
 /* Dark: night chart. Applied by system preference, or forced with data-theme. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #0c1a22;
-    --paper-2: #132630;
-    --ink: #e2edec;
-    --ink-soft: #9db5b8;
-    --line: #2b4651;
-    --tide: #78b7c4;
-    --signal: #ff5c3a;
-    --on-signal: #0c1a22;
+    --paper: #0b1c1d;
+    --paper-2: #112a2e;
+    --wash: #15374d;
+    --ink: #e3f4ee;
+    --ink-soft: #9fbcb8;
+    --line: #2a4a4d;
+    --tide: #6db4f0;
+    --signal: #ff4da1;
+    --on-signal: #1a0612;
     --glass-hi: rgb(255 255 255 / 0.14);
     --glass-sh: rgb(0 0 0 / 0.55);
   }
 }
 :root[data-theme="dark"] {
-  --paper: #0c1a22;
-  --paper-2: #132630;
-  --ink: #e2edec;
-  --ink-soft: #9db5b8;
-  --line: #2b4651;
-  --tide: #78b7c4;
-  --signal: #ff5c3a;
-  --on-signal: #0c1a22;
+  --paper: #0b1c1d;
+  --paper-2: #112a2e;
+  --wash: #15374d;
+  --ink: #e3f4ee;
+  --ink-soft: #9fbcb8;
+  --line: #2a4a4d;
+  --tide: #6db4f0;
+  --signal: #ff4da1;
+  --on-signal: #1a0612;
   --glass-hi: rgb(255 255 255 / 0.14);
   --glass-sh: rgb(0 0 0 / 0.55);
 }

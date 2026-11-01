@@ -68,7 +68,7 @@ export function scatterSvg(m: Model, layout: ChartLayout = 'wide'): string {
   const mono = 'ui-monospace, Menlo, monospace';
   const out: string[] = [];
 
-  out.push(`<rect x="${x0 - 74}" y="${y0 - 70}" width="${x1 - x0 + 98}" height="${y1 - y0 + 148}" rx="22" fill="var(--paper-2)" fill-opacity=".72" stroke="var(--line)" stroke-opacity=".6"/>`);
+  out.push(`<rect x="${x0 - 74}" y="${y0 - 70}" width="${x1 - x0 + 98}" height="${y1 - y0 + 148}" rx="22" fill="color-mix(in oklab, var(--wash) 34%, var(--paper-2))" fill-opacity=".72" stroke="var(--line)" stroke-opacity=".6"/>`);
   out.push(`<text x="${x0 - 52}" y="${y0 - 34}" font-size="${fs}" fill="var(--ink-soft)" font-family="${mono}">views vs the channel median, log scale</text>`);
 
   for (let g = 2 ** Math.ceil(lo); g <= 2 ** hi; g *= 2) {

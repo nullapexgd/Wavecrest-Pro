@@ -20,7 +20,7 @@
 .poster--scatter {
   opacity: clamp(0, calc((var(--p) - 0.5) * 3.4), 1);
   /* the chart sits beside the copy on wide screens, below it on narrow ones */
-  inset: var(--s-9) var(--gutter) calc(var(--s-9) + var(--s-3)) calc(var(--gutter) + 25rem);
+  inset: var(--s-9) var(--edge) calc(var(--s-9) + var(--s-3)) calc(var(--edge) + 25rem);
   pointer-events: none;
 }
 .poster--scatter .scat { position: absolute; inset: 0; }
@@ -57,7 +57,7 @@
 .stage__copy > *, .stage__chartcopy > * { pointer-events: auto; }
 
 .stage__copy {
-  left: var(--gutter);
+  left: var(--edge);
   top: 50%;
   translate: 0 -50%;
   display: grid; gap: var(--s-5);
@@ -69,7 +69,7 @@
 .stage.is-chart .stage__copy { visibility: hidden; } /* out of the tab order once it has faded */
 
 .stage__chartcopy {
-  left: var(--gutter);
+  left: var(--edge);
   top: calc(var(--s-9) + var(--s-5));
   display: grid; gap: var(--s-4);
   max-width: 24rem;
@@ -86,8 +86,8 @@
 .facts { font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.45; color: var(--ink-soft); }
 
 .stage__foot {
-  position: absolute; left: var(--gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom));
-  max-width: min(27rem, 52vw);
+  position: absolute; left: var(--edge); bottom: max(var(--s-5), env(safe-area-inset-bottom));
+  max-width: min(36rem, 58vw);
   display: grid; gap: var(--s-3);
 }
 .stage__caption { font-family: var(--font-data); font-size: var(--fs-data); line-height: 1.4; color: var(--ink-soft); }
@@ -109,7 +109,7 @@
 
 /* Controls for the sample (accessible equivalent of hover and drag) */
 .stage__tools {
-  position: absolute; right: var(--gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom));
+  position: absolute; right: var(--edge); bottom: max(var(--s-5), env(safe-area-inset-bottom));
   display: flex; gap: var(--s-2); align-items: center;
 }
 .tool {
@@ -124,7 +124,7 @@
 .tool[aria-pressed='true'] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 .explore {
-  position: absolute; right: var(--gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom));
+  position: absolute; right: var(--edge); bottom: max(var(--s-5), env(safe-area-inset-bottom));
   min-height: var(--hit); padding: 0 var(--s-5); border-radius: var(--r-pill);
   border: 1px solid var(--ink-soft); background: color-mix(in oklab, var(--paper-2) 82%, transparent);
   font-weight: 600; font-size: var(--fs-small); cursor: pointer;
@@ -152,6 +152,13 @@
 .inspector__views { font-family: var(--font-data); font-size: var(--fs-data); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .inspector.is-crest { border-color: var(--signal); }
 
+/* A soft paper scrim keeps the headline readable where it meets the relief's edge. */
+.stage__copy::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: -2.5rem -4rem -2.5rem -6rem;
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--paper) 88%, transparent) 62%, transparent);
+}
+
 /* Narrow screens: copy at the top, the relief below it */
 @media (max-width: 960px) {
   .stage__copy {
@@ -160,7 +167,10 @@
   }
   .stage__copy .lead { font-size: 1.0625rem; }
   .stage__chartcopy { top: calc(var(--s-9) + var(--s-2)); right: var(--gutter); max-width: none; }
-  .stage__foot { max-width: calc(100% - 2 * var(--gutter)); bottom: calc(var(--hit) + var(--s-6)); }
+  .stage__foot { max-width: calc(100% - 2 * var(--gutter)); bottom: calc(var(--hit) + var(--s-6)); left: var(--gutter); padding: var(--s-3) var(--s-4); border-radius: var(--r-surface); background: color-mix(in oklab, var(--paper) 90%, transparent); }
+  .stage__copy, .stage__chartcopy { left: var(--gutter); }
+  .stage__tools, .explore { right: var(--gutter); }
+  .stage__copy::before { display: none; }
   .poster--scatter { inset: 15.25rem var(--s-2) 13.5rem var(--s-2); }
   /* the flat chart owns the screen: title and key above it, picker below, nothing else */
   .stage__chartcopy > p { display: none; }
