@@ -204,9 +204,13 @@ test('pick needs a live run of this user, and a free run has two searches', asyn
   for (let i = 0; i < 2; i++) { const o = {}; await pick(s.body.runId, o); assert.equal(o.res.statusCode, 200); assert.equal(o.res.body.clips.length, 1); }
   const over = {}; await pick(s.body.runId, over); assert.equal(over.res.statusCode, 429); assert.equal(over.res.body.code, 'PICK_LIMIT');
   assert.equal(calls.length, 2); // the model was not called for the refused requests
-  // after a refund the run no longer exists, so it cannot be used to spend the model
+  // a run that returned clips is used up: refunding it is a no-op, so it stays at its search limit
   await handler(post({ action: 'refund', runId: s.body.runId }), makeRes());
-  const gone = {}; await pick(s.body.runId, gone); assert.equal(gone.res.statusCode, 409);
+  const still = {}; await pick(s.body.runId, still); assert.equal(still.res.statusCode, 429);
+  // a run that never returned clips can be refunded, and then it no longer exists
+  const fresh = makeRes(); await handler(post({ action: 'start' }), fresh);
+  await handler(post({ action: 'refund', runId: fresh.body.runId }), makeRes());
+  const gone = {}; await pick(fresh.body.runId, gone); assert.equal(gone.res.statusCode, 409);
 });
 
 test('a too-long transcript is refused before the model is called', async () => {
@@ -237,4 +241,28 @@ test('clips up to three minutes are accepted when asked for, never longer, and a
   assert.equal(ask(0, 170, { minSec: 90, maxSec: 180 }).length, 1);
   assert.equal(ask(0, 170).length, 0, 'the default 20-60 s still refuses a 170 s clip');
   assert.equal(ask(0, 400, { minSec: 90, maxSec: 999 }).length, 0, 'the server never goes past 3 minutes');
+});
+
+test('start, pick, refund cannot be repeated for free: a run that returned clips is not given back', async () => {
+  const kv = fakeKv(); const quota = makeReelcutQuota({ kv, newId: ids });
+  const handler = makeReelcutHandler({ getUser: async () => USER, quota, pickClips: async () => [{ start: 10, end: 45, title: 't', hook: 'h', reason: '' }] });
+  const call = body => { const res = makeRes(); return handler(post(body), res).then(() => res); };
+  for (let i = 0; i < 3; i++) {
+    const s = await call({ action: 'start' }); assert.equal(s.statusCode, 200, `start ${i}`);
+    assert.equal((await call({ action: 'pick', runId: s.body.runId, chunks: T })).statusCode, 200);
+    assert.equal((await call({ action: 'refund', runId: s.body.runId })).statusCode, 200); // accepted, but a no-op
+  }
+  assert.equal((await call({ action: 'start' })).statusCode, 429, 'the weekly limit still applies after three used runs');
+  assert.equal((await quota.status('u-1')).used, 3);
+});
+
+test('a run whose search failed or found nothing is still refundable', async () => {
+  const kv = fakeKv(); const quota = makeReelcutQuota({ kv, newId: ids });
+  let fail = true;
+  const handler = makeReelcutHandler({ getUser: async () => USER, quota, pickClips: async () => { if (fail) throw new UserFacingError('none', 'NO_CLIPS', 422); return []; } });
+  const call = body => { const res = makeRes(); return handler(post(body), res).then(() => res); };
+  const s = await call({ action: 'start' });
+  assert.equal((await call({ action: 'pick', runId: s.body.runId, chunks: T })).statusCode, 422);
+  assert.equal((await call({ action: 'refund', runId: s.body.runId })).statusCode, 200);
+  assert.equal((await quota.status('u-1')).used, 0);
 });
