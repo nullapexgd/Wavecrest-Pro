@@ -22,7 +22,9 @@ const toBlob = `(b64 => new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0
 
 test.describe.configure({ mode: 'serial' });
 // REELCUT_CHANNEL=chrome runs against the installed Chrome, which has a real GPU adapter (the bundled Chromium has none).
-if (process.env.REELCUT_CHANNEL) test.use({ channel: process.env.REELCUT_CHANNEL, launchOptions: { args: ['--enable-unsafe-webgpu'] } });
+// REELCUT_CHROMIUM=/usr/bin/chromium does the same with a system browser (Linux).
+if (process.env.REELCUT_CHROMIUM) test.use({ launchOptions: { executablePath: process.env.REELCUT_CHROMIUM, args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--ignore-gpu-blocklist'] } });
+else if (process.env.REELCUT_CHANNEL) test.use({ channel: process.env.REELCUT_CHANNEL, launchOptions: { args: ['--enable-unsafe-webgpu'] } });
 
 test('decodes a window to 16 kHz mono with the right length and signal', async ({ page }, info) => {
   test.skip(info.project.name !== '1440-light', 'engine test, one viewport is enough');
