@@ -34,12 +34,12 @@ test('"Clip these" lists the long videos that beat the median, with a Send to Re
   await expect(sec.locator('.pick').first()).toContainText('How I built a desk in a day');
   await expect(sec.locator('.pick').first()).toContainText('supports idea: How I built a shelf in a day');
   const go = sec.getByRole('link', { name: 'Send to Reelcut' }).first();
-  const link = new URL(await go.getAttribute('href'));
-  expect(link.origin).toBe('http://127.0.0.1:3000');
+  const link = new URL(await go.getAttribute('href'), page.url());
+  expect(link.pathname).toBe('/reelcut');
+  expect(link.origin).toBe(new URL(page.url()).origin); // a page on this site, not a local app
   expect(link.searchParams.get('url')).toBe('https://www.youtube.com/watch?v=aaaaaaaaaaa');
   expect(link.searchParams.get('instructions')).toContain('How I built a shelf in a day');
-  await expect(go).toHaveAttribute('target', '_blank');
-  await expect(go).toHaveAttribute('rel', /noopener/);
+  await expect(go).not.toHaveAttribute('target', /.*/);
   await page.waitForTimeout(500);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/clips-${page.viewportSize().width}-${test.info().project.name}.png` });
   await noOverflow(page);
