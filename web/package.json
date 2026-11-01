@@ -19,6 +19,7 @@
     "test:browser": "playwright test"
   },
   "dependencies": {
+    "mediabunny": "^1.65.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
