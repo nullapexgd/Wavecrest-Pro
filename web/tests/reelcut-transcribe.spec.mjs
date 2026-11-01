@@ -67,3 +67,23 @@ test('live: transcribes speech on this device with timestamps', async ({ page },
   expect(r.first.start).toBeGreaterThanOrEqual(0); expect(r.last.end).toBeLessThan(12);
   expect(r.stages).toContain('model');
 });
+
+// Speed check on a real file: REELCUT_SPEED_FILE=/path/to/video.mp4 (needs REELCUT_LIVE_WHISPER=1). Prints timings, asserts only that it finishes.
+test('speed: transcribes a long file and reports how fast', async ({ page }, info) => {
+  test.skip(info.project.name !== '1440-light' || !process.env.REELCUT_LIVE_WHISPER || !process.env.REELCUT_SPEED_FILE, 'set REELCUT_LIVE_WHISPER=1 and REELCUT_SPEED_FILE');
+  test.setTimeout(900_000);
+  await page.goto(url);
+  const data = readFileSync(process.env.REELCUT_SPEED_FILE).toString('base64');
+  const r = await page.evaluate(async ([b64, mk, DEV]) => {
+    const file = new File([await eval(mk)(b64).arrayBuffer()], 'long.mp4');
+    const { audioDuration } = { audioDuration: null };
+    const t0 = performance.now(); let modelDone = 0;
+    const out = await window.transcribe(file, { language: 'en', device: DEV, onProgress: (s) => { if (s === 'model') modelDone = performance.now() - t0; } }).result;
+    const total = performance.now() - t0;
+    const audioSec = out.chunks.at(-1)?.end ?? 0;
+    return { device: out.device, chunks: out.chunks.length, audioSec: Math.round(audioSec), totalSec: +(total / 1000).toFixed(1), modelLoadSec: +(modelDone / 1000).toFixed(1) };
+  }, [data, toBlob, process.env.REELCUT_DEVICE || undefined]);
+  const speedX = +(r.audioSec / Math.max(1, r.totalSec - r.modelLoadSec)).toFixed(1);
+  console.log('speed:', JSON.stringify({ ...r, xRealtimeAfterModel: speedX }));
+  expect(r.chunks).toBeGreaterThan(10);
+});
