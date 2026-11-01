@@ -47,7 +47,7 @@ function poses(w: number, h: number): { hero: Pose; chart: Pose } {
         chart: { yaw: 0, pitch: 1.36, fit: 0.86, shiftX: 0, shiftY: 0.12, amp: 0.035 }
       }
     : {
-        hero: { yaw: 0.42, pitch: 0.6, fit: 0.5, shiftX: 0.18, shiftY: 0.03, amp: 1 },
+        hero: { yaw: 0.42, pitch: 0.6, fit: 0.46, shiftX: 0.27, shiftY: 0.03, amp: 1 },
         chart: { yaw: 0, pitch: 1.37, fit: 0.62, shiftX: 0.15, shiftY: 0.02, amp: 0.035 }
       };
 }
