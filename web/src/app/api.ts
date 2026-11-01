@@ -27,6 +27,11 @@ export async function me(): Promise<Me | null> {
   return json<Me>(r);
 }
 
+/** Remembers a pasted channel across sign-in (a signed cookie that expires in 15 minutes). Best effort. */
+export const rememberChannel = (channel: string) =>
+  fetch('/api/auth/pending', { ...same, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ channel }) }).then(r => json<{ ok: true }>(r));
+export const clearPending = () => fetch('/api/auth/pending', { ...same, method: 'DELETE' }).then(() => undefined);
+
 export const getReport = (id: string) => fetch(`/api/report/${encodeURIComponent(id)}`, same).then(r => json<Report>(r));
 
 export const sendFeedback = (useful: 'yes' | 'no', message: string, reportId?: string) =>

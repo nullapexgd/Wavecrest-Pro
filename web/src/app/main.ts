@@ -58,6 +58,7 @@ function failView(err: unknown, retry?: () => void): void {
     PLAN_LIMIT: { h: 'This month\'s free analysis is used', p: `The count resets on ${monthReset()} (UTC). Your earlier reports are still yours to open.` },
     IN_PROGRESS: { h: 'An analysis is already running', p: 'Only one can run at a time. Give it a minute, then check your reports.', action: 'Check again' },
     PREVIOUS_FAILED: { h: 'That attempt did not finish', p: 'It did not use your analysis. Start a new one.', action: 'Start again' },
+    CAPACITY: { h: 'Full for today', p: 'Wavecrest is at its free daily limit, and it resets at 00:00 UTC. Nothing was used. The sample report is open now.' },
     RATE_LIMITED: { h: 'Too many requests', p: 'Wait a little while and try again. Nothing was used.', action: 'Try again' },
     NOT_FOUND: { h: 'That report does not exist', p: 'It may be private, deleted, or the link may be wrong. Private reports only open for their owner.' },
     NETWORK: { h: 'The connection dropped', p: 'If the analysis finished, it is already in your reports. If not, it did not use your analysis.', action: 'Try again' }
@@ -87,6 +88,8 @@ async function home(): Promise<void> {
   const spent = limit !== null && used !== null && used >= limit;
   const left = limit === null ? null : used === null ? null : Math.max(0, limit - used);
 
+  const full = me.capacity?.full === true;
+  const pending = me.pending ?? null;
   const quota = limit === null
     ? `<p class="quota"><b>Unlimited analyses</b> on your ${esc(me.entitlement.label)} plan.</p>`
     : used === null
@@ -103,18 +106,23 @@ async function home(): Promise<void> {
   swap(`
     <div class="home"><div>
     <div class="start">
+      ${pending ? `<div class="pending" role="group" aria-labelledby="pend-h">
+        <h2 id="pend-h" class="h-small">Analyse ${esc(pending)}?</h2>
+        <p>${spent ? 'Your free analysis for this month is already used, so this cannot run. The sample report shows what it would have given you.' : full ? 'Wavecrest is at its free daily limit right now. Try again after 00:00 UTC.' : 'This uses your free analysis for this month.'}</p>
+        <div class="actions">${spent || full ? '' : `<button class="btn btn--primary" type="button" data-pend-go><span>Start analysis</span>${arrow}</button>`}<button class="btn btn--ghost" type="button" data-pend-no><span>${spent || full ? 'Dismiss' : 'Not now'}</span></button></div></div>` : ''}
       <p class="eyebrow">New analysis</p>
       <h1 class="display start__h">Which channel should we read?</h1>
       <form class="ask" data-form novalidate>
         <label class="ask__label" for="chan">YouTube channel link</label>
         <div class="ask__row">
           <input id="chan" name="url" type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false"
-                 placeholder="youtube.com/@channel" ${spent ? 'disabled' : ''} aria-describedby="chan-help chan-err" required>
-          <button class="btn btn--primary" type="submit" ${spent ? 'disabled' : ''}><span>Analyse</span>${arrow}</button>
+                 placeholder="youtube.com/@channel" ${spent || full ? 'disabled' : ''} aria-describedby="chan-help chan-err" required>
+          <button class="btn btn--primary" type="submit" ${spent || full ? 'disabled' : ''}><span>Analyse</span>${arrow}</button>
         </div>
         <p class="ask__help" id="chan-help">A channel link or @handle works. Any public channel with at least 3 videos.</p>
         <p class="ask__err" id="chan-err" role="alert" hidden></p>
       </form>
+      ${full ? `<p class="quota quota--spent"><b>Full for today.</b> Wavecrest is at its free daily limit. It resets at 00:00 UTC; the <a href="/sample">sample report</a> is open now.</p>` : ''}
       ${quota}
       <p class="note">Takes about a minute. It reads public data only: titles, dates, views and likes, never private YouTube Studio numbers.</p>
     </div>
@@ -129,7 +137,10 @@ async function home(): Promise<void> {
   const form = root.querySelector<HTMLFormElement>('[data-form]')!;
   const input = form.querySelector<HTMLInputElement>('#chan')!;
   const err = form.querySelector<HTMLElement>('#chan-err')!;
-  input.focus();
+  const drop = () => { if (me) me.pending = null; void api.clearPending().catch(() => undefined); root.querySelector('.pending')?.remove(); };
+  root.querySelector('[data-pend-go]')?.addEventListener('click', () => { const c = pending!; drop(); void run(c); });
+  root.querySelector('[data-pend-no]')?.addEventListener('click', () => { if (pending && !input.value) input.value = pending; drop(); input.focus(); });
+  if (!pending) input.focus();
   form.addEventListener('submit', e => {
     e.preventDefault();
     const url = input.value.trim();
@@ -146,11 +157,53 @@ async function home(): Promise<void> {
 function signedOut(): void {
   swap(`<div class="start">
     <p class="eyebrow">Free beta</p>
-    <h1 class="display start__h">Sign in to read a channel.</h1>
-    <p class="lead">One free analysis a month with a Google or GitHub account. No card, nothing to buy. Not ready? The sample report is open to everyone.</p>
-    <div class="actions"><a class="btn btn--primary" href="/login"><span>Sign in</span>${arrow}</a><a class="btn btn--ghost" href="/sample">See the sample report</a></div>
-  </div>`);
+    <h1 class="display start__h">Which channel should we read?</h1>
+    <form class="ask" data-form novalidate>
+      <label class="ask__label" for="chan">YouTube channel link</label>
+      <div class="ask__row">
+        <input id="chan" name="url" type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false"
+               placeholder="youtube.com/@channel" aria-describedby="chan-help chan-err" required>
+        <button class="btn btn--primary" type="submit"><span>Continue</span>${arrow}</button>
+      </div>
+      <p class="ask__help" id="chan-help">A channel link or @handle works. You sign in next: one free analysis a month, no card.</p>
+      <p class="ask__err" id="chan-err" role="alert" hidden></p>
+    </form>
+    <p class="note">Not ready? <a href="/sample">The sample report</a> is open to everyone.</p>
+  </div>`, 'h1');
+  setTitle('Analyse a channel');
+  const form = root.querySelector<HTMLFormElement>('[data-form]')!;
+  const input = form.querySelector<HTMLInputElement>('#chan')!;
+  const err = form.querySelector<HTMLElement>('#chan-err')!;
+  input.focus();
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const url = input.value.trim();
+    if (!/youtu|^@?[\w.-]{3,}$/i.test(url)) {
+      err.textContent = 'Paste a channel link like youtube.com/@handle, or a video link.';
+      err.hidden = false; input.setAttribute('aria-invalid', 'true'); input.focus();
+      return;
+    }
+    void signInStep(url);
+  });
+  input.addEventListener('input', () => { err.hidden = true; input.removeAttribute('aria-invalid'); });
+}
+
+/** The channel is held for 15 minutes in a signed cookie, so it is still here when the visitor comes back from Google or GitHub. */
+async function signInStep(url: string): Promise<void> {
+  let kept = true;
+  try { await api.rememberChannel(url); } catch (e) {
+    if (e instanceof ApiError && e.status === 400) { signedOut(); const err = root.querySelector<HTMLElement>('#chan-err'); if (err) { err.textContent = 'That does not look like a YouTube channel link. Try youtube.com/@handle.'; err.hidden = false; } return; }
+    kept = false; // cookies blocked or offline: sign-in still works, they will just paste again
+  }
+  swap(`<div class="start">
+    <p class="eyebrow">One step left</p>
+    <h1 class="display start__h">Sign in to analyse this channel.</h1>
+    <p class="lead"><b class="chan">${esc(url)}</b></p>
+    <p>${kept ? 'You will confirm it after signing in.' : 'Sign in, then paste it again.'} One free analysis a month with a Google or GitHub account, no card.</p>
+    <div class="actions"><a class="btn btn--primary" href="/api/auth/google"><span>Continue with Google</span>${arrow}</a><a class="btn btn--primary" href="/api/auth/github"><span>Continue with GitHub</span>${arrow}</a><button class="btn btn--ghost" type="button" data-change><span>Change channel</span></button></div>
+  </div>`, 'h1');
   setTitle('Sign in');
+  root.querySelector('[data-change]')?.addEventListener('click', () => { void api.clearPending().catch(() => undefined); signedOut(); });
 }
 
 /* ───────────── a live run ───────────── */
