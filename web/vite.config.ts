@@ -5,7 +5,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 // Vite bundles this file into a temp folder, so resolve siblings from its real location.
 const here = fileURLToPath(new URL('.', import.meta.url));
-const PAGES = ['pricing', 'privacy', 'terms', 'changelog', 'app', 'login', 'sample'];
+const PAGES = ['pricing', 'privacy', 'terms', 'changelog', 'app', 'login', 'sample', 'reelcut'];
 
 // Shared partials (head, nav, footer) for every page, and the first picture baked into the
 // home page: the HTML already holds one real creator's chart, so something complete shows

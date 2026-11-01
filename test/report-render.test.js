@@ -135,8 +135,9 @@ test('clip picks attach the first idea that cites the video', () => {
   assert.deepEqual(picks.map(p => p.idea), ['Idea one', 'Idea one']);
 });
 test('Send to Reelcut is a plain link carrying the video and a brief, escaped', () => {
-  const link = new URL(reelcutLink('abc123', 'Say "hi" & <go>'));
-  assert.equal(link.origin, 'http://127.0.0.1:3000');
+  const link = new URL(reelcutLink('abc123', 'Say "hi" & <go>'), 'https://wavecrest.test');
+  assert.equal(link.pathname, '/reelcut');
+  assert.equal(link.origin, 'https://wavecrest.test'); // a page on this site
   assert.equal(link.searchParams.get('url'), 'https://www.youtube.com/watch?v=abc123');
   assert.match(link.searchParams.get('instructions'), /Say "hi" & <go>/);
   assert.ok(link.searchParams.get('instructions').length < 400);
@@ -146,7 +147,7 @@ test('the report lists the picks with working links, and says so when there are 
   const ev = { ...clipEv, videos: [long('aaa', 'Hit <b>x</b>', 4000, { tags: ['T1'] }), long('bbb', 'Meh', 900, { tags: ['T2'] })] };
   const html = renderReport(report({ evidence: ev, videoIdeas: idea }));
   assert.match(html, /id="s-clips"/);
-  assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/\?url=https%3A%2F%2Fwww\.youtube\.com%2Fwatch%3Fv%3Daaa/);
+  assert.match(html, /href="\/reelcut\?url=https%3A%2F%2Fwww\.youtube\.com%2Fwatch%3Fv%3Daaa/);
   assert.doesNotMatch(html, /<b>x<\/b>/, 'titles are escaped');
   assert.match(html, /Copy this list as JSON/);
   assert.match(renderReport(report({ evidence: { ...ev, videos: [long('bbb', 'Meh', 900)] } })), /No long video in this report clearly beat/);

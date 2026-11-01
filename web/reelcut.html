@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--HEAD-->
+    <title>Reelcut · Wavecrest</title>
+    <meta name="robots" content="noindex" />
+    <script type="module" src="/src/reelcut/main.ts"></script>
+  </head>
+  <body>
+    <!--NAV-->
+    <main id="main" class="reelcut">
+      <p class="eyebrow">Reelcut</p>
+      <h1 class="display" style="font-size: clamp(2.25rem, 1rem + 4vw, 3.5rem)">Cut your best videos into Shorts.</h1>
+      <p class="lead">Pick a video from your computer. Everything is processed on your own machine, and the file is never uploaded.</p>
+      <div class="reelcut__brief" data-brief hidden>
+        <strong>From your report</strong>
+        <span data-brief-url></span>
+        <span class="fine" data-brief-note></span>
+      </div>
+      <section data-tool>
+        <label class="reelcut__drop" data-drop>
+          <strong>Drop a video here, or choose a file</strong>
+          <input type="file" data-file accept="video/*,.mkv" />
+          <span class="fine" data-file-status role="status">MP4, MOV, MKV or WebM.</span>
+        </label>
+        <div class="reelcut__range" data-range hidden>
+          <p class="fine" data-range-note></p>
+          <label>Start at minute <input type="number" min="0" step="1" value="0" inputmode="numeric" data-start /></label>
+        </div>
+        <p><button class="btn" type="button" data-go disabled><span>Find clips</span></button></p>
+        <div class="reelcut__work" data-work hidden>
+          <progress max="1" value="0" data-bar aria-label="Progress"></progress>
+          <p data-work-msg role="status"></p>
+          <p class="fine">Keep this tab open. Nothing is uploaded except the transcript text used to pick clips.</p>
+          <button class="btn btn--ghost" type="button" data-cancel><span>Cancel</span></button>
+        </div>
+        <p class="reelcut__error" data-error role="alert" hidden></p>
+        <ol class="reelcut__clips" data-clips></ol>
+      </section>
+      <section data-blocked hidden>
+        <p class="lead" data-blocked-msg></p>
+        <p>Save this page for later:</p>
+        <p>
+          <button class="btn" type="button" data-copy-link><span>Copy link</span></button>
+          <a class="btn btn--ghost" data-mail href="mailto:"><span>Email it to myself</span></a>
+        </p>
+      </section>
+      <p class="fine">You choose the video, so only use footage you own or have the rights to. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+    </main>
+    <!--FOOT-->
+  </body>
+</html>

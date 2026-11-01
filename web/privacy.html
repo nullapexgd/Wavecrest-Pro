@@ -36,6 +36,13 @@
           <p>The chart shows public upload data for a well-known or smaller YouTube channel, picked at random or by you. It comes from YouTube's public feeds and the YouTube Data API, is cached on our servers, and is the same for every visitor. Choosing a channel sends nothing about you to YouTube. These creators have no connection to Wavecrest.</p>
         </section>
 
+        <section aria-labelledby="reelcut">
+          <h2 id="reelcut">Reelcut (cutting your own videos)</h2>
+          <p>Reelcut works on a video file you choose on your own computer. The file is read by your browser and is never uploaded. The speech in it is turned into text on your device by a speech model that your browser downloads once (from Hugging Face, which can see your IP address when it does) and keeps in its cache.</p>
+          <p>To pick the best moments, we send the transcript text of the part of the video you chose, and the note you gave, to our server and on to Groq, or to Google Gemini if Groq is unavailable. We do not store that text, the clips or the video. Their own policies cover what those providers keep. Clips are then cut on your device.</p>
+          <p>We keep one counter per account of how many videos you have used this week. It expires within nine days. Only use footage you own or have the right to use.</p>
+        </section>
+
         <section aria-labelledby="not">
           <h2 id="not">What we do not do</h2>
           <ul>
@@ -52,7 +59,9 @@
             <div><dt>Neon</dt><dd>Stores accounts, reports and usage records (PostgreSQL).</dd></div>
             <div><dt>Upstash</dt><dd>Short-lived rate-limit counters and cached sample data.</dd></div>
             <div><dt>Google (YouTube)</dt><dd>The channel you analyze is looked up through the YouTube Data API, so YouTube receives that request. Wavecrest uses YouTube API Services; by using it you also agree to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>, and Google's handling of data is described in the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. A report also shows video thumbnails, which your browser loads directly from YouTube's image servers (<code>i.ytimg.com</code>), so Google can see your IP address when you open one.</dd></div>
-            <div><dt>Groq</dt><dd>Runs the language model. The public video titles, descriptions and statistics of the channel being analyzed are sent to it to write the report. Your email and name are not.</dd></div>
+            <div><dt>Groq</dt><dd>Runs the language model. The public video titles, descriptions and statistics of the channel being analyzed are sent to it to write the report. If you use Reelcut, the transcript text of the part you chose is sent to it too. Your email and name are not.</dd></div>
+            <div><dt>Google (Gemini)</dt><dd>Used as a fallback when Groq is unavailable, for the same text Groq would receive. Your email and name are not sent.</dd></div>
+            <div><dt>Hugging Face</dt><dd>Serves the speech model that Reelcut downloads to your browser. It receives that download request, including your IP address. It receives no video, audio or text from you.</dd></div>
             <div><dt>Resend</dt><dd>Sends the confirmation email if you use the early-access form. The address is not stored by us.</dd></div>
           </dl>
         </section>

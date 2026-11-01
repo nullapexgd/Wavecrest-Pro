@@ -49,4 +49,7 @@ export interface Me {
   entitlement: { plan: string; label: string; limit: number | null };
   /** null when the usage count could not be read */
   usage: { used: number | null };
+  /** a channel pasted before signing in, waiting for the user to confirm */
+  pending?: string | null;
+  capacity?: { full: boolean; resetsAt?: string };
 }

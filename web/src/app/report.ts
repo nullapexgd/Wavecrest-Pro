@@ -127,8 +127,8 @@ const PURGED_NOTE = 'Removed after 30 days.';
 
 /* ───────────── clip these (hand-off to Reelcut) ───────────── */
 
-/** Reelcut runs on the owner's own machine, so this is a plain link to it, never a request from this page. */
-const REELCUT = 'http://127.0.0.1:3000/';
+/** Reelcut is a page on this site that runs on the visitor's own computer. This is a plain link to it, never a request from this page. */
+const REELCUT = '/reelcut';
 const clipBrief = (idea?: string) => (idea
   ? `Find the moments that best support this video idea: "${idea.slice(0, 160)}". Prefer a clear hook and a payoff, no setup needed.`
   : 'Find the strongest standalone moments: a clear hook and a payoff, no setup needed.');
@@ -147,9 +147,9 @@ function clips(a: Analysis, ev: Evidence | undefined, r: Report): string {
       <img src="${esc(thumbUrl(p.video.id))}" alt="" data-thumb width="160" height="90" loading="lazy" decoding="async">
       <div class="pick__txt"><button type="button" class="linklike" data-video="${esc(p.video.id)}">${esc(p.video.title)}</button>
         <p class="meta">${esc(formatMultiple(p.multiple))} the channel median · ${Math.round(p.video.duration / 60)} min${p.idea ? ` · supports idea: ${esc(p.idea)}` : ''}</p></div>
-      <a class="btn btn--ghost pick__go" href="${esc(reelcutLink(p.video.id, p.idea))}" target="_blank" rel="noopener noreferrer"><span>Send to Reelcut</span></a></li>`).join('');
+      <a class="btn btn--ghost pick__go" href="${esc(reelcutLink(p.video.id, p.idea))}"><span>Send to Reelcut</span></a></li>`).join('');
   return section('clips', `<ul class="picks">${rows}</ul>
-    <p class="note">Reelcut is a separate app that runs on your own computer. The button opens it with the video and a brief filled in; nothing is sent from this page. <button type="button" class="linklike" data-copy="${esc(bundle)}" data-copymsg="List copied as JSON">Copy this list as JSON</button></p>`, intro);
+    <p class="note">Reelcut works on a computer, with a video file you already have. The button opens it with the video link and a brief filled in; nothing is sent from this page. <button type="button" class="linklike" data-copy="${esc(bundle)}" data-copymsg="List copied as JSON">Copy this list as JSON</button></p>`, intro);
 }
 
 /* ───────────── performance map ───────────── */

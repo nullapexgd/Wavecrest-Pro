@@ -19,6 +19,8 @@
     "test:browser": "playwright test"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
+    "mediabunny": "^1.65.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
